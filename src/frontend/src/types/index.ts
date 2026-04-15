@@ -20,6 +20,7 @@ export interface Expense {
   date: string;
   amountCents: bigint;
   notes?: string;
+  receiptUrl?: string;
   recurringTemplateId?: bigint;
   createdAt: Timestamp;
 }
@@ -86,11 +87,7 @@ export function getBudgetStatus(summary: BudgetSummary): BudgetStatus {
 
 export function formatCents(cents: bigint | number): string {
   const value = typeof cents === "bigint" ? Number(cents) : cents;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(value / 100);
+  return `N$${(value / 100).toFixed(2)}`;
 }
 
 export function getMonthName(month: number): string {

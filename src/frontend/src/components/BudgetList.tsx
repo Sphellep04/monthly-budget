@@ -1,7 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trash2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, PiggyBank, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useDeleteBudget } from "../hooks/useBudget";
 import type { Budget } from "../types";
@@ -16,14 +17,18 @@ interface BudgetListProps {
 
 function BudgetRowSkeleton() {
   return (
-    <div className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card">
-      <Skeleton className="w-4 h-4 rounded-full flex-shrink-0" />
-      <Skeleton className="h-4 w-32" />
-      <Skeleton className="h-5 w-20 rounded-full" />
-      <div className="ml-auto">
-        <Skeleton className="h-4 w-20" />
+    <div className="flex items-center gap-4 p-4 rounded-2xl border border-border bg-card shadow-subtle">
+      <Skeleton className="w-10 h-10 rounded-xl flex-shrink-0" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-3 w-20" />
       </div>
-      <Skeleton className="w-8 h-8 rounded-md" />
+      <Skeleton className="h-5 w-20 rounded-full hidden sm:block" />
+      <div className="text-right">
+        <Skeleton className="h-4 w-20 mb-1" />
+        <Skeleton className="h-3 w-12 ml-auto" />
+      </div>
+      <Skeleton className="w-8 h-8 rounded-lg" />
     </div>
   );
 }
@@ -36,36 +41,48 @@ interface BudgetRowProps {
 function BudgetRow({ budget, index }: BudgetRowProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const deleteMutation = useDeleteBudget();
+  const categoryIcon = CATEGORY_ICONS[budget.category] ?? "📦";
 
   async function handleDelete() {
     await deleteMutation.mutateAsync(budget.id);
     setConfirmOpen(false);
   }
 
-  const categoryIcon = CATEGORY_ICONS[budget.category] ?? "📦";
-
   return (
     <>
       <div
         data-ocid={`budget.item.${index}`}
-        className="group flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-smooth"
+        className="group flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-hover hover:border-primary/20 hover:shadow-elevated"
       >
-        {/* Color swatch */}
+        {/* Icon + color dot */}
         <div
-          className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm ring-2 ring-offset-2 ring-offset-card"
-          style={{ backgroundColor: budget.color }}
-          aria-hidden="true"
-        />
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 shadow-subtle"
+          style={{ backgroundColor: `${budget.color}20` }}
+        >
+          {categoryIcon}
+        </div>
 
-        {/* Name */}
-        <p className="font-display font-medium text-foreground min-w-0 truncate flex-1">
-          {budget.name}
-        </p>
+        {/* Name + subline */}
+        <div className="flex-1 min-w-0">
+          <p className="font-display font-semibold text-foreground truncate text-sm leading-tight">
+            {budget.name}
+          </p>
+          <div className="flex items-center gap-1.5 mt-1">
+            <div
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: budget.color }}
+              aria-hidden="true"
+            />
+            <span className="text-xs text-muted-foreground">
+              {budget.category}
+            </span>
+          </div>
+        </div>
 
         {/* Category badge */}
         <Badge
           variant="secondary"
-          className="hidden sm:flex items-center gap-1.5 text-xs flex-shrink-0"
+          className="hidden sm:flex items-center gap-1.5 text-[11px] flex-shrink-0 font-medium"
         >
           <span>{categoryIcon}</span>
           <span>{budget.category}</span>
@@ -73,30 +90,44 @@ function BudgetRow({ budget, index }: BudgetRowProps) {
 
         {/* Limit */}
         <div className="text-right flex-shrink-0">
-          <p className="font-mono text-sm font-semibold text-foreground">
+          <p className="font-mono text-sm font-bold text-foreground tabular-nums">
             {formatCents(budget.limitCents)}
           </p>
-          <p className="text-xs text-muted-foreground">/ month</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+            / month
+          </p>
         </div>
 
-        {/* Delete */}
-        <Button
-          variant="ghost"
-          size="icon"
-          data-ocid={`budget.delete_button.${index}`}
-          onClick={() => setConfirmOpen(true)}
-          className="flex-shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive transition-smooth"
-          aria-label={`Delete ${budget.name}`}
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
+        {/* Actions */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <Link to="/budgets/$id" params={{ id: budget.id.toString() }}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-8 h-8 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-primary"
+              aria-label={`View ${budget.name}`}
+            >
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            data-ocid={`budget.delete_button.${index}`}
+            onClick={() => setConfirmOpen(true)}
+            className="w-8 h-8 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-destructive hover:bg-destructive/8"
+            aria-label={`Delete ${budget.name}`}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
       </div>
 
       <DeleteConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title={`Delete "${budget.name}"?`}
-        description="This will permanently remove this budget and all associated data. This action cannot be undone."
+        description="This will permanently remove this budget and all associated expenses. This action cannot be undone."
         onConfirm={handleDelete}
         isPending={deleteMutation.isPending}
       />
@@ -123,18 +154,25 @@ export function BudgetList({
     return (
       <div
         data-ocid="budget.empty_state"
-        className="flex flex-col items-center justify-center py-16 px-4 rounded-xl border border-dashed border-border bg-muted/20"
+        className="flex flex-col items-center justify-center py-20 px-6 rounded-2xl border border-dashed border-border bg-card/40 text-center"
       >
-        <div className="text-5xl mb-4">💰</div>
-        <h3 className="font-display font-semibold text-lg text-foreground mb-1">
+        <div className="w-16 h-16 rounded-2xl bg-primary/8 flex items-center justify-center mb-5 shadow-subtle">
+          <PiggyBank className="w-8 h-8 text-primary" />
+        </div>
+        <h3 className="font-display font-bold text-xl text-foreground mb-2">
           No budgets yet
         </h3>
-        <p className="text-muted-foreground text-sm text-center mb-6 max-w-xs">
+        <p className="text-muted-foreground text-sm text-center mb-7 max-w-xs leading-relaxed">
           Set up your first monthly budget to start tracking where your money
-          goes.
+          goes — and stay in control.
         </p>
-        <Button data-ocid="budget.empty_state_add_button" onClick={onAddBudget}>
-          + Add Your First Budget
+        <Button
+          data-ocid="budget.empty_state_add_button"
+          onClick={onAddBudget}
+          className="gap-2 button-hover shadow-elevated"
+        >
+          <span>Create Your First Budget</span>
+          <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
     );

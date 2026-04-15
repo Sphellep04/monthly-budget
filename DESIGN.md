@@ -2,15 +2,15 @@
 
 ## Direction
 
-Clarity-First Budget Companion — A professional yet approachable personal finance tool that prioritizes visual hierarchy and at-a-glance spending status through structured layouts and strategic color coding.
+Premium Clarity Budget Tool — A refined, elevated financial companion that combines clarity with polished micro-interactions and premium visual depth. Precision-engineered interface for confident spending decisions.
 
 ## Tone
 
-Modern financial interface designed with restraint—minimalist decoration, high contrast, and trust-building clarity over decorative flourish. The focus is on data legibility and confidence in spending decisions.
+Premium fintech aesthetic—restrained elegance, smooth transitions, intentional depth layering, and trust-building clarity. Functional beauty without overstatement. Every interaction feels considered and refined.
 
 ## Differentiation
 
-Category cards with integrated progress bars, status indicators (green/amber/red), and context-aware typography that positions spending psychology ahead of abstract numbers.
+Elevated card depth with shadow hierarchy, polished focus rings and input states, backdrop-blurred modals, smooth micro-interactions on hover/active, and refined typography rhythm that creates visual confidence.
 
 ## Color Palette
 
@@ -35,7 +35,7 @@ Category cards with integrated progress bars, status indicators (green/amber/red
 
 ## Elevation & Depth
 
-Subtle layering via background colors and minimal shadows—card surfaces elevated above background via color, not depth effects. One shadow scale: `shadow-sm` for popover/dropdown, no glow or ambient effects.
+Three-tier shadow hierarchy: `shadow-subtle` for form inputs/interactive elements, `shadow-elevated` for cards on hover/popovers, `shadow-premium` for modals/dialogs. Depth via shadows + background color shifts. No glow or ambient effects.
 
 ## Structural Zones
 
@@ -53,17 +53,19 @@ Subtle layering via background colors and minimal shadows—card surfaces elevat
 
 ## Component Patterns
 
-- Buttons: rounded-md, primary color, hover opacity-90, secondary for destructive with destructive color
-- Cards: rounded-lg, bg-card, border-border, shadow-sm hover state
-- Progress Bar: `h-2 rounded-full`, success color with animated fill on load
-- Badge: `rounded-full px-2 py-1`, muted background with foreground text, contextual color override for status
-- Form Input: `border-border rounded-md px-3 py-2`, focus ring-primary
+- **Buttons**: `rounded-md`, primary color, `button-hover` (opacity-90 + scale-98 on active), smooth cubic-bezier transition
+- **Cards**: `rounded-lg`, `bg-card`, `border-border`, `card-hover` (shadow-elevated on hover), 200ms spring transition
+- **Progress Bar**: `h-2 rounded-full`, success/warning/destructive colors, animated fill on load (slide-up + fade-in)
+- **Badge**: `rounded-full px-2 py-1`, muted background, contextual status color with increased chroma
+- **Form Input**: `border-border rounded-md px-3 py-2`, `input-focus` with 2px offset ring, error state in destructive color with bold border
+- **Modal**: `bg-card shadow-premium`, backdrop blur (via CSS), refined padding (24px), focus trap with focus-ring utility
 
 ## Motion
 
-- Entrance: Category cards fade in with staggered timing (100ms between each) on dashboard load
-- Hover: Progress bars expand opacity, cards lift with subtle shadow increase
-- Decorative: None—interactions are functional only
+- **Entrance**: Category cards use `animate-fade-in` + staggered delay (100ms), progress bars `animate-slide-up` on mount
+- **Hover**: Cards gain `shadow-elevated`, buttons scale 98% on active, form inputs focus-ring appears
+- **Transitions**: All interactive elements use 0.3s cubic-bezier(0.4, 0, 0.2, 1) smooth curve, buttons use 0.2s spring for snappy feedback
+- **Decorative**: None—only functional interactions
 
 ## Constraints
 
@@ -75,4 +77,4 @@ Subtle layering via background colors and minimal shadows—card surfaces elevat
 
 ## Signature Detail
 
-Progress bars with animated fill on mount and contextual color state changes—the primary visual device for budget status, allowing users to glance and understand spending position without reading numbers.
+Refined shadow hierarchy and polished micro-interactions: card elevation on hover, spring transitions on buttons, focus rings with 2px offset, and staggered entrance animations. Premium feel through considered depth and smooth motion, not decoration. Progress bars remain primary status indicator with animated fills and contextual color states.

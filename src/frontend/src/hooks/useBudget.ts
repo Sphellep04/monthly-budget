@@ -94,6 +94,7 @@ export function useAddExpense() {
         date: expense.date,
         amountCents: expense.amountCents,
         notes: expense.notes,
+        receiptUrl: expense.receiptUrl,
       });
     },
     onSuccess: (_data, variables) => {

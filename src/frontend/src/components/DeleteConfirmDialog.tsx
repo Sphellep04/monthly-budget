@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -29,19 +29,29 @@ export function DeleteConfirmDialog({
 }: DeleteConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent data-ocid="delete.dialog" className="max-w-md">
+      <AlertDialogContent
+        data-ocid="delete.dialog"
+        className="max-w-md shadow-premium backdrop-blur-md"
+      >
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-display text-lg">
+          {/* Warning icon */}
+          <div className="w-12 h-12 rounded-2xl bg-destructive/10 flex items-center justify-center mb-2">
+            <AlertTriangle className="w-6 h-6 text-destructive" />
+          </div>
+
+          <AlertDialogTitle className="font-display text-lg font-bold text-foreground">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground">
+          <AlertDialogDescription className="text-muted-foreground text-sm leading-relaxed">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="gap-2">
+
+        <AlertDialogFooter className="gap-2.5 mt-2">
           <AlertDialogCancel
             data-ocid="delete.cancel_button"
             disabled={isPending}
+            className="button-hover"
           >
             Cancel
           </AlertDialogCancel>
@@ -52,7 +62,7 @@ export function DeleteConfirmDialog({
               onConfirm();
             }}
             disabled={isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 button-hover shadow-elevated min-w-[90px]"
           >
             {isPending ? (
               <>
@@ -60,7 +70,10 @@ export function DeleteConfirmDialog({
                 Deleting…
               </>
             ) : (
-              "Delete"
+              <>
+                <AlertTriangle className="w-4 h-4 mr-1.5" />
+                Delete
+              </>
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -39,6 +39,7 @@ type ExpenseInput =
    budgetId: nat;
    date: text;
    notes: opt text;
+   receiptUrl: opt text;
  };
 type Expense = 
  record {
@@ -49,6 +50,7 @@ type Expense =
    id: nat;
    notes: opt text;
    owner: UserId;
+   receiptUrl: opt text;
    recurringTemplateId: opt nat;
  };
 type CategoryTrendPoint = 

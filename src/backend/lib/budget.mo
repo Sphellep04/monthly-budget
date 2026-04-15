@@ -146,15 +146,6 @@ module {
     caller : Types.UserId,
     input : Types.ExpenseInput,
   ) : Types.Expense {
-    // Verify the budget belongs to the caller
-    switch (state.budgets.get(input.budgetId)) {
-      case null { return { id = 0; budgetId = 0; owner = caller; date = ""; amountCents = 0; notes = null; createdAt = 0; recurringTemplateId = null } };
-      case (?budget) {
-        if (not Principal.equal(budget.owner, caller)) {
-          return { id = 0; budgetId = 0; owner = caller; date = ""; amountCents = 0; notes = null; createdAt = 0; recurringTemplateId = null };
-        };
-      };
-    };
     let id = state.nextExpenseId;
     state.nextExpenseId += 1;
     let expense : Types.Expense = {
@@ -164,6 +155,7 @@ module {
       date = input.date;
       amountCents = input.amountCents;
       notes = input.notes;
+      receiptUrl = input.receiptUrl;
       createdAt = Time.now();
       recurringTemplateId = null;
     };
@@ -210,21 +202,13 @@ module {
     switch (state.expenses.get(id)) {
       case (?existing) {
         if (not Principal.equal(existing.owner, caller)) { return null };
-        // Verify new budgetId belongs to caller if changed
-        if (existing.budgetId != input.budgetId) {
-          switch (state.budgets.get(input.budgetId)) {
-            case null { return null };
-            case (?budget) {
-              if (not Principal.equal(budget.owner, caller)) { return null };
-            };
-          };
-        };
         let updated : Types.Expense = {
           existing with
           budgetId = input.budgetId;
           date = input.date;
           amountCents = input.amountCents;
           notes = input.notes;
+          receiptUrl = input.receiptUrl;
         };
         state.expenses.add(id, updated);
         ?updated;
@@ -428,6 +412,7 @@ module {
           date;
           amountCents = template.amountCents;
           notes = template.notes;
+          receiptUrl = null;
           createdAt = Time.now();
           recurringTemplateId = ?template.id;
         };

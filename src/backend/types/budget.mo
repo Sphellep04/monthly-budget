@@ -35,15 +35,18 @@ module {
     date : Text;         // ISO date string e.g. "2024-03-15"
     amountCents : Nat;   // stored as cents
     notes : ?Text;
+    receiptUrl : ?Text;  // optional object-storage URL for attached receipt
     createdAt : Timestamp;
     recurringTemplateId : ?Nat; // set when auto-generated from a template
   };
 
+  // Used for both createExpense and updateExpense
   public type ExpenseInput = {
     budgetId : Nat;
     date : Text;
     amountCents : Nat;
     notes : ?Text;
+    receiptUrl : ?Text;  // optional receipt attachment URL
   };
 
   // ---- Monthly summary ----

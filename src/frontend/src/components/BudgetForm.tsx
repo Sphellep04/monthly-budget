@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Check, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { CATEGORY_ICONS } from "../types";
 
@@ -40,6 +40,32 @@ interface BudgetFormProps {
   isPending?: boolean;
 }
 
+function FieldError({ message, id }: { message: string; id: string }) {
+  return (
+    <p
+      data-ocid={id}
+      className="flex items-center gap-1.5 text-xs text-destructive mt-1 slide-up"
+    >
+      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+      {message}
+    </p>
+  );
+}
+
+function FieldLabel({
+  children,
+  htmlFor,
+}: { children: React.ReactNode; htmlFor?: string }) {
+  return (
+    <Label
+      htmlFor={htmlFor}
+      className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+    >
+      {children}
+    </Label>
+  );
+}
+
 export function BudgetForm({
   onSubmit,
   onCancel,
@@ -58,8 +84,8 @@ export function BudgetForm({
     if (!name.trim()) errs.name = "Budget name is required.";
     const parsed = Number.parseFloat(limitDollars);
     if (!limitDollars || Number.isNaN(parsed) || parsed <= 0)
-      errs.limit = "Enter a positive dollar amount.";
-    if (!category) errs.category = "Select a category.";
+      errs.limit = "Enter a positive amount.";
+    if (!category) errs.category = "Please select a category.";
     return errs;
   }
 
@@ -80,10 +106,8 @@ export function BudgetForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
       {/* Budget Name */}
-      <div className="space-y-1.5">
-        <Label htmlFor="budget-name" className="text-sm font-medium">
-          Budget Name
-        </Label>
+      <div>
+        <FieldLabel htmlFor="budget-name">Budget Name</FieldLabel>
         <Input
           id="budget-name"
           data-ocid="budget_form.name_input"
@@ -92,26 +116,22 @@ export function BudgetForm({
           onChange={(e) => setName(e.target.value)}
           disabled={isPending}
           aria-invalid={!!errors.name}
+          className={`input-focus h-10 ${errors.name ? "border-destructive focus:border-destructive focus:ring-destructive/15" : ""}`}
         />
         {errors.name && (
-          <p
-            data-ocid="budget_form.name_field_error"
-            className="text-xs text-destructive"
-          >
-            {errors.name}
-          </p>
+          <FieldError message={errors.name} id="budget_form.name_field_error" />
         )}
       </div>
 
       {/* Monthly Limit */}
-      <div className="space-y-1.5">
-        <Label htmlFor="budget-limit" className="text-sm font-medium">
-          Monthly Limit ($)
-        </Label>
+      <div>
+        <FieldLabel htmlFor="budget-limit">Monthly Limit</FieldLabel>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-            $
-          </span>
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+            <span className="text-muted-foreground text-sm font-mono font-medium">
+              N$
+            </span>
+          </div>
           <Input
             id="budget-limit"
             data-ocid="budget_form.limit_input"
@@ -122,23 +142,21 @@ export function BudgetForm({
             value={limitDollars}
             onChange={(e) => setLimitDollars(e.target.value)}
             disabled={isPending}
-            className="pl-7"
+            className={`pl-10 input-focus h-10 font-mono ${errors.limit ? "border-destructive focus:border-destructive focus:ring-destructive/15" : ""}`}
             aria-invalid={!!errors.limit}
           />
         </div>
         {errors.limit && (
-          <p
-            data-ocid="budget_form.limit_field_error"
-            className="text-xs text-destructive"
-          >
-            {errors.limit}
-          </p>
+          <FieldError
+            message={errors.limit}
+            id="budget_form.limit_field_error"
+          />
         )}
       </div>
 
       {/* Category */}
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Category</Label>
+      <div>
+        <FieldLabel>Category</FieldLabel>
         <Select
           value={category}
           onValueChange={setCategory}
@@ -147,13 +165,14 @@ export function BudgetForm({
           <SelectTrigger
             data-ocid="budget_form.category_select"
             aria-invalid={!!errors.category}
+            className={`input-focus h-10 ${errors.category ? "border-destructive" : ""}`}
           >
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="shadow-premium">
             {CATEGORIES.map((cat) => (
               <SelectItem key={cat} value={cat}>
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-2.5">
                   <span>{CATEGORY_ICONS[cat]}</span>
                   <span>{cat}</span>
                 </span>
@@ -162,62 +181,65 @@ export function BudgetForm({
           </SelectContent>
         </Select>
         {errors.category && (
-          <p
-            data-ocid="budget_form.category_field_error"
-            className="text-xs text-destructive"
-          >
-            {errors.category}
-          </p>
+          <FieldError
+            message={errors.category}
+            id="budget_form.category_field_error"
+          />
         )}
       </div>
 
       {/* Color */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Color</Label>
+      <div>
+        <FieldLabel>Color</FieldLabel>
         <div
-          className="flex flex-wrap gap-2"
-          role="radiogroup"
+          className="flex flex-wrap gap-2.5 p-3 rounded-xl bg-muted/40 border border-border"
           aria-label="Budget color"
         >
           {PRESET_COLORS.map((c) => (
             <button
               key={c}
               type="button"
-              role="radio"
-              aria-checked={color === c}
+              aria-pressed={color === c}
               data-ocid="budget_form.color_swatch"
               onClick={() => setColor(c)}
               disabled={isPending}
-              className={`w-7 h-7 rounded-full border-2 transition-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              className={`w-8 h-8 rounded-full transition-spring focus-visible-ring relative flex items-center justify-center ${
                 color === c
-                  ? "border-foreground scale-110"
-                  : "border-transparent hover:scale-105"
+                  ? "ring-2 ring-offset-2 ring-foreground/60 scale-110"
+                  : "hover:scale-110 hover:ring-2 hover:ring-offset-1 hover:ring-foreground/30"
               }`}
               style={{ backgroundColor: c }}
               aria-label={`Color ${c}`}
-            />
+            >
+              {color === c && (
+                <Check
+                  className="w-4 h-4 text-white drop-shadow"
+                  strokeWidth={3}
+                />
+              )}
+            </button>
           ))}
         </div>
-        {/* Preview swatch */}
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 mt-2 px-1">
           <div
-            className="w-4 h-4 rounded-full flex-shrink-0"
+            className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
             style={{ backgroundColor: color }}
           />
-          <span className="text-xs text-muted-foreground font-mono">
+          <span className="text-[11px] text-muted-foreground font-mono">
             {color}
           </span>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end gap-3 pt-2">
+      <div className="flex justify-end gap-3 pt-1">
         <Button
           type="button"
           variant="outline"
           data-ocid="budget_form.cancel_button"
           onClick={onCancel}
           disabled={isPending}
+          className="button-hover"
         >
           Cancel
         </Button>
@@ -225,6 +247,7 @@ export function BudgetForm({
           type="submit"
           data-ocid="budget_form.submit_button"
           disabled={isPending}
+          className="button-hover shadow-elevated min-w-[110px]"
         >
           {isPending ? (
             <>

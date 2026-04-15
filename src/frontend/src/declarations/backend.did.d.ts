@@ -45,6 +45,7 @@ export interface CategoryTrendPoint {
 export interface Expense {
   'id' : bigint,
   'recurringTemplateId' : [] | [bigint],
+  'receiptUrl' : [] | [string],
   'owner' : UserId,
   'date' : string,
   'createdAt' : Timestamp,
@@ -53,6 +54,7 @@ export interface Expense {
   'notes' : [] | [string],
 }
 export interface ExpenseInput {
+  'receiptUrl' : [] | [string],
   'date' : string,
   'amountCents' : bigint,
   'budgetId' : bigint,

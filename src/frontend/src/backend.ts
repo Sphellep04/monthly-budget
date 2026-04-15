@@ -134,6 +134,7 @@ export interface MonthlySummary {
     budgets: Array<BudgetSummary>;
 }
 export interface ExpenseInput {
+    receiptUrl?: string;
     date: string;
     amountCents: bigint;
     budgetId: bigint;
@@ -142,6 +143,7 @@ export interface ExpenseInput {
 export interface Expense {
     id: bigint;
     recurringTemplateId?: bigint;
+    receiptUrl?: string;
     owner: UserId;
     date: string;
     createdAt: Timestamp;
@@ -513,6 +515,7 @@ function from_candid_record_n11(_uploadFile: (file: ExternalBlob) => Promise<Uin
 function from_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;
     recurringTemplateId: [] | [bigint];
+    receiptUrl: [] | [string];
     owner: _UserId;
     date: string;
     createdAt: _Timestamp;
@@ -522,6 +525,7 @@ function from_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint
 }): {
     id: bigint;
     recurringTemplateId?: bigint;
+    receiptUrl?: string;
     owner: UserId;
     date: string;
     createdAt: Timestamp;
@@ -532,6 +536,7 @@ function from_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint
     return {
         id: value.id,
         recurringTemplateId: record_opt_to_undefined(from_candid_opt_n4(_uploadFile, _downloadFile, value.recurringTemplateId)),
+        receiptUrl: record_opt_to_undefined(from_candid_opt_n5(_uploadFile, _downloadFile, value.receiptUrl)),
         owner: value.owner,
         date: value.date,
         createdAt: value.createdAt,
@@ -553,17 +558,20 @@ function to_candid_RecurringTemplateInput_n8(_uploadFile: (file: ExternalBlob) =
     return to_candid_record_n9(_uploadFile, _downloadFile, value);
 }
 function to_candid_record_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    receiptUrl?: string;
     date: string;
     amountCents: bigint;
     budgetId: bigint;
     notes?: string;
 }): {
+    receiptUrl: [] | [string];
     date: string;
     amountCents: bigint;
     budgetId: bigint;
     notes: [] | [string];
 } {
     return {
+        receiptUrl: value.receiptUrl ? candid_some(value.receiptUrl) : candid_none(),
         date: value.date,
         amountCents: value.amountCents,
         budgetId: value.budgetId,

@@ -25,47 +25,53 @@ const navItems: NavItem[] = [
   {
     label: "Dashboard",
     href: "/",
-    icon: <LayoutDashboard size={18} />,
+    icon: <LayoutDashboard size={17} />,
     ocid: "sidebar.dashboard.link",
   },
   {
     label: "Budgets",
     href: "/budgets",
-    icon: <Wallet size={18} />,
+    icon: <Wallet size={17} />,
     ocid: "sidebar.budgets.link",
   },
   {
     label: "Charts",
     href: "/charts",
-    icon: <BarChart2 size={18} />,
+    icon: <BarChart2 size={17} />,
     ocid: "sidebar.charts.link",
   },
 ];
 
-export function Sidebar() {
+function SidebarInner({ onNavClick }: { onNavClick?: () => void }) {
   const { logout } = useAuth();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
-  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const SidebarContent = () => (
+  return (
     <div className="flex flex-col h-full">
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-sidebar-border">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/20 text-primary">
-          <TrendingUp size={16} />
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
+        <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-primary/20 text-primary shadow-glow-sm">
+          <TrendingUp size={17} strokeWidth={2.2} />
+          {/* Inner glow ring */}
+          <div className="absolute inset-0 rounded-xl ring-1 ring-primary/30" />
         </div>
-        <span className="font-display font-semibold text-lg text-sidebar-foreground tracking-tight">
-          BudgetWise
-        </span>
+        <div className="flex flex-col">
+          <span className="font-display font-bold text-[1.05rem] text-sidebar-foreground tracking-tight leading-none">
+            BudgetWise
+          </span>
+          <span className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 tracking-wider">
+            FINANCE TRACKER
+          </span>
+        </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-2 mb-2">
-          Menu
+      <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.12em] px-3 mb-3">
+          Navigation
         </p>
-        {navItems.map((item) => {
+        {navItems.map((item, i) => {
           const isActive =
             item.href === "/"
               ? pathname === "/"
@@ -75,88 +81,113 @@ export function Sidebar() {
               key={item.href}
               to={item.href}
               data-ocid={item.ocid}
-              onClick={() => setMobileOpen(false)}
+              onClick={onNavClick}
+              style={{ animationDelay: `${i * 40}ms` }}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-smooth",
+                "group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[0.8375rem] font-medium transition-colors-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-1",
                 isActive
-                  ? "bg-primary/15 text-primary"
+                  ? "nav-active-indicator bg-primary/12 text-primary"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               )}
             >
               <span
                 className={cn(
-                  "transition-smooth",
-                  isActive ? "text-primary" : "text-muted-foreground",
+                  "flex-shrink-0 transition-colors-fast",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground/70 group-hover:text-sidebar-accent-foreground",
                 )}
               >
                 {item.icon}
               </span>
-              {item.label}
+              <span className="truncate">{item.label}</span>
               {isActive && (
-                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
+                <span className="ml-auto flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_oklch(var(--primary)/0.6)]" />
               )}
             </Link>
           );
         })}
       </nav>
 
-      <Separator className="bg-sidebar-border" />
+      <Separator className="bg-sidebar-border/60" />
 
-      {/* Logout */}
-      <div className="px-3 py-4">
+      {/* User section / Logout */}
+      <div className="px-3 py-4 space-y-1">
         <Button
           variant="ghost"
           size="sm"
           onClick={logout}
           data-ocid="sidebar.logout_button"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-smooth"
+          className="w-full justify-start gap-3 text-[0.8125rem] text-muted-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-colors-fast rounded-lg h-9 px-3"
         >
-          <LogOut size={16} />
-          Sign out
+          <LogOut size={15} className="flex-shrink-0" />
+          <span>Sign out</span>
         </Button>
       </div>
     </div>
   );
+}
+
+export function Sidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <>
       {/* Mobile toggle */}
       <button
         type="button"
-        className="fixed top-4 left-4 z-50 md:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-card border border-border shadow-sm"
+        className={cn(
+          "fixed top-4 left-4 z-50 md:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-card border border-border shadow-elevated transition-spring",
+          "hover:bg-muted active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+        )}
         onClick={() => setMobileOpen((o) => !o)}
-        onKeyDown={(e) => e.key === "Enter" && setMobileOpen((o) => !o)}
         aria-label="Toggle sidebar"
         data-ocid="sidebar.toggle"
       >
-        {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+        <span
+          className={cn(
+            "transition-spring",
+            mobileOpen ? "rotate-90" : "rotate-0",
+          )}
+        >
+          {mobileOpen ? <X size={17} /> : <Menu size={17} />}
+        </span>
       </button>
 
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          role="button"
-          tabIndex={0}
-          aria-label="Close sidebar"
-          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm md:hidden"
-          onClick={() => setMobileOpen(false)}
-          onKeyDown={(e) => e.key === "Enter" && setMobileOpen(false)}
-        />
-      )}
+      {/* Mobile backdrop */}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 md:hidden transition-smooth",
+          mobileOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none",
+        )}
+        style={{
+          background: "oklch(0 0 0 / 0.5)",
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label="Close sidebar"
+        onClick={() => setMobileOpen(false)}
+        onKeyDown={(e) => e.key === "Enter" && setMobileOpen(false)}
+      />
 
       {/* Mobile drawer */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-full w-64 bg-sidebar border-r border-sidebar-border transition-smooth md:hidden",
+          "fixed top-0 left-0 z-40 h-full w-64 bg-sidebar border-r border-sidebar-border shadow-premium md:hidden",
+          "transition-smooth",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <SidebarContent />
+        <SidebarInner onNavClick={() => setMobileOpen(false)} />
       </aside>
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 h-screen bg-sidebar border-r border-sidebar-border flex-col sticky top-0">
-        <SidebarContent />
+      <aside className="hidden md:flex w-64 flex-shrink-0 h-screen bg-sidebar border-r border-sidebar-border/80 flex-col sticky top-0 shadow-[1px_0_0_0_oklch(var(--sidebar-border)/0.8)]">
+        <SidebarInner />
       </aside>
     </>
   );

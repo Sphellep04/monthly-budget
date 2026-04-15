@@ -5,8 +5,9 @@ import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   Download,
-  LayoutDashboard,
+  Loader2,
   PlusCircle,
+  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
 import { createActor } from "../backend";
@@ -21,7 +22,7 @@ function BudgetGridSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {(["a", "b", "c", "d", "e", "f"] as const).map((k) => (
-        <Skeleton key={k} className="h-36 rounded-xl" />
+        <Skeleton key={k} className="h-44 rounded-2xl" />
       ))}
     </div>
   );
@@ -30,33 +31,50 @@ function BudgetGridSkeleton() {
 function EmptyState() {
   return (
     <div
-      className="flex flex-col items-center justify-center py-16 px-6 text-center rounded-2xl border border-dashed border-border bg-card/50"
+      className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle"
       data-ocid="dashboard.empty_state"
     >
-      <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center mb-4">
-        <LayoutDashboard className="h-8 w-8 text-primary" />
+      {/* Icon */}
+      <div className="relative mb-6">
+        <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center shadow-elevated">
+          <Sparkles className="h-10 w-10 text-primary" />
+        </div>
+        {/* Glow ring */}
+        <div
+          className="absolute inset-0 rounded-2xl bg-primary/5 blur-xl scale-125 pointer-events-none"
+          aria-hidden="true"
+        />
       </div>
-      <h3 className="font-display font-bold text-lg text-foreground mb-2">
-        No budgets yet
+
+      <h3 className="font-display font-bold text-xl text-foreground mb-2 tracking-tight">
+        No budgets set up yet
       </h3>
-      <p className="text-sm text-muted-foreground max-w-xs mb-6 font-body leading-relaxed">
-        Start tracking your spending by creating your first budget category for
-        this month.
+      <p className="text-sm text-muted-foreground max-w-sm mb-8 font-body leading-relaxed">
+        Take control of your spending by creating your first budget category. It
+        only takes a minute — you'll get instant insight into where your money
+        goes.
       </p>
-      <Link to="/budgets">
-        <Button
-          className="gap-2 font-body"
-          data-ocid="dashboard.create_budget_button"
-        >
+
+      <Link to="/budgets" data-ocid="dashboard.create_budget_button">
+        <Button className="gap-2 font-body px-6 h-10 rounded-xl shadow-elevated button-hover transition-spring">
           <PlusCircle className="h-4 w-4" />
           Create your first budget
         </Button>
       </Link>
+
+      {/* Decorative dots */}
+      <div className="flex gap-2 mt-8 opacity-30" aria-hidden="true">
+        {["d1", "d2", "d3", "d4", "d5"].map((id) => (
+          <div
+            key={id}
+            className="w-1.5 h-1.5 rounded-full bg-muted-foreground"
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-/** Exports summary + expense structure as CSV */
 function ExportCsvButton({
   year,
   month,
@@ -77,9 +95,10 @@ function ExportCsvButton({
       const filename = `budget-${monthName}-${year}.csv`;
       const lines: string[] = [];
 
-      // Summary section
       lines.push("=== BUDGET SUMMARY ===");
-      lines.push("Category,Budget Limit,Amount Spent,Remaining,% Used");
+      lines.push(
+        "Category,Budget Limit (N$),Amount Spent (N$),Remaining (N$),% Used",
+      );
       for (const bs of summary.budgets) {
         const limit = Number(bs.budget.limitCents) / 100;
         const spent = Number(bs.totalSpentCents) / 100;
@@ -97,10 +116,8 @@ function ExportCsvButton({
         `"TOTAL",${totalLimit.toFixed(2)},${totalSpent.toFixed(2)},${(totalLimit - totalSpent).toFixed(2)},${totalPct}%`,
       );
       lines.push("");
-
-      // Fetch all expenses for each budget and filter to selected month
       lines.push("=== DETAILED EXPENSES ===");
-      lines.push("Date,Category,Amount,Notes");
+      lines.push("Date,Category,Amount (N$),Notes");
 
       const monthPad = String(month).padStart(2, "0");
       const monthPrefix = `${year}-${monthPad}`;
@@ -110,7 +127,6 @@ function ExportCsvButton({
         const expenses = (rawExpenses as unknown as Expense[]).filter((e) =>
           e.date.startsWith(monthPrefix),
         );
-
         lines.push(`"--- ${bs.budget.name} ---","","",""`);
         if (expenses.length === 0) {
           lines.push(`"(no expenses)","","",""`);
@@ -145,12 +161,16 @@ function ExportCsvButton({
     <Button
       variant="outline"
       size="sm"
-      className="gap-1.5 transition-smooth font-body"
+      className="gap-2 font-body h-9 px-3.5 rounded-xl border-border hover:border-primary/40 hover:bg-primary/5 transition-smooth shadow-subtle"
       onClick={handleExport}
       disabled={!summary || !actor || isExporting}
       data-ocid="dashboard.export_csv_button"
     >
-      <Download className="h-4 w-4" />
+      {isExporting ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Download className="h-4 w-4" />
+      )}
       {isExporting ? "Exporting…" : "Export CSV"}
     </Button>
   );
@@ -167,20 +187,26 @@ export function DashboardPage() {
 
   return (
     <div
-      className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto"
+      className="p-5 md:p-7 space-y-7 max-w-7xl mx-auto page-enter"
       data-ocid="dashboard.page"
     >
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 md:pt-0">
+      {/* ── Page hero header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-1">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">
-            Dashboard
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5 font-body">
-            {getMonthName(month)} {year} overview
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="font-display text-3xl font-bold text-foreground tracking-tight leading-none">
+              {getMonthName(month)} Budget
+            </h1>
+            <span className="font-mono text-lg text-muted-foreground font-medium tabular-nums leading-none mt-0.5">
+              {year}
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground font-body">
+            Track spending and stay on top of your finances
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+
+        <div className="flex items-center gap-2.5 flex-wrap">
           <MonthSelector
             year={year}
             month={month}
@@ -193,7 +219,7 @@ export function DashboardPage() {
           <Link to="/budgets">
             <Button
               size="sm"
-              className="gap-1.5 transition-smooth font-body"
+              className="gap-2 font-body h-9 px-4 rounded-xl shadow-elevated button-hover transition-spring"
               data-ocid="dashboard.add_budget_button"
             >
               <PlusCircle className="h-4 w-4" />
@@ -203,22 +229,31 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Monthly summary header */}
+      {/* ── Monthly summary ── */}
       <MonthlySummaryHeader summary={summary} isLoading={isLoading} />
 
-      {/* Budget grid */}
+      {/* ── Budget grid ── */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-base font-semibold text-foreground">
-            Budget Categories
-          </h2>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-display text-lg font-semibold text-foreground leading-none">
+              Budget Categories
+            </h2>
+            {hasBudgets && (
+              <p className="text-xs text-muted-foreground font-body mt-1">
+                {budgets.length} categor{budgets.length === 1 ? "y" : "ies"}{" "}
+                this month
+              </p>
+            )}
+          </div>
           {hasBudgets && (
             <Link
               to="/budgets"
-              className="text-xs text-primary hover:underline flex items-center gap-1 transition-smooth"
+              className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 font-medium font-body transition-colors duration-200 group"
               data-ocid="dashboard.view_all_link"
             >
-              View all <ArrowRight className="h-3 w-3" />
+              Manage budgets
+              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />
             </Link>
           )}
         </div>

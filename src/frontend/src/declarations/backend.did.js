@@ -13,6 +13,7 @@ export const Timestamp = IDL.Int;
 export const Expense = IDL.Record({
   'id' : IDL.Nat,
   'recurringTemplateId' : IDL.Opt(IDL.Nat),
+  'receiptUrl' : IDL.Opt(IDL.Text),
   'owner' : UserId,
   'date' : IDL.Text,
   'createdAt' : Timestamp,
@@ -40,6 +41,7 @@ export const Budget = IDL.Record({
   'category' : IDL.Text,
 });
 export const ExpenseInput = IDL.Record({
+  'receiptUrl' : IDL.Opt(IDL.Text),
   'date' : IDL.Text,
   'amountCents' : IDL.Nat,
   'budgetId' : IDL.Nat,
@@ -150,6 +152,7 @@ export const idlFactory = ({ IDL }) => {
   const Expense = IDL.Record({
     'id' : IDL.Nat,
     'recurringTemplateId' : IDL.Opt(IDL.Nat),
+    'receiptUrl' : IDL.Opt(IDL.Text),
     'owner' : UserId,
     'date' : IDL.Text,
     'createdAt' : Timestamp,
@@ -177,6 +180,7 @@ export const idlFactory = ({ IDL }) => {
     'category' : IDL.Text,
   });
   const ExpenseInput = IDL.Record({
+    'receiptUrl' : IDL.Opt(IDL.Text),
     'date' : IDL.Text,
     'amountCents' : IDL.Nat,
     'budgetId' : IDL.Nat,

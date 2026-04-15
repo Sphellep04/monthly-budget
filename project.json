@@ -1,20 +1,24 @@
 {
-  "overview": "A personal monthly budget app that lets you create spending categories, log expenses, and track how much you've spent vs. your budget each month.",
+  "overview": "A personal finance tracker for monthly budgets with expense logging, category spending limits, analytics charts, recurring expense templates, receipt photo attachments, and CSV export — all in Namibian dollars (N$).",
   "features": [
-    "Internet Identity login",
-    "Budget categories with monthly limits",
-    "Expense logging with date, amount, and notes",
-    "Dashboard with per-category progress bars and overspend alerts",
-    "Month selector for reviewing past months",
-    "Real-time balance tracking"
+    "Monthly budget categories with spending limits",
+    "Expense logging with optional receipt photo attachments",
+    "Namibian dollar (N$) currency display throughout",
+    "Spending trend charts (12-month line chart and category bar chart)",
+    "Recurring expense templates that auto-add each month",
+    "CSV export of monthly budget summary and expenses",
+    "Color-coded progress bars for budget status",
+    "Month switching to review past spending",
+    "User authentication with Internet Identity"
   ],
   "category": "productivity",
   "tags": [
     "budget",
-    "personal-finance",
+    "finance",
     "expense-tracker",
-    "monthly",
-    "productivity"
+    "namibia",
+    "receipts",
+    "personal-finance"
   ],
-  "last_updated": "2026-04-15T06:09:20.961Z"
+  "last_updated": "2026-04-15T14:28:05.535Z"
 }

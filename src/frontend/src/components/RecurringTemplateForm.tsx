@@ -2,12 +2,21 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertCircle,
+  CalendarClock,
+  Loader2,
+  RefreshCw,
+  StickyNote,
+  Wallet,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -18,10 +27,26 @@ import type { RecurringTemplate } from "../types";
 
 interface Props {
   budgetId: bigint;
-  templateId: bigint | null; // null = create, non-null = edit
+  templateId: bigint | null;
   templates: RecurringTemplate[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+function FieldLabel({
+  children,
+  htmlFor,
+  icon,
+}: { children: React.ReactNode; htmlFor?: string; icon?: React.ReactNode }) {
+  return (
+    <Label
+      htmlFor={htmlFor}
+      className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1.5"
+    >
+      {icon}
+      {children}
+    </Label>
+  );
 }
 
 export function RecurringTemplateForm({
@@ -38,12 +63,12 @@ export function RecurringTemplateForm({
   const [amountStr, setAmountStr] = useState("");
   const [dayOfMonth, setDayOfMonth] = useState("1");
   const [notes, setNotes] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const createTemplate = useCreateRecurringTemplate();
   const updateTemplate = useUpdateRecurringTemplate();
   const isPending = createTemplate.isPending || updateTemplate.isPending;
 
-  // Populate form when editing
   useEffect(() => {
     if (existing) {
       setName(existing.name);
@@ -56,31 +81,37 @@ export function RecurringTemplateForm({
       setDayOfMonth("1");
       setNotes("");
     }
+    setErrors({});
   }, [existing]);
+
+  function validate() {
+    const errs: Record<string, string> = {};
+    if (!name.trim()) errs.name = "Name is required.";
+    const amount = Math.round(Number.parseFloat(amountStr) * 100);
+    if (Number.isNaN(amount) || amount <= 0)
+      errs.amount = "Enter a valid amount.";
+    const day = Number.parseInt(dayOfMonth, 10);
+    if (Number.isNaN(day) || day < 1 || day > 31)
+      errs.day = "Day must be between 1 and 31.";
+    return errs;
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
+    setErrors({});
 
-    const amountCents = Math.round(Number.parseFloat(amountStr) * 100);
+    const amountCents = BigInt(Math.round(Number.parseFloat(amountStr) * 100));
     const day = Number.parseInt(dayOfMonth, 10);
-
-    if (!name.trim()) {
-      toast.error("Please enter a name");
-      return;
-    }
-    if (Number.isNaN(amountCents) || amountCents <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
-    }
-    if (Number.isNaN(day) || day < 1 || day > 31) {
-      toast.error("Day of month must be between 1 and 31");
-      return;
-    }
 
     const input = {
       budgetId,
       name: name.trim(),
-      amountCents: BigInt(amountCents),
+      amountCents,
       dayOfMonth: BigInt(day),
       notes: notes.trim() || undefined,
     };
@@ -90,7 +121,7 @@ export function RecurringTemplateForm({
         { id: templateId, input },
         {
           onSuccess: () => {
-            toast.success("Recurring template updated");
+            toast.success("Template updated");
             onOpenChange(false);
           },
           onError: () => toast.error("Failed to update template"),
@@ -109,19 +140,35 @@ export function RecurringTemplateForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" data-ocid="recurring_form.dialog">
+      <DialogContent
+        className="sm:max-w-md shadow-premium backdrop-blur-md"
+        data-ocid="recurring_form.dialog"
+      >
         <DialogHeader>
-          <DialogTitle className="font-display">
-            {isEditing ? "Edit Recurring Expense" : "Add Recurring Expense"}
-          </DialogTitle>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">
+              <RefreshCw className="w-4 h-4 text-secondary" />
+            </div>
+            <DialogTitle className="font-display text-xl font-bold">
+              {isEditing ? "Edit Recurring Expense" : "Add Recurring Expense"}
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-sm text-muted-foreground">
+            {isEditing
+              ? "Update this recurring expense template."
+              : "This expense will be auto-applied each month on the day you choose."}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           {/* Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="rt-name" className="text-sm font-medium">
+          <div>
+            <FieldLabel
+              htmlFor="rt-name"
+              icon={<StickyNote className="w-3 h-3" />}
+            >
               Name
-            </Label>
+            </FieldLabel>
             <Input
               id="rt-name"
               placeholder="e.g. Netflix subscription"
@@ -129,32 +176,57 @@ export function RecurringTemplateForm({
               onChange={(e) => setName(e.target.value)}
               data-ocid="recurring_form.name_input"
               autoFocus
+              className={`input-focus h-10 ${errors.name ? "border-destructive" : ""}`}
             />
+            {errors.name && (
+              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
+                <AlertCircle className="w-3.5 h-3.5" />
+                {errors.name}
+              </p>
+            )}
           </div>
 
           {/* Amount */}
-          <div className="space-y-1.5">
-            <Label htmlFor="rt-amount" className="text-sm font-medium">
-              Amount ($)
-            </Label>
-            <Input
-              id="rt-amount"
-              type="number"
-              inputMode="decimal"
-              min="0.01"
-              step="0.01"
-              placeholder="0.00"
-              value={amountStr}
-              onChange={(e) => setAmountStr(e.target.value)}
-              data-ocid="recurring_form.amount_input"
-            />
+          <div>
+            <FieldLabel
+              htmlFor="rt-amount"
+              icon={<Wallet className="w-3 h-3" />}
+            >
+              Amount
+            </FieldLabel>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none">
+                N$
+              </span>
+              <Input
+                id="rt-amount"
+                type="number"
+                inputMode="decimal"
+                min="0.01"
+                step="0.01"
+                placeholder="0.00"
+                value={amountStr}
+                onChange={(e) => setAmountStr(e.target.value)}
+                data-ocid="recurring_form.amount_input"
+                className={`pl-9 input-focus h-10 font-mono text-sm ${errors.amount ? "border-destructive" : ""}`}
+              />
+            </div>
+            {errors.amount && (
+              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
+                <AlertCircle className="w-3.5 h-3.5" />
+                {errors.amount}
+              </p>
+            )}
           </div>
 
           {/* Day of month */}
-          <div className="space-y-1.5">
-            <Label htmlFor="rt-day" className="text-sm font-medium">
-              Day of month
-            </Label>
+          <div>
+            <FieldLabel
+              htmlFor="rt-day"
+              icon={<CalendarClock className="w-3 h-3" />}
+            >
+              Day of Month
+            </FieldLabel>
             <Input
               id="rt-day"
               type="number"
@@ -165,21 +237,32 @@ export function RecurringTemplateForm({
               value={dayOfMonth}
               onChange={(e) => setDayOfMonth(e.target.value)}
               data-ocid="recurring_form.day_input"
+              className={`input-focus h-10 font-mono w-32 ${errors.day ? "border-destructive" : ""}`}
             />
-            <p className="text-xs text-muted-foreground">
-              For months with fewer days, the expense will be created on the
-              last day.
-            </p>
+            {errors.day ? (
+              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
+                <AlertCircle className="w-3.5 h-3.5" />
+                {errors.day}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground mt-1.5">
+                For months with fewer days, the expense will be created on the
+                last available day.
+              </p>
+            )}
           </div>
 
           {/* Notes */}
-          <div className="space-y-1.5">
-            <Label htmlFor="rt-notes" className="text-sm font-medium">
+          <div>
+            <FieldLabel
+              htmlFor="rt-notes"
+              icon={<StickyNote className="w-3 h-3" />}
+            >
               Notes{" "}
-              <span className="text-muted-foreground font-normal">
+              <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
                 (optional)
               </span>
-            </Label>
+            </FieldLabel>
             <Textarea
               id="rt-notes"
               placeholder="e.g. Annual plan, paid monthly"
@@ -187,15 +270,18 @@ export function RecurringTemplateForm({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               data-ocid="recurring_form.notes_textarea"
+              className="input-focus text-sm resize-none"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-1">
+          <div className="flex justify-end gap-2.5 pt-1">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               data-ocid="recurring_form.cancel_button"
+              className="button-hover"
+              disabled={isPending}
             >
               Cancel
             </Button>
@@ -203,12 +289,18 @@ export function RecurringTemplateForm({
               type="submit"
               disabled={isPending}
               data-ocid="recurring_form.submit_button"
+              className="button-hover shadow-elevated min-w-[120px]"
             >
-              {isPending
-                ? "Saving…"
-                : isEditing
-                  ? "Save Changes"
-                  : "Add Template"}
+              {isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving…
+                </>
+              ) : isEditing ? (
+                "Save Changes"
+              ) : (
+                "Add Template"
+              )}
             </Button>
           </div>
         </form>

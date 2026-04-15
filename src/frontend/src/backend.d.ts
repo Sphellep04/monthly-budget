@@ -52,6 +52,7 @@ export interface MonthlySummary {
     budgets: Array<BudgetSummary>;
 }
 export interface ExpenseInput {
+    receiptUrl?: string;
     date: string;
     amountCents: bigint;
     budgetId: bigint;
@@ -60,6 +61,7 @@ export interface ExpenseInput {
 export interface Expense {
     id: bigint;
     recurringTemplateId?: bigint;
+    receiptUrl?: string;
     owner: UserId;
     date: string;
     createdAt: Timestamp;
