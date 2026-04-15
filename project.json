@@ -1,0 +1,20 @@
+{
+  "overview": "A personal monthly budget app that lets you create spending categories, log expenses, and track how much you've spent vs. your budget each month.",
+  "features": [
+    "Internet Identity login",
+    "Budget categories with monthly limits",
+    "Expense logging with date, amount, and notes",
+    "Dashboard with per-category progress bars and overspend alerts",
+    "Month selector for reviewing past months",
+    "Real-time balance tracking"
+  ],
+  "category": "productivity",
+  "tags": [
+    "budget",
+    "personal-finance",
+    "expense-tracker",
+    "monthly",
+    "productivity"
+  ],
+  "last_updated": "2026-04-15T06:09:20.961Z"
+}

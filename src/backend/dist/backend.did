@@ -1,0 +1,114 @@
+type UserId = principal;
+type Timestamp = int;
+type RecurringTemplateInput = 
+ record {
+   amountCents: nat;
+   budgetId: nat;
+   dayOfMonth: nat;
+   name: text;
+   notes: opt text;
+ };
+type RecurringTemplate = 
+ record {
+   amountCents: nat;
+   budgetId: nat;
+   createdAt: Timestamp;
+   dayOfMonth: nat;
+   id: nat;
+   name: text;
+   notes: opt text;
+   owner: UserId;
+ };
+type MonthlyTrendPoint = 
+ record {
+   month: nat;
+   totalSpentCents: nat;
+   year: nat;
+ };
+type MonthlySummary = 
+ record {
+   budgets: vec BudgetSummary;
+   month: nat;
+   totalBudgetCents: nat;
+   totalSpentCents: nat;
+   year: nat;
+ };
+type ExpenseInput = 
+ record {
+   amountCents: nat;
+   budgetId: nat;
+   date: text;
+   notes: opt text;
+ };
+type Expense = 
+ record {
+   amountCents: nat;
+   budgetId: nat;
+   createdAt: Timestamp;
+   date: text;
+   id: nat;
+   notes: opt text;
+   owner: UserId;
+   recurringTemplateId: opt nat;
+ };
+type CategoryTrendPoint = 
+ record {
+   budgetId: nat;
+   budgetName: text;
+   limitCents: nat;
+   month: nat;
+   spentCents: nat;
+   year: nat;
+ };
+type BudgetSummary = 
+ record {
+   budget: Budget;
+   remainingCents: int;
+   totalSpentCents: nat;
+ };
+type BudgetInput = 
+ record {
+   category: text;
+   color: text;
+   limitCents: nat;
+   month: nat;
+   name: text;
+   year: nat;
+ };
+type Budget = 
+ record {
+   category: text;
+   color: text;
+   createdAt: Timestamp;
+   id: nat;
+   limitCents: nat;
+   month: nat;
+   name: text;
+   owner: UserId;
+   year: nat;
+ };
+service : {
+  applyRecurringTemplates: (year: nat, month: nat) -> (vec Expense);
+  createBudget: (input: BudgetInput) -> (Budget);
+  createExpense: (input: ExpenseInput) -> (Expense);
+  createRecurringTemplate: (input: RecurringTemplateInput) ->
+   (RecurringTemplate);
+  deleteBudget: (id: nat) -> (bool);
+  deleteExpense: (id: nat) -> (bool);
+  deleteRecurringTemplate: (id: nat) -> (bool);
+  getBudget: (id: nat) -> (opt Budget) query;
+  getCategoryTrend: (budgetId: nat, months: nat, currentYear: nat,
+   currentMonth: nat) -> (vec CategoryTrendPoint) query;
+  getExpense: (id: nat) -> (opt Expense) query;
+  getMonthlySummary: (year: nat, month: nat) -> (MonthlySummary) query;
+  getMonthlyTrend: (months: nat, currentYear: nat, currentMonth: nat) ->
+   (vec MonthlyTrendPoint) query;
+  getRecurringTemplate: (id: nat) -> (opt RecurringTemplate) query;
+  listBudgets: (year: nat, month: nat) -> (vec Budget) query;
+  listExpenses: (budgetId: nat) -> (vec Expense) query;
+  listRecurringTemplates: (budgetId: nat) -> (vec RecurringTemplate) query;
+  updateBudget: (id: nat, input: BudgetInput) -> (opt Budget);
+  updateExpense: (id: nat, input: ExpenseInput) -> (opt Expense);
+  updateRecurringTemplate: (id: nat, input: RecurringTemplateInput) ->
+   (opt RecurringTemplate);
+}

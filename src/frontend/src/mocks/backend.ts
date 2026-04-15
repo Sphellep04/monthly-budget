@@ -1,0 +1,151 @@
+import { Principal } from "@icp-sdk/core/principal";
+import type {
+  backendInterface,
+  Budget,
+  BudgetSummary,
+  CategoryTrendPoint,
+  Expense,
+  MonthlyTrendPoint,
+  MonthlySummary,
+  RecurringTemplate,
+} from "../backend.d";
+
+const stubOwner = Principal.anonymous();
+
+const mockBudgets: Budget[] = [
+  {
+    id: BigInt(1),
+    owner: stubOwner,
+    name: "Groceries",
+    limitCents: BigInt(80000),
+    color: "#22c55e",
+    category: "Groceries",
+    year: BigInt(2026),
+    month: BigInt(4),
+    createdAt: BigInt(Date.now()),
+  },
+  {
+    id: BigInt(2),
+    owner: stubOwner,
+    name: "Housing",
+    limitCents: BigInt(180000),
+    color: "#3b82f6",
+    category: "Housing",
+    year: BigInt(2026),
+    month: BigInt(4),
+    createdAt: BigInt(Date.now()),
+  },
+  {
+    id: BigInt(3),
+    owner: stubOwner,
+    name: "Dining Out",
+    limitCents: BigInt(45000),
+    color: "#f97316",
+    category: "Dining Out",
+    year: BigInt(2026),
+    month: BigInt(4),
+    createdAt: BigInt(Date.now()),
+  },
+  {
+    id: BigInt(4),
+    owner: stubOwner,
+    name: "Transportation",
+    limitCents: BigInt(30000),
+    color: "#f59e0b",
+    category: "Transportation",
+    year: BigInt(2026),
+    month: BigInt(4),
+    createdAt: BigInt(Date.now()),
+  },
+  {
+    id: BigInt(5),
+    owner: stubOwner,
+    name: "Shopping",
+    limitCents: BigInt(25000),
+    color: "#ef4444",
+    category: "Shopping",
+    year: BigInt(2026),
+    month: BigInt(4),
+    createdAt: BigInt(Date.now()),
+  },
+  {
+    id: BigInt(6),
+    owner: stubOwner,
+    name: "Utilities",
+    limitCents: BigInt(40000),
+    color: "#06b6d4",
+    category: "Utilities",
+    year: BigInt(2026),
+    month: BigInt(4),
+    createdAt: BigInt(Date.now()),
+  },
+];
+
+const mockMonthlySummary: MonthlySummary = {
+  year: BigInt(2026),
+  month: BigInt(4),
+  totalBudgetCents: BigInt(400000),
+  totalSpentCents: BigInt(278430),
+  budgets: [
+    { budget: mockBudgets[0], totalSpentCents: BigInt(45000), remainingCents: BigInt(35000) },
+    { budget: mockBudgets[1], totalSpentCents: BigInt(135000), remainingCents: BigInt(45000) },
+    { budget: mockBudgets[2], totalSpentCents: BigInt(31000), remainingCents: BigInt(14000) },
+    { budget: mockBudgets[3], totalSpentCents: BigInt(21000), remainingCents: BigInt(9000) },
+    { budget: mockBudgets[4], totalSpentCents: BigInt(28430), remainingCents: BigInt(-3430) },
+    { budget: mockBudgets[5], totalSpentCents: BigInt(18000), remainingCents: BigInt(22000) },
+  ] as BudgetSummary[],
+};
+
+const mockExpenses: Expense[] = [
+  { id: BigInt(1), budgetId: BigInt(1), owner: stubOwner, date: "2026-04-10", amountCents: BigInt(4500), notes: "Weekly grocery run", createdAt: BigInt(Date.now()) },
+  { id: BigInt(2), budgetId: BigInt(1), owner: stubOwner, date: "2026-04-08", amountCents: BigInt(12300), notes: "Farmers market", createdAt: BigInt(Date.now()) },
+];
+
+export const mockBackend: backendInterface = {
+  createBudget: async (input) => ({ ...input, id: BigInt(99), owner: stubOwner, createdAt: BigInt(Date.now()) }),
+  createExpense: async (input) => ({ ...input, id: BigInt(99), owner: stubOwner, createdAt: BigInt(Date.now()), notes: input.notes }),
+  deleteBudget: async () => true,
+  deleteExpense: async () => true,
+  getBudget: async (id) => mockBudgets.find(b => b.id === id) ?? null,
+  getExpense: async (id) => mockExpenses.find(e => e.id === id) ?? null,
+  getMonthlySummary: async () => mockMonthlySummary,
+  listBudgets: async () => mockBudgets,
+  listExpenses: async () => mockExpenses,
+  updateBudget: async (id, input) => ({ ...input, id, owner: stubOwner, createdAt: BigInt(Date.now()) }),
+  updateExpense: async (id, input) => ({ ...input, id, owner: stubOwner, createdAt: BigInt(Date.now()), notes: input.notes }),
+  // New methods for recurring templates
+  applyRecurringTemplates: async () => [],
+  createRecurringTemplate: async (input) => ({ ...input, id: BigInt(99), owner: stubOwner, createdAt: BigInt(Date.now()) } as RecurringTemplate),
+  deleteRecurringTemplate: async () => true,
+  getRecurringTemplate: async () => null,
+  listRecurringTemplates: async () => [] as RecurringTemplate[],
+  updateRecurringTemplate: async (id, input) => ({ ...input, id, owner: stubOwner, createdAt: BigInt(Date.now()) } as RecurringTemplate),
+  // Trend methods
+  getMonthlyTrend: async (_months, currentYear, currentMonth) => {
+    const points: MonthlyTrendPoint[] = [];
+    for (let i = 11; i >= 0; i--) {
+      let y = Number(currentYear);
+      let m = Number(currentMonth) - i;
+      while (m <= 0) { m += 12; y--; }
+      points.push({ year: BigInt(y), month: BigInt(m), totalSpentCents: BigInt(Math.round(150000 + Math.random() * 100000)) });
+    }
+    return points;
+  },
+  getCategoryTrend: async (budgetId, _months, currentYear, currentMonth) => {
+    const points: CategoryTrendPoint[] = [];
+    const budget = mockBudgets.find(b => b.id === budgetId);
+    if (!budget) return points;
+    for (let i = 5; i >= 0; i--) {
+      let y = Number(currentYear);
+      let m = Number(currentMonth) - i;
+      while (m <= 0) { m += 12; y--; }
+      points.push({
+        year: BigInt(y), month: BigInt(m),
+        budgetId, budgetName: budget.name,
+        spentCents: BigInt(Math.round(Number(budget.limitCents) * 0.4 + Math.random() * Number(budget.limitCents) * 0.6)),
+        limitCents: budget.limitCents,
+      });
+    }
+    return points;
+  },
+};
