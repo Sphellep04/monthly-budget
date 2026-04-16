@@ -101,10 +101,20 @@ export interface Budget {
     category: string;
 }
 export type Timestamp = bigint;
+export interface BudgetTemplateCategory {
+    limitCents: bigint;
+    name: string;
+    color: string;
+    category: string;
+}
 export interface MonthlyTrendPoint {
     month: bigint;
     totalSpentCents: bigint;
     year: bigint;
+}
+export interface BudgetTemplateInput {
+    categories: Array<BudgetTemplateCategory>;
+    name: string;
 }
 export interface CategoryBreakdownPoint {
     name: string;
@@ -165,6 +175,26 @@ export interface BudgetSummary {
     budget: Budget;
     remainingCents: bigint;
 }
+export interface BillPaymentInput {
+    month: bigint;
+    recurringTemplateId: string;
+    year: bigint;
+    paidDate?: Timestamp;
+    paidAmountCents?: bigint;
+    dueDay: bigint;
+    notes?: string;
+}
+export interface BillPayment {
+    id: string;
+    month: bigint;
+    recurringTemplateId: string;
+    owner: UserId;
+    year: bigint;
+    paidDate?: Timestamp;
+    paidAmountCents?: bigint;
+    dueDay: bigint;
+    notes?: string;
+}
 export interface UserSettings {
     alertThresholdPercent: bigint;
 }
@@ -183,6 +213,13 @@ export interface BudgetInput {
     year: bigint;
     category: string;
 }
+export interface BudgetTemplate {
+    id: string;
+    categories: Array<BudgetTemplateCategory>;
+    owner: UserId;
+    name: string;
+    createdAt: Timestamp;
+}
 export interface Note {
     id: string;
     title: string;
@@ -192,16 +229,23 @@ export interface Note {
     updatedAt: Timestamp;
 }
 export interface backendInterface {
+    applyBudgetTemplate(templateId: string, year: bigint, month: bigint): Promise<Array<Budget>>;
     applyRecurringTemplates(year: bigint, month: bigint): Promise<Array<Expense>>;
+    createBillPayment(input: BillPaymentInput): Promise<BillPayment>;
     createBudget(input: BudgetInput): Promise<Budget>;
+    createBudgetTemplate(input: BudgetTemplateInput): Promise<BudgetTemplate>;
     createExpense(input: ExpenseInput): Promise<Expense>;
     createNote(title: string, content: string): Promise<Note>;
     createRecurringTemplate(input: RecurringTemplateInput): Promise<RecurringTemplate>;
+    deleteBillPayment(id: string): Promise<boolean>;
     deleteBudget(id: bigint): Promise<boolean>;
+    deleteBudgetTemplate(id: string): Promise<boolean>;
     deleteExpense(id: bigint): Promise<boolean>;
     deleteNote(id: string): Promise<boolean>;
     deleteRecurringTemplate(id: bigint): Promise<boolean>;
+    getBillPayment(id: string): Promise<BillPayment | null>;
     getBudget(id: bigint): Promise<Budget | null>;
+    getBudgetTemplate(id: string): Promise<BudgetTemplate | null>;
     getCategoryBreakdown(year: bigint, month: bigint): Promise<Array<CategoryBreakdownPoint>>;
     getCategoryBreakdownForRange(startDate: string, endDate: string): Promise<Array<CategoryBreakdownPoint>>;
     getCategoryTrend(budgetId: bigint, months: bigint, currentYear: bigint, currentMonth: bigint): Promise<Array<CategoryTrendPoint>>;
@@ -212,20 +256,38 @@ export interface backendInterface {
     getMonthlyTrend(months: bigint, currentYear: bigint, currentMonth: bigint): Promise<Array<MonthlyTrendPoint>>;
     getRecurringTemplate(id: bigint): Promise<RecurringTemplate | null>;
     getUserSettings(): Promise<UserSettings>;
+    listBillPayments(year: bigint, month: bigint): Promise<Array<BillPayment>>;
+    listBudgetTemplates(): Promise<Array<BudgetTemplate>>;
     listBudgets(year: bigint, month: bigint): Promise<Array<Budget>>;
     listExpenses(budgetId: bigint): Promise<Array<Expense>>;
     listNotes(): Promise<Array<Note>>;
     listRecurringTemplates(budgetId: bigint): Promise<Array<RecurringTemplate>>;
     searchExpenses(startDate: string, endDate: string, queryText: string | null, categoryId: bigint | null, minAmountCents: bigint | null, maxAmountCents: bigint | null): Promise<Array<Expense>>;
+    updateBillPayment(id: string, input: BillPaymentInput): Promise<BillPayment | null>;
     updateBudget(id: bigint, input: BudgetInput): Promise<Budget | null>;
+    updateBudgetTemplate(id: string, input: BudgetTemplateInput): Promise<BudgetTemplate | null>;
     updateExpense(id: bigint, input: ExpenseInput): Promise<Expense | null>;
     updateNote(id: string, title: string, content: string): Promise<Note | null>;
     updateRecurringTemplate(id: bigint, input: RecurringTemplateInput): Promise<RecurringTemplate | null>;
     updateUserSettings(settings: UserSettings): Promise<UserSettings>;
 }
-import type { Budget as _Budget, Expense as _Expense, ExpenseInput as _ExpenseInput, Note as _Note, RecurringTemplate as _RecurringTemplate, RecurringTemplateInput as _RecurringTemplateInput, Timestamp as _Timestamp, UserId as _UserId } from "./declarations/backend.did.d.ts";
+import type { BillPayment as _BillPayment, BillPaymentInput as _BillPaymentInput, Budget as _Budget, BudgetTemplate as _BudgetTemplate, Expense as _Expense, ExpenseInput as _ExpenseInput, Note as _Note, RecurringTemplate as _RecurringTemplate, RecurringTemplateInput as _RecurringTemplateInput, Timestamp as _Timestamp, UserId as _UserId } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async applyBudgetTemplate(arg0: string, arg1: bigint, arg2: bigint): Promise<Array<Budget>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.applyBudgetTemplate(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.applyBudgetTemplate(arg0, arg1, arg2);
+            return result;
+        }
+    }
     async applyRecurringTemplates(arg0: bigint, arg1: bigint): Promise<Array<Expense>> {
         if (this.processError) {
             try {
@@ -238,6 +300,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.applyRecurringTemplates(arg0, arg1);
             return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async createBillPayment(arg0: BillPaymentInput): Promise<BillPayment> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createBillPayment(to_candid_BillPaymentInput_n6(this._uploadFile, this._downloadFile, arg0));
+                return from_candid_BillPayment_n8(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createBillPayment(to_candid_BillPaymentInput_n6(this._uploadFile, this._downloadFile, arg0));
+            return from_candid_BillPayment_n8(this._uploadFile, this._downloadFile, result);
         }
     }
     async createBudget(arg0: BudgetInput): Promise<Budget> {
@@ -254,17 +330,31 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async createBudgetTemplate(arg0: BudgetTemplateInput): Promise<BudgetTemplate> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createBudgetTemplate(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createBudgetTemplate(arg0);
+            return result;
+        }
+    }
     async createExpense(arg0: ExpenseInput): Promise<Expense> {
         if (this.processError) {
             try {
-                const result = await this.actor.createExpense(to_candid_ExpenseInput_n6(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.createExpense(to_candid_ExpenseInput_n11(this._uploadFile, this._downloadFile, arg0));
                 return from_candid_Expense_n2(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.createExpense(to_candid_ExpenseInput_n6(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.createExpense(to_candid_ExpenseInput_n11(this._uploadFile, this._downloadFile, arg0));
             return from_candid_Expense_n2(this._uploadFile, this._downloadFile, result);
         }
     }
@@ -285,15 +375,29 @@ export class Backend implements backendInterface {
     async createRecurringTemplate(arg0: RecurringTemplateInput): Promise<RecurringTemplate> {
         if (this.processError) {
             try {
-                const result = await this.actor.createRecurringTemplate(to_candid_RecurringTemplateInput_n8(this._uploadFile, this._downloadFile, arg0));
-                return from_candid_RecurringTemplate_n10(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor.createRecurringTemplate(to_candid_RecurringTemplateInput_n13(this._uploadFile, this._downloadFile, arg0));
+                return from_candid_RecurringTemplate_n15(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.createRecurringTemplate(to_candid_RecurringTemplateInput_n8(this._uploadFile, this._downloadFile, arg0));
-            return from_candid_RecurringTemplate_n10(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor.createRecurringTemplate(to_candid_RecurringTemplateInput_n13(this._uploadFile, this._downloadFile, arg0));
+            return from_candid_RecurringTemplate_n15(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async deleteBillPayment(arg0: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteBillPayment(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteBillPayment(arg0);
+            return result;
         }
     }
     async deleteBudget(arg0: bigint): Promise<boolean> {
@@ -307,6 +411,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.deleteBudget(arg0);
+            return result;
+        }
+    }
+    async deleteBudgetTemplate(arg0: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteBudgetTemplate(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteBudgetTemplate(arg0);
             return result;
         }
     }
@@ -352,18 +470,46 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getBillPayment(arg0: string): Promise<BillPayment | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBillPayment(arg0);
+                return from_candid_opt_n17(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBillPayment(arg0);
+            return from_candid_opt_n17(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getBudget(arg0: bigint): Promise<Budget | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.getBudget(arg0);
-                return from_candid_opt_n12(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getBudget(arg0);
-            return from_candid_opt_n12(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getBudgetTemplate(arg0: string): Promise<BudgetTemplate | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBudgetTemplate(arg0);
+                return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBudgetTemplate(arg0);
+            return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
         }
     }
     async getCategoryBreakdown(arg0: bigint, arg1: bigint): Promise<Array<CategoryBreakdownPoint>> {
@@ -426,14 +572,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getExpense(arg0);
-                return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getExpense(arg0);
-            return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
         }
     }
     async getExpensesInRange(arg0: string, arg1: string): Promise<Array<Expense>> {
@@ -482,14 +628,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getRecurringTemplate(arg0);
-                return from_candid_opt_n14(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getRecurringTemplate(arg0);
-            return from_candid_opt_n14(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
         }
     }
     async getUserSettings(): Promise<UserSettings> {
@@ -503,6 +649,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getUserSettings();
+            return result;
+        }
+    }
+    async listBillPayments(arg0: bigint, arg1: bigint): Promise<Array<BillPayment>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listBillPayments(arg0, arg1);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listBillPayments(arg0, arg1);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async listBudgetTemplates(): Promise<Array<BudgetTemplate>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listBudgetTemplates();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listBudgetTemplates();
             return result;
         }
     }
@@ -552,84 +726,112 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.listRecurringTemplates(arg0);
-                return from_candid_vec_n15(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.listRecurringTemplates(arg0);
-            return from_candid_vec_n15(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
         }
     }
     async searchExpenses(arg0: string, arg1: string, arg2: string | null, arg3: bigint | null, arg4: bigint | null, arg5: bigint | null): Promise<Array<Expense>> {
         if (this.processError) {
             try {
-                const result = await this.actor.searchExpenses(arg0, arg1, to_candid_opt_n16(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg3), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg4), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg5));
+                const result = await this.actor.searchExpenses(arg0, arg1, to_candid_opt_n24(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n25(this._uploadFile, this._downloadFile, arg3), to_candid_opt_n25(this._uploadFile, this._downloadFile, arg4), to_candid_opt_n25(this._uploadFile, this._downloadFile, arg5));
                 return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.searchExpenses(arg0, arg1, to_candid_opt_n16(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg3), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg4), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg5));
+            const result = await this.actor.searchExpenses(arg0, arg1, to_candid_opt_n24(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n25(this._uploadFile, this._downloadFile, arg3), to_candid_opt_n25(this._uploadFile, this._downloadFile, arg4), to_candid_opt_n25(this._uploadFile, this._downloadFile, arg5));
             return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async updateBillPayment(arg0: string, arg1: BillPaymentInput): Promise<BillPayment | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateBillPayment(arg0, to_candid_BillPaymentInput_n6(this._uploadFile, this._downloadFile, arg1));
+                return from_candid_opt_n17(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateBillPayment(arg0, to_candid_BillPaymentInput_n6(this._uploadFile, this._downloadFile, arg1));
+            return from_candid_opt_n17(this._uploadFile, this._downloadFile, result);
         }
     }
     async updateBudget(arg0: bigint, arg1: BudgetInput): Promise<Budget | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.updateBudget(arg0, arg1);
-                return from_candid_opt_n12(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.updateBudget(arg0, arg1);
-            return from_candid_opt_n12(this._uploadFile, this._downloadFile, result);
-        }
-    }
-    async updateExpense(arg0: bigint, arg1: ExpenseInput): Promise<Expense | null> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.updateExpense(arg0, to_candid_ExpenseInput_n6(this._uploadFile, this._downloadFile, arg1));
-                return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.updateExpense(arg0, to_candid_ExpenseInput_n6(this._uploadFile, this._downloadFile, arg1));
-            return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
-        }
-    }
-    async updateNote(arg0: string, arg1: string, arg2: string): Promise<Note | null> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.updateNote(arg0, arg1, arg2);
                 return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateNote(arg0, arg1, arg2);
+            const result = await this.actor.updateBudget(arg0, arg1);
             return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
         }
     }
-    async updateRecurringTemplate(arg0: bigint, arg1: RecurringTemplateInput): Promise<RecurringTemplate | null> {
+    async updateBudgetTemplate(arg0: string, arg1: BudgetTemplateInput): Promise<BudgetTemplate | null> {
         if (this.processError) {
             try {
-                const result = await this.actor.updateRecurringTemplate(arg0, to_candid_RecurringTemplateInput_n8(this._uploadFile, this._downloadFile, arg1));
-                return from_candid_opt_n14(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor.updateBudgetTemplate(arg0, arg1);
+                return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateRecurringTemplate(arg0, to_candid_RecurringTemplateInput_n8(this._uploadFile, this._downloadFile, arg1));
-            return from_candid_opt_n14(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor.updateBudgetTemplate(arg0, arg1);
+            return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async updateExpense(arg0: bigint, arg1: ExpenseInput): Promise<Expense | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateExpense(arg0, to_candid_ExpenseInput_n11(this._uploadFile, this._downloadFile, arg1));
+                return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateExpense(arg0, to_candid_ExpenseInput_n11(this._uploadFile, this._downloadFile, arg1));
+            return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async updateNote(arg0: string, arg1: string, arg2: string): Promise<Note | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateNote(arg0, arg1, arg2);
+                return from_candid_opt_n26(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateNote(arg0, arg1, arg2);
+            return from_candid_opt_n26(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async updateRecurringTemplate(arg0: bigint, arg1: RecurringTemplateInput): Promise<RecurringTemplate | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateRecurringTemplate(arg0, to_candid_RecurringTemplateInput_n13(this._uploadFile, this._downloadFile, arg1));
+                return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateRecurringTemplate(arg0, to_candid_RecurringTemplateInput_n13(this._uploadFile, this._downloadFile, arg1));
+            return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
         }
     }
     async updateUserSettings(arg0: UserSettings): Promise<UserSettings> {
@@ -647,22 +849,34 @@ export class Backend implements backendInterface {
         }
     }
 }
+function from_candid_BillPayment_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _BillPayment): BillPayment {
+    return from_candid_record_n9(_uploadFile, _downloadFile, value);
+}
 function from_candid_Expense_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Expense): Expense {
     return from_candid_record_n3(_uploadFile, _downloadFile, value);
 }
-function from_candid_RecurringTemplate_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _RecurringTemplate): RecurringTemplate {
-    return from_candid_record_n11(_uploadFile, _downloadFile, value);
+function from_candid_RecurringTemplate_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _RecurringTemplate): RecurringTemplate {
+    return from_candid_record_n16(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Budget]): Budget | null {
+function from_candid_opt_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Timestamp]): Timestamp | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Expense]): Expense | null {
+function from_candid_opt_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_BillPayment]): BillPayment | null {
+    return value.length === 0 ? null : from_candid_BillPayment_n8(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Budget]): Budget | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_BudgetTemplate]): BudgetTemplate | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Expense]): Expense | null {
     return value.length === 0 ? null : from_candid_Expense_n2(_uploadFile, _downloadFile, value[0]);
 }
-function from_candid_opt_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_RecurringTemplate]): RecurringTemplate | null {
-    return value.length === 0 ? null : from_candid_RecurringTemplate_n10(_uploadFile, _downloadFile, value[0]);
+function from_candid_opt_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_RecurringTemplate]): RecurringTemplate | null {
+    return value.length === 0 ? null : from_candid_RecurringTemplate_n15(_uploadFile, _downloadFile, value[0]);
 }
-function from_candid_opt_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Note]): Note | null {
+function from_candid_opt_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Note]): Note | null {
     return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
@@ -671,7 +885,7 @@ function from_candid_opt_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 function from_candid_opt_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_record_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_record_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;
     owner: _UserId;
     name: string;
@@ -734,25 +948,64 @@ function from_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint
         notes: record_opt_to_undefined(from_candid_opt_n5(_uploadFile, _downloadFile, value.notes))
     };
 }
+function from_candid_record_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    id: string;
+    month: bigint;
+    recurringTemplateId: string;
+    owner: _UserId;
+    year: bigint;
+    paidDate: [] | [_Timestamp];
+    paidAmountCents: [] | [bigint];
+    dueDay: bigint;
+    notes: [] | [string];
+}): {
+    id: string;
+    month: bigint;
+    recurringTemplateId: string;
+    owner: UserId;
+    year: bigint;
+    paidDate?: Timestamp;
+    paidAmountCents?: bigint;
+    dueDay: bigint;
+    notes?: string;
+} {
+    return {
+        id: value.id,
+        month: value.month,
+        recurringTemplateId: value.recurringTemplateId,
+        owner: value.owner,
+        year: value.year,
+        paidDate: record_opt_to_undefined(from_candid_opt_n10(_uploadFile, _downloadFile, value.paidDate)),
+        paidAmountCents: record_opt_to_undefined(from_candid_opt_n4(_uploadFile, _downloadFile, value.paidAmountCents)),
+        dueDay: value.dueDay,
+        notes: record_opt_to_undefined(from_candid_opt_n5(_uploadFile, _downloadFile, value.notes))
+    };
+}
 function from_candid_vec_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Expense>): Array<Expense> {
     return value.map((x)=>from_candid_Expense_n2(_uploadFile, _downloadFile, x));
 }
-function from_candid_vec_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_RecurringTemplate>): Array<RecurringTemplate> {
-    return value.map((x)=>from_candid_RecurringTemplate_n10(_uploadFile, _downloadFile, x));
+function from_candid_vec_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_BillPayment>): Array<BillPayment> {
+    return value.map((x)=>from_candid_BillPayment_n8(_uploadFile, _downloadFile, x));
 }
-function to_candid_ExpenseInput_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ExpenseInput): _ExpenseInput {
+function from_candid_vec_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_RecurringTemplate>): Array<RecurringTemplate> {
+    return value.map((x)=>from_candid_RecurringTemplate_n15(_uploadFile, _downloadFile, x));
+}
+function to_candid_BillPaymentInput_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BillPaymentInput): _BillPaymentInput {
     return to_candid_record_n7(_uploadFile, _downloadFile, value);
 }
-function to_candid_RecurringTemplateInput_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: RecurringTemplateInput): _RecurringTemplateInput {
-    return to_candid_record_n9(_uploadFile, _downloadFile, value);
+function to_candid_ExpenseInput_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ExpenseInput): _ExpenseInput {
+    return to_candid_record_n12(_uploadFile, _downloadFile, value);
 }
-function to_candid_opt_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: string | null): [] | [string] {
+function to_candid_RecurringTemplateInput_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: RecurringTemplateInput): _RecurringTemplateInput {
+    return to_candid_record_n14(_uploadFile, _downloadFile, value);
+}
+function to_candid_opt_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: string | null): [] | [string] {
     return value === null ? candid_none() : candid_some(value);
 }
-function to_candid_opt_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: bigint | null): [] | [bigint] {
+function to_candid_opt_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: bigint | null): [] | [bigint] {
     return value === null ? candid_none() : candid_some(value);
 }
-function to_candid_record_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     receiptUrl?: string;
     date: string;
     amountCents: bigint;
@@ -773,7 +1026,7 @@ function to_candid_record_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
         notes: value.notes ? candid_some(value.notes) : candid_none()
     };
 }
-function to_candid_record_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function to_candid_record_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     name: string;
     dayOfMonth: bigint;
     amountCents: bigint;
@@ -791,6 +1044,33 @@ function to_candid_record_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
         dayOfMonth: value.dayOfMonth,
         amountCents: value.amountCents,
         budgetId: value.budgetId,
+        notes: value.notes ? candid_some(value.notes) : candid_none()
+    };
+}
+function to_candid_record_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    month: bigint;
+    recurringTemplateId: string;
+    year: bigint;
+    paidDate?: Timestamp;
+    paidAmountCents?: bigint;
+    dueDay: bigint;
+    notes?: string;
+}): {
+    month: bigint;
+    recurringTemplateId: string;
+    year: bigint;
+    paidDate: [] | [_Timestamp];
+    paidAmountCents: [] | [bigint];
+    dueDay: bigint;
+    notes: [] | [string];
+} {
+    return {
+        month: value.month,
+        recurringTemplateId: value.recurringTemplateId,
+        year: value.year,
+        paidDate: value.paidDate ? candid_some(value.paidDate) : candid_none(),
+        paidAmountCents: value.paidAmountCents ? candid_some(value.paidAmountCents) : candid_none(),
+        dueDay: value.dueDay,
         notes: value.notes ? candid_some(value.notes) : candid_none()
     };
 }

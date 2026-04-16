@@ -99,6 +99,30 @@ export interface UserSettings {
   alertThresholdPercent: number;
 }
 
+export interface BillPayment {
+  id: string;
+  owner: string;
+  recurringTemplateId: string;
+  year: bigint;
+  month: bigint;
+  dueDay: bigint;
+  paidDate?: bigint;
+  paidAmountCents?: bigint;
+  notes?: string;
+}
+
+export interface BillPaymentInput {
+  recurringTemplateId: string;
+  year: bigint;
+  month: bigint;
+  dueDay: bigint;
+  paidDate?: bigint;
+  paidAmountCents?: bigint;
+  notes?: string;
+}
+
+export type BillStatus = "paid" | "due-soon" | "overdue" | "upcoming";
+
 export function getBudgetStatus(
   summary: BudgetSummary,
   threshold = 80,

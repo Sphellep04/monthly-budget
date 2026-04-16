@@ -84,6 +84,26 @@ type CategoryBreakdownPoint =
    color: text;
    name: text;
  };
+type BudgetTemplateInput = 
+ record {
+   categories: vec BudgetTemplateCategory;
+   name: text;
+ };
+type BudgetTemplateCategory = 
+ record {
+   category: text;
+   color: text;
+   limitCents: nat;
+   name: text;
+ };
+type BudgetTemplate = 
+ record {
+   categories: vec BudgetTemplateCategory;
+   createdAt: Timestamp;
+   id: text;
+   name: text;
+   owner: UserId;
+ };
 type BudgetSummary = 
  record {
    budget: Budget;
@@ -111,18 +131,48 @@ type Budget =
    owner: UserId;
    year: nat;
  };
+type BillPaymentInput = 
+ record {
+   dueDay: nat;
+   month: nat;
+   notes: opt text;
+   paidAmountCents: opt nat;
+   paidDate: opt Timestamp;
+   recurringTemplateId: text;
+   year: nat;
+ };
+type BillPayment = 
+ record {
+   dueDay: nat;
+   id: text;
+   month: nat;
+   notes: opt text;
+   owner: UserId;
+   paidAmountCents: opt nat;
+   paidDate: opt Timestamp;
+   recurringTemplateId: text;
+   year: nat;
+ };
 service : {
+  applyBudgetTemplate: (templateId: text, year: nat, month: nat) ->
+   (vec Budget);
   applyRecurringTemplates: (year: nat, month: nat) -> (vec Expense);
+  createBillPayment: (input: BillPaymentInput) -> (BillPayment);
   createBudget: (input: BudgetInput) -> (Budget);
+  createBudgetTemplate: (input: BudgetTemplateInput) -> (BudgetTemplate);
   createExpense: (input: ExpenseInput) -> (Expense);
   createNote: (title: text, content: text) -> (Note);
   createRecurringTemplate: (input: RecurringTemplateInput) ->
    (RecurringTemplate);
+  deleteBillPayment: (id: text) -> (bool);
   deleteBudget: (id: nat) -> (bool);
+  deleteBudgetTemplate: (id: text) -> (bool);
   deleteExpense: (id: nat) -> (bool);
   deleteNote: (id: text) -> (bool);
   deleteRecurringTemplate: (id: nat) -> (bool);
+  getBillPayment: (id: text) -> (opt BillPayment) query;
   getBudget: (id: nat) -> (opt Budget) query;
+  getBudgetTemplate: (id: text) -> (opt BudgetTemplate) query;
   getCategoryBreakdown: (year: nat, month: nat) ->
    (vec CategoryBreakdownPoint) query;
   getCategoryBreakdownForRange: (startDate: text, endDate: text) ->
@@ -137,6 +187,8 @@ service : {
    (vec MonthlyTrendPoint) query;
   getRecurringTemplate: (id: nat) -> (opt RecurringTemplate) query;
   getUserSettings: () -> (UserSettings) query;
+  listBillPayments: (year: nat, month: nat) -> (vec BillPayment) query;
+  listBudgetTemplates: () -> (vec BudgetTemplate) query;
   listBudgets: (year: nat, month: nat) -> (vec Budget) query;
   listExpenses: (budgetId: nat) -> (vec Expense) query;
   listNotes: () -> (vec Note) query;
@@ -144,7 +196,10 @@ service : {
   searchExpenses: (startDate: text, endDate: text, queryText: opt text,
    categoryId: opt nat, minAmountCents: opt nat, maxAmountCents: opt nat) ->
    (vec Expense) query;
+  updateBillPayment: (id: text, input: BillPaymentInput) -> (opt BillPayment);
   updateBudget: (id: nat, input: BudgetInput) -> (opt Budget);
+  updateBudgetTemplate: (id: text, input: BudgetTemplateInput) ->
+   (opt BudgetTemplate);
   updateExpense: (id: nat, input: ExpenseInput) -> (opt Expense);
   updateNote: (id: text, title: text, content: text) -> (opt Note);
   updateRecurringTemplate: (id: nat, input: RecurringTemplateInput) ->

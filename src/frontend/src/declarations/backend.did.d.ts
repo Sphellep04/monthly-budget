@@ -10,6 +10,26 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface BillPayment {
+  'id' : string,
+  'month' : bigint,
+  'recurringTemplateId' : string,
+  'owner' : UserId,
+  'year' : bigint,
+  'paidDate' : [] | [Timestamp],
+  'paidAmountCents' : [] | [bigint],
+  'dueDay' : bigint,
+  'notes' : [] | [string],
+}
+export interface BillPaymentInput {
+  'month' : bigint,
+  'recurringTemplateId' : string,
+  'year' : bigint,
+  'paidDate' : [] | [Timestamp],
+  'paidAmountCents' : [] | [bigint],
+  'dueDay' : bigint,
+  'notes' : [] | [string],
+}
 export interface Budget {
   'id' : bigint,
   'month' : bigint,
@@ -33,6 +53,23 @@ export interface BudgetSummary {
   'totalSpentCents' : bigint,
   'budget' : Budget,
   'remainingCents' : bigint,
+}
+export interface BudgetTemplate {
+  'id' : string,
+  'categories' : Array<BudgetTemplateCategory>,
+  'owner' : UserId,
+  'name' : string,
+  'createdAt' : Timestamp,
+}
+export interface BudgetTemplateCategory {
+  'limitCents' : bigint,
+  'name' : string,
+  'color' : string,
+  'category' : string,
+}
+export interface BudgetTemplateInput {
+  'categories' : Array<BudgetTemplateCategory>,
+  'name' : string,
 }
 export interface CategoryBreakdownPoint {
   'name' : string,
@@ -108,19 +145,26 @@ export type Timestamp = bigint;
 export type UserId = Principal;
 export interface UserSettings { 'alertThresholdPercent' : bigint }
 export interface _SERVICE {
+  'applyBudgetTemplate' : ActorMethod<[string, bigint, bigint], Array<Budget>>,
   'applyRecurringTemplates' : ActorMethod<[bigint, bigint], Array<Expense>>,
+  'createBillPayment' : ActorMethod<[BillPaymentInput], BillPayment>,
   'createBudget' : ActorMethod<[BudgetInput], Budget>,
+  'createBudgetTemplate' : ActorMethod<[BudgetTemplateInput], BudgetTemplate>,
   'createExpense' : ActorMethod<[ExpenseInput], Expense>,
   'createNote' : ActorMethod<[string, string], Note>,
   'createRecurringTemplate' : ActorMethod<
     [RecurringTemplateInput],
     RecurringTemplate
   >,
+  'deleteBillPayment' : ActorMethod<[string], boolean>,
   'deleteBudget' : ActorMethod<[bigint], boolean>,
+  'deleteBudgetTemplate' : ActorMethod<[string], boolean>,
   'deleteExpense' : ActorMethod<[bigint], boolean>,
   'deleteNote' : ActorMethod<[string], boolean>,
   'deleteRecurringTemplate' : ActorMethod<[bigint], boolean>,
+  'getBillPayment' : ActorMethod<[string], [] | [BillPayment]>,
   'getBudget' : ActorMethod<[bigint], [] | [Budget]>,
+  'getBudgetTemplate' : ActorMethod<[string], [] | [BudgetTemplate]>,
   'getCategoryBreakdown' : ActorMethod<
     [bigint, bigint],
     Array<CategoryBreakdownPoint>
@@ -143,6 +187,8 @@ export interface _SERVICE {
   >,
   'getRecurringTemplate' : ActorMethod<[bigint], [] | [RecurringTemplate]>,
   'getUserSettings' : ActorMethod<[], UserSettings>,
+  'listBillPayments' : ActorMethod<[bigint, bigint], Array<BillPayment>>,
+  'listBudgetTemplates' : ActorMethod<[], Array<BudgetTemplate>>,
   'listBudgets' : ActorMethod<[bigint, bigint], Array<Budget>>,
   'listExpenses' : ActorMethod<[bigint], Array<Expense>>,
   'listNotes' : ActorMethod<[], Array<Note>>,
@@ -158,7 +204,15 @@ export interface _SERVICE {
     ],
     Array<Expense>
   >,
+  'updateBillPayment' : ActorMethod<
+    [string, BillPaymentInput],
+    [] | [BillPayment]
+  >,
   'updateBudget' : ActorMethod<[bigint, BudgetInput], [] | [Budget]>,
+  'updateBudgetTemplate' : ActorMethod<
+    [string, BudgetTemplateInput],
+    [] | [BudgetTemplate]
+  >,
   'updateExpense' : ActorMethod<[bigint, ExpenseInput], [] | [Expense]>,
   'updateNote' : ActorMethod<[string, string, string], [] | [Note]>,
   'updateRecurringTemplate' : ActorMethod<

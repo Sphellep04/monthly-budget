@@ -2,6 +2,8 @@ import { useActor } from "@caffeineai/core-infrastructure";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createActor } from "../backend";
 import type {
+  BillPayment,
+  BillPaymentInput,
   Budget,
   BudgetSummary,
   CategoryBreakdownPoint,
@@ -571,6 +573,98 @@ export function useGetCategoryBreakdownForRange(
   });
 }
 
+// ─── Bill Payments ────────────────────────────────────────────────────────────
+
+export function useListBillPayments(year: number, month: number) {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<BillPayment[]>({
+    queryKey: ["bill-payments", year, month],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listBillPayments(BigInt(year), BigInt(month));
+      return result as unknown as BillPayment[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateBillPayment() {
+  const queryClient = useQueryClient();
+  const { actor } = useActor(createActor);
+  return useMutation({
+    mutationFn: async (input: BillPaymentInput) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.createBillPayment(input) as unknown as BillPayment;
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "bill-payments",
+          Number(variables.year),
+          Number(variables.month),
+        ],
+      });
+    },
+  });
+}
+
+export function useUpdateBillPayment() {
+  const queryClient = useQueryClient();
+  const { actor } = useActor(createActor);
+  return useMutation({
+    mutationFn: async ({
+      id,
+      input,
+    }: { id: string; input: BillPaymentInput }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.updateBillPayment(
+        id,
+        input,
+      ) as unknown as BillPayment | null;
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "bill-payments",
+          Number(variables.input.year),
+          Number(variables.input.month),
+        ],
+      });
+    },
+  });
+}
+
+export function useDeleteBillPayment() {
+  const queryClient = useQueryClient();
+  const { actor } = useActor(createActor);
+  return useMutation({
+    mutationFn: async ({ id }: { id: string; year: number; month: number }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.deleteBillPayment(id);
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["bill-payments", variables.year, variables.month],
+      });
+    },
+  });
+}
+
+// ─── List all budgets (used by bills page to fetch all templates) ─────────────
+
+export function useListBudgets(year: number, month: number) {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<Budget[]>({
+    queryKey: ["budgets-list", year, month],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listBudgets(BigInt(year), BigInt(month));
+      return result as unknown as Budget[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export type {
   MonthlySummary,
   Budget,
@@ -584,4 +678,6 @@ export type {
   CategoryBreakdownPoint,
   Note,
   UserSettings,
+  BillPayment,
+  BillPaymentInput,
 };

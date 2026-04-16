@@ -1,4 +1,26 @@
-// Version: 1.0.0
+// Version: 3.0.0
+type BillPayment__777909272 =
+  {
+    dueDay : Nat;
+    id : Text;
+    month : Nat;
+    notes : ?Text;
+    owner : UserId__513714410;
+    paidAmountCents : ?Nat;
+    paidDate : ?Timestamp__118761982;
+    recurringTemplateId : Text;
+    year : Nat
+  };
+type BudgetTemplateCategory__738420917 =
+  {category : Text; color : Text; limitCents : Nat; name : Text};
+type BudgetTemplate__901186529 =
+  {
+    categories : [BudgetTemplateCategory__738420917];
+    createdAt : Timestamp__118761982;
+    id : Text;
+    name : Text;
+    owner : UserId__513714410
+  };
 type Budget__278125643 =
   {
     category : Text;
@@ -45,6 +67,18 @@ type Note__178829401 =
     updatedAt : Timestamp__118761982;
     userId : Principal
   };
+type OldAppState__187517345 =
+  {
+    budgets : Map__605269027<Nat, Budget__278125643>;
+    expenses : Map__605269027<Nat, Expense__316178970>;
+    var nextBudgetId : Nat;
+    var nextExpenseId : Nat;
+    var nextNoteId : Nat;
+    var nextRecurringTemplateId : Nat;
+    notes : Map__605269027<Text, Note__178829401>;
+    recurringTemplates : Map__605269027<Nat, RecurringTemplate__1063638852>;
+    userSettings : Map__605269027<UserId__513714410, UserSettings__414068732>
+  };
 type RecurringTemplate__1063638852 =
   {
     amountCents : Nat;
@@ -61,12 +95,18 @@ type Timestamp__301639476 = Int;
 type UserId__158757552 = Principal;
 type UserId__513714410 = UserId__158757552;
 type UserSettings__414068732 = {alertThresholdPercent : Nat};
-actor {
+actor ({
+  in state : OldAppState__187517345
+}, {
   stable state :
     {
+      billPayments : Map__605269027<Text, BillPayment__777909272>;
+      budgetTemplates : Map__605269027<Text, BudgetTemplate__901186529>;
       budgets : Map__605269027<Nat, Budget__278125643>;
       expenses : Map__605269027<Nat, Expense__316178970>;
+      var nextBillPaymentId : Nat;
       var nextBudgetId : Nat;
+      var nextBudgetTemplateId : Nat;
       var nextExpenseId : Nat;
       var nextNoteId : Nat;
       var nextRecurringTemplateId : Nat;
@@ -75,4 +115,4 @@ actor {
       userSettings :
         Map__605269027<UserId__513714410, UserSettings__414068732>
     }
-};
+}) ;

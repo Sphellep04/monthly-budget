@@ -44,6 +44,14 @@ const SearchPage = lazy(() =>
 const ReportsPage = lazy(() =>
   import("./pages/ReportsPage").then((m) => ({ default: m.ReportsPage })),
 );
+const BillsPage = lazy(() =>
+  import("./pages/BillsPage").then((m) => ({ default: m.BillsPage })),
+);
+const TemplatesPage = lazy(() =>
+  import("./pages/TemplatesPage").then((m) => ({
+    default: m.TemplatesPage,
+  })),
+);
 
 function PageLoader() {
   return (
@@ -207,6 +215,26 @@ const reportsRoute = createRoute({
   ),
 });
 
+const billsRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/bills",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <BillsPage />
+    </Suspense>
+  ),
+});
+
+const templatesRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/templates",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <TemplatesPage />
+    </Suspense>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   authRoute.addChildren([
     layoutRoute.addChildren([
@@ -219,6 +247,8 @@ const routeTree = rootRoute.addChildren([
       insightsRoute,
       searchRoute,
       reportsRoute,
+      billsRoute,
+      templatesRoute,
     ]),
   ]),
 ]);

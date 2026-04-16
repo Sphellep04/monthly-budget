@@ -156,4 +156,53 @@ mixin (state : BudgetLib.State) {
   public shared ({ caller }) func updateUserSettings(settings : Types.UserSettings) : async Types.UserSettings {
     BudgetLib.updateUserSettings(state, caller, settings);
   };
+
+  // ---- Bill Payment endpoints ----
+
+  public shared ({ caller }) func createBillPayment(input : Types.BillPaymentInput) : async Types.BillPayment {
+    BudgetLib.createBillPayment(state, caller, input);
+  };
+
+  public shared query ({ caller }) func getBillPayment(id : Text) : async ?Types.BillPayment {
+    BudgetLib.getBillPayment(state, caller, id);
+  };
+
+  public shared query ({ caller }) func listBillPayments(year : Nat, month : Nat) : async [Types.BillPayment] {
+    BudgetLib.listBillPayments(state, caller, year, month);
+  };
+
+  public shared ({ caller }) func updateBillPayment(id : Text, input : Types.BillPaymentInput) : async ?Types.BillPayment {
+    BudgetLib.updateBillPayment(state, caller, id, input);
+  };
+
+  public shared ({ caller }) func deleteBillPayment(id : Text) : async Bool {
+    BudgetLib.deleteBillPayment(state, caller, id);
+  };
+
+  // ---- Budget Template endpoints ----
+
+  public shared ({ caller }) func createBudgetTemplate(input : Types.BudgetTemplateInput) : async Types.BudgetTemplate {
+    BudgetLib.createBudgetTemplate(state, caller, input);
+  };
+
+  public shared query ({ caller }) func listBudgetTemplates() : async [Types.BudgetTemplate] {
+    BudgetLib.listBudgetTemplates(state, caller);
+  };
+
+  public shared query ({ caller }) func getBudgetTemplate(id : Text) : async ?Types.BudgetTemplate {
+    BudgetLib.getBudgetTemplate(state, caller, id);
+  };
+
+  public shared ({ caller }) func updateBudgetTemplate(id : Text, input : Types.BudgetTemplateInput) : async ?Types.BudgetTemplate {
+    BudgetLib.updateBudgetTemplate(state, caller, id, input);
+  };
+
+  public shared ({ caller }) func deleteBudgetTemplate(id : Text) : async Bool {
+    BudgetLib.deleteBudgetTemplate(state, caller, id);
+  };
+
+  // Creates Budget records for each category in the template for the given year/month.
+  public shared ({ caller }) func applyBudgetTemplate(templateId : Text, year : Nat, month : Nat) : async [Types.Budget] {
+    BudgetLib.applyBudgetTemplate(state, caller, templateId, year, month);
+  };
 };

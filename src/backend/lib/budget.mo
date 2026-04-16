@@ -2,6 +2,7 @@ import Map "mo:core/Map";
 import List "mo:core/List";
 import Iter "mo:core/Iter";
 import Nat "mo:core/Nat";
+import Int "mo:core/Int";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
@@ -14,10 +15,14 @@ module {
     recurringTemplates : Map.Map<Nat, Types.RecurringTemplate>;
     notes : Map.Map<Text, Types.Note>;
     userSettings : Map.Map<Types.UserId, Types.UserSettings>;
+    billPayments : Map.Map<Text, Types.BillPayment>;
+    budgetTemplates : Map.Map<Text, Types.BudgetTemplate>;
     var nextBudgetId : Nat;
     var nextExpenseId : Nat;
     var nextRecurringTemplateId : Nat;
     var nextNoteId : Nat;
+    var nextBillPaymentId : Nat;
+    var nextBudgetTemplateId : Nat;
   };
 
   public func newState() : State {
@@ -27,10 +32,14 @@ module {
       recurringTemplates = Map.empty<Nat, Types.RecurringTemplate>();
       notes = Map.empty<Text, Types.Note>();
       userSettings = Map.empty<Types.UserId, Types.UserSettings>();
+      billPayments = Map.empty<Text, Types.BillPayment>();
+      budgetTemplates = Map.empty<Text, Types.BudgetTemplate>();
       var nextBudgetId = 1;
       var nextExpenseId = 1;
       var nextRecurringTemplateId = 1;
       var nextNoteId = 1;
+      var nextBillPaymentId = 1;
+      var nextBudgetTemplateId = 1;
     };
   };
 
@@ -886,6 +895,223 @@ module {
     };
     state.userSettings.add(caller, clamped);
     clamped;
+  };
+
+  // ---- Bill Payment CRUD ----
+
+  public func createBillPayment(
+    state : State,
+    caller : Types.UserId,
+    input : Types.BillPaymentInput,
+  ) : Types.BillPayment {
+    let id = caller.toText() # "-bp-" # state.nextBillPaymentId.toText();
+    state.nextBillPaymentId += 1;
+    let payment : Types.BillPayment = {
+      id;
+      owner = caller;
+      recurringTemplateId = input.recurringTemplateId;
+      year = input.year;
+      month = input.month;
+      dueDay = input.dueDay;
+      paidDate = input.paidDate;
+      paidAmountCents = input.paidAmountCents;
+      notes = input.notes;
+    };
+    state.billPayments.add(id, payment);
+    payment;
+  };
+
+  public func getBillPayment(
+    state : State,
+    caller : Types.UserId,
+    id : Text,
+  ) : ?Types.BillPayment {
+    switch (state.billPayments.get(id)) {
+      case (?payment) {
+        if (Principal.equal(payment.owner, caller)) { ?payment } else { null };
+      };
+      case null { null };
+    };
+  };
+
+  public func listBillPayments(
+    state : State,
+    caller : Types.UserId,
+    year : Nat,
+    month : Nat,
+  ) : [Types.BillPayment] {
+    let results = List.empty<Types.BillPayment>();
+    for ((_, payment) in state.billPayments.entries()) {
+      if (
+        Principal.equal(payment.owner, caller) and
+        payment.year == year and
+        payment.month == month
+      ) {
+        results.add(payment);
+      };
+    };
+    // Sort by dueDay ascending
+    results.sortInPlace(func(a, b) { Nat.compare(a.dueDay, b.dueDay) });
+    results.toArray();
+  };
+
+  public func updateBillPayment(
+    state : State,
+    caller : Types.UserId,
+    id : Text,
+    input : Types.BillPaymentInput,
+  ) : ?Types.BillPayment {
+    switch (state.billPayments.get(id)) {
+      case (?existing) {
+        if (not Principal.equal(existing.owner, caller)) { return null };
+        let updated : Types.BillPayment = {
+          existing with
+          recurringTemplateId = input.recurringTemplateId;
+          year = input.year;
+          month = input.month;
+          dueDay = input.dueDay;
+          paidDate = input.paidDate;
+          paidAmountCents = input.paidAmountCents;
+          notes = input.notes;
+        };
+        state.billPayments.add(id, updated);
+        ?updated;
+      };
+      case null { null };
+    };
+  };
+
+  public func deleteBillPayment(
+    state : State,
+    caller : Types.UserId,
+    id : Text,
+  ) : Bool {
+    switch (state.billPayments.get(id)) {
+      case (?payment) {
+        if (not Principal.equal(payment.owner, caller)) { return false };
+        state.billPayments.remove(id);
+        true;
+      };
+      case null { false };
+    };
+  };
+
+  // ---- Budget Template CRUD ----
+
+  public func createBudgetTemplate(
+    state : State,
+    caller : Types.UserId,
+    input : Types.BudgetTemplateInput,
+  ) : Types.BudgetTemplate {
+    let id = caller.toText() # "-bt-" # state.nextBudgetTemplateId.toText();
+    state.nextBudgetTemplateId += 1;
+    let template : Types.BudgetTemplate = {
+      id;
+      owner = caller;
+      name = input.name;
+      createdAt = Time.now();
+      categories = input.categories;
+    };
+    state.budgetTemplates.add(id, template);
+    template;
+  };
+
+  public func listBudgetTemplates(
+    state : State,
+    caller : Types.UserId,
+  ) : [Types.BudgetTemplate] {
+    let results = List.empty<Types.BudgetTemplate>();
+    for ((_, template) in state.budgetTemplates.entries()) {
+      if (Principal.equal(template.owner, caller)) {
+        results.add(template);
+      };
+    };
+    // Sort by createdAt descending (newest first)
+    results.sortInPlace(func(a, b) { Int.compare(b.createdAt, a.createdAt) });
+    results.toArray();
+  };
+
+  public func getBudgetTemplate(
+    state : State,
+    caller : Types.UserId,
+    id : Text,
+  ) : ?Types.BudgetTemplate {
+    switch (state.budgetTemplates.get(id)) {
+      case (?template) {
+        if (Principal.equal(template.owner, caller)) { ?template } else { null };
+      };
+      case null { null };
+    };
+  };
+
+  public func updateBudgetTemplate(
+    state : State,
+    caller : Types.UserId,
+    id : Text,
+    input : Types.BudgetTemplateInput,
+  ) : ?Types.BudgetTemplate {
+    switch (state.budgetTemplates.get(id)) {
+      case (?existing) {
+        if (not Principal.equal(existing.owner, caller)) { return null };
+        let updated : Types.BudgetTemplate = {
+          existing with
+          name = input.name;
+          categories = input.categories;
+        };
+        state.budgetTemplates.add(id, updated);
+        ?updated;
+      };
+      case null { null };
+    };
+  };
+
+  public func deleteBudgetTemplate(
+    state : State,
+    caller : Types.UserId,
+    id : Text,
+  ) : Bool {
+    switch (state.budgetTemplates.get(id)) {
+      case (?template) {
+        if (not Principal.equal(template.owner, caller)) { return false };
+        state.budgetTemplates.remove(id);
+        true;
+      };
+      case null { false };
+    };
+  };
+
+  // Creates Budget records for each category in the template for the given year/month.
+  // Returns the list of newly created budgets.
+  public func applyBudgetTemplate(
+    state : State,
+    caller : Types.UserId,
+    templateId : Text,
+    year : Nat,
+    month : Nat,
+  ) : [Types.Budget] {
+    let template = switch (state.budgetTemplates.get(templateId)) {
+      case (?t) {
+        if (not Principal.equal(t.owner, caller)) {
+          return [];
+        };
+        t;
+      };
+      case null { return [] };
+    };
+    let created = List.empty<Types.Budget>();
+    for (cat in template.categories.values()) {
+      let input : Types.BudgetInput = {
+        name = cat.name;
+        limitCents = cat.limitCents;
+        color = cat.color;
+        category = cat.category;
+        year;
+        month;
+      };
+      let budget = createBudget(state, caller, input);
+      created.add(budget);
+    };
+    created.toArray();
   };
 
 };

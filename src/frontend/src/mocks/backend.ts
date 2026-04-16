@@ -1,8 +1,12 @@
 import { Principal } from "@icp-sdk/core/principal";
 import type {
   backendInterface,
+  BillPayment,
+  BillPaymentInput,
   Budget,
   BudgetSummary,
+  BudgetTemplate,
+  BudgetTemplateInput,
   CategoryBreakdownPoint,
   CategoryTrendPoint,
   DailySpendingPoint,
@@ -203,4 +207,35 @@ export const mockBackend: backendInterface = {
   },
   // Search
   searchExpenses: async () => mockExpenses,
+  // Bill Payment methods
+  createBillPayment: async (input: BillPaymentInput): Promise<BillPayment> => ({
+    ...input,
+    id: `anon-bp-1`,
+    owner: stubOwner,
+  }),
+  getBillPayment: async (_id: string): Promise<BillPayment | null> => null,
+  listBillPayments: async (): Promise<BillPayment[]> => [],
+  updateBillPayment: async (_id: string, input: BillPaymentInput): Promise<BillPayment | null> => ({
+    ...input,
+    id: _id,
+    owner: stubOwner,
+  }),
+  deleteBillPayment: async (): Promise<boolean> => true,
+  // Budget Template methods
+  createBudgetTemplate: async (input: BudgetTemplateInput): Promise<BudgetTemplate> => ({
+    ...input,
+    id: `anon-bt-1`,
+    owner: stubOwner,
+    createdAt: BigInt(Date.now()),
+  }),
+  listBudgetTemplates: async (): Promise<BudgetTemplate[]> => [],
+  getBudgetTemplate: async (_id: string): Promise<BudgetTemplate | null> => null,
+  updateBudgetTemplate: async (_id: string, input: BudgetTemplateInput): Promise<BudgetTemplate | null> => ({
+    ...input,
+    id: _id,
+    owner: stubOwner,
+    createdAt: BigInt(Date.now()),
+  }),
+  deleteBudgetTemplate: async (): Promise<boolean> => true,
+  applyBudgetTemplate: async (): Promise<Budget[]> => [],
 };

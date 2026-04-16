@@ -99,6 +99,50 @@ module {
     alertThresholdPercent : Nat; // 50–100; default 80
   };
 
+  // ---- Bill Payments ----
+  public type BillPayment = {
+    id : Text;
+    owner : UserId;
+    recurringTemplateId : Text;
+    year : Nat;
+    month : Nat;
+    dueDay : Nat;
+    paidDate : ?Timestamp;
+    paidAmountCents : ?Nat;
+    notes : ?Text;
+  };
+
+  public type BillPaymentInput = {
+    recurringTemplateId : Text;
+    year : Nat;
+    month : Nat;
+    dueDay : Nat;
+    paidDate : ?Timestamp;
+    paidAmountCents : ?Nat;
+    notes : ?Text;
+  };
+
+  // ---- Budget Templates ----
+  public type BudgetTemplateCategory = {
+    name : Text;
+    limitCents : Nat;
+    color : Text;
+    category : Text;
+  };
+
+  public type BudgetTemplate = {
+    id : Text;
+    owner : UserId;
+    name : Text;
+    createdAt : Timestamp;
+    categories : [BudgetTemplateCategory];
+  };
+
+  public type BudgetTemplateInput = {
+    name : Text;
+    categories : [BudgetTemplateCategory];
+  };
+
   // ---- Chart / Trend types ----
 
   // Total spending across all budgets for a given month

@@ -10,6 +10,17 @@ import { IDL } from '@icp-sdk/core/candid';
 
 export const UserId = IDL.Principal;
 export const Timestamp = IDL.Int;
+export const Budget = IDL.Record({
+  'id' : IDL.Nat,
+  'month' : IDL.Nat,
+  'owner' : UserId,
+  'limitCents' : IDL.Nat,
+  'name' : IDL.Text,
+  'createdAt' : Timestamp,
+  'color' : IDL.Text,
+  'year' : IDL.Nat,
+  'category' : IDL.Text,
+});
 export const Expense = IDL.Record({
   'id' : IDL.Nat,
   'recurringTemplateId' : IDL.Opt(IDL.Nat),
@@ -21,6 +32,26 @@ export const Expense = IDL.Record({
   'budgetId' : IDL.Nat,
   'notes' : IDL.Opt(IDL.Text),
 });
+export const BillPaymentInput = IDL.Record({
+  'month' : IDL.Nat,
+  'recurringTemplateId' : IDL.Text,
+  'year' : IDL.Nat,
+  'paidDate' : IDL.Opt(Timestamp),
+  'paidAmountCents' : IDL.Opt(IDL.Nat),
+  'dueDay' : IDL.Nat,
+  'notes' : IDL.Opt(IDL.Text),
+});
+export const BillPayment = IDL.Record({
+  'id' : IDL.Text,
+  'month' : IDL.Nat,
+  'recurringTemplateId' : IDL.Text,
+  'owner' : UserId,
+  'year' : IDL.Nat,
+  'paidDate' : IDL.Opt(Timestamp),
+  'paidAmountCents' : IDL.Opt(IDL.Nat),
+  'dueDay' : IDL.Nat,
+  'notes' : IDL.Opt(IDL.Text),
+});
 export const BudgetInput = IDL.Record({
   'month' : IDL.Nat,
   'limitCents' : IDL.Nat,
@@ -29,16 +60,22 @@ export const BudgetInput = IDL.Record({
   'year' : IDL.Nat,
   'category' : IDL.Text,
 });
-export const Budget = IDL.Record({
-  'id' : IDL.Nat,
-  'month' : IDL.Nat,
-  'owner' : UserId,
+export const BudgetTemplateCategory = IDL.Record({
   'limitCents' : IDL.Nat,
   'name' : IDL.Text,
-  'createdAt' : Timestamp,
   'color' : IDL.Text,
-  'year' : IDL.Nat,
   'category' : IDL.Text,
+});
+export const BudgetTemplateInput = IDL.Record({
+  'categories' : IDL.Vec(BudgetTemplateCategory),
+  'name' : IDL.Text,
+});
+export const BudgetTemplate = IDL.Record({
+  'id' : IDL.Text,
+  'categories' : IDL.Vec(BudgetTemplateCategory),
+  'owner' : UserId,
+  'name' : IDL.Text,
+  'createdAt' : Timestamp,
 });
 export const ExpenseInput = IDL.Record({
   'receiptUrl' : IDL.Opt(IDL.Text),
@@ -110,12 +147,23 @@ export const MonthlyTrendPoint = IDL.Record({
 export const UserSettings = IDL.Record({ 'alertThresholdPercent' : IDL.Nat });
 
 export const idlService = IDL.Service({
+  'applyBudgetTemplate' : IDL.Func(
+      [IDL.Text, IDL.Nat, IDL.Nat],
+      [IDL.Vec(Budget)],
+      [],
+    ),
   'applyRecurringTemplates' : IDL.Func(
       [IDL.Nat, IDL.Nat],
       [IDL.Vec(Expense)],
       [],
     ),
+  'createBillPayment' : IDL.Func([BillPaymentInput], [BillPayment], []),
   'createBudget' : IDL.Func([BudgetInput], [Budget], []),
+  'createBudgetTemplate' : IDL.Func(
+      [BudgetTemplateInput],
+      [BudgetTemplate],
+      [],
+    ),
   'createExpense' : IDL.Func([ExpenseInput], [Expense], []),
   'createNote' : IDL.Func([IDL.Text, IDL.Text], [Note], []),
   'createRecurringTemplate' : IDL.Func(
@@ -123,11 +171,19 @@ export const idlService = IDL.Service({
       [RecurringTemplate],
       [],
     ),
+  'deleteBillPayment' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'deleteBudget' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'deleteBudgetTemplate' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'deleteExpense' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteNote' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'deleteRecurringTemplate' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'getBillPayment' : IDL.Func([IDL.Text], [IDL.Opt(BillPayment)], ['query']),
   'getBudget' : IDL.Func([IDL.Nat], [IDL.Opt(Budget)], ['query']),
+  'getBudgetTemplate' : IDL.Func(
+      [IDL.Text],
+      [IDL.Opt(BudgetTemplate)],
+      ['query'],
+    ),
   'getCategoryBreakdown' : IDL.Func(
       [IDL.Nat, IDL.Nat],
       [IDL.Vec(CategoryBreakdownPoint)],
@@ -170,6 +226,12 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getUserSettings' : IDL.Func([], [UserSettings], ['query']),
+  'listBillPayments' : IDL.Func(
+      [IDL.Nat, IDL.Nat],
+      [IDL.Vec(BillPayment)],
+      ['query'],
+    ),
+  'listBudgetTemplates' : IDL.Func([], [IDL.Vec(BudgetTemplate)], ['query']),
   'listBudgets' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Vec(Budget)], ['query']),
   'listExpenses' : IDL.Func([IDL.Nat], [IDL.Vec(Expense)], ['query']),
   'listNotes' : IDL.Func([], [IDL.Vec(Note)], ['query']),
@@ -190,7 +252,17 @@ export const idlService = IDL.Service({
       [IDL.Vec(Expense)],
       ['query'],
     ),
+  'updateBillPayment' : IDL.Func(
+      [IDL.Text, BillPaymentInput],
+      [IDL.Opt(BillPayment)],
+      [],
+    ),
   'updateBudget' : IDL.Func([IDL.Nat, BudgetInput], [IDL.Opt(Budget)], []),
+  'updateBudgetTemplate' : IDL.Func(
+      [IDL.Text, BudgetTemplateInput],
+      [IDL.Opt(BudgetTemplate)],
+      [],
+    ),
   'updateExpense' : IDL.Func([IDL.Nat, ExpenseInput], [IDL.Opt(Expense)], []),
   'updateNote' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Opt(Note)], []),
   'updateRecurringTemplate' : IDL.Func(
@@ -206,6 +278,17 @@ export const idlInitArgs = [];
 export const idlFactory = ({ IDL }) => {
   const UserId = IDL.Principal;
   const Timestamp = IDL.Int;
+  const Budget = IDL.Record({
+    'id' : IDL.Nat,
+    'month' : IDL.Nat,
+    'owner' : UserId,
+    'limitCents' : IDL.Nat,
+    'name' : IDL.Text,
+    'createdAt' : Timestamp,
+    'color' : IDL.Text,
+    'year' : IDL.Nat,
+    'category' : IDL.Text,
+  });
   const Expense = IDL.Record({
     'id' : IDL.Nat,
     'recurringTemplateId' : IDL.Opt(IDL.Nat),
@@ -217,6 +300,26 @@ export const idlFactory = ({ IDL }) => {
     'budgetId' : IDL.Nat,
     'notes' : IDL.Opt(IDL.Text),
   });
+  const BillPaymentInput = IDL.Record({
+    'month' : IDL.Nat,
+    'recurringTemplateId' : IDL.Text,
+    'year' : IDL.Nat,
+    'paidDate' : IDL.Opt(Timestamp),
+    'paidAmountCents' : IDL.Opt(IDL.Nat),
+    'dueDay' : IDL.Nat,
+    'notes' : IDL.Opt(IDL.Text),
+  });
+  const BillPayment = IDL.Record({
+    'id' : IDL.Text,
+    'month' : IDL.Nat,
+    'recurringTemplateId' : IDL.Text,
+    'owner' : UserId,
+    'year' : IDL.Nat,
+    'paidDate' : IDL.Opt(Timestamp),
+    'paidAmountCents' : IDL.Opt(IDL.Nat),
+    'dueDay' : IDL.Nat,
+    'notes' : IDL.Opt(IDL.Text),
+  });
   const BudgetInput = IDL.Record({
     'month' : IDL.Nat,
     'limitCents' : IDL.Nat,
@@ -225,16 +328,22 @@ export const idlFactory = ({ IDL }) => {
     'year' : IDL.Nat,
     'category' : IDL.Text,
   });
-  const Budget = IDL.Record({
-    'id' : IDL.Nat,
-    'month' : IDL.Nat,
-    'owner' : UserId,
+  const BudgetTemplateCategory = IDL.Record({
     'limitCents' : IDL.Nat,
     'name' : IDL.Text,
-    'createdAt' : Timestamp,
     'color' : IDL.Text,
-    'year' : IDL.Nat,
     'category' : IDL.Text,
+  });
+  const BudgetTemplateInput = IDL.Record({
+    'categories' : IDL.Vec(BudgetTemplateCategory),
+    'name' : IDL.Text,
+  });
+  const BudgetTemplate = IDL.Record({
+    'id' : IDL.Text,
+    'categories' : IDL.Vec(BudgetTemplateCategory),
+    'owner' : UserId,
+    'name' : IDL.Text,
+    'createdAt' : Timestamp,
   });
   const ExpenseInput = IDL.Record({
     'receiptUrl' : IDL.Opt(IDL.Text),
@@ -306,12 +415,23 @@ export const idlFactory = ({ IDL }) => {
   const UserSettings = IDL.Record({ 'alertThresholdPercent' : IDL.Nat });
   
   return IDL.Service({
+    'applyBudgetTemplate' : IDL.Func(
+        [IDL.Text, IDL.Nat, IDL.Nat],
+        [IDL.Vec(Budget)],
+        [],
+      ),
     'applyRecurringTemplates' : IDL.Func(
         [IDL.Nat, IDL.Nat],
         [IDL.Vec(Expense)],
         [],
       ),
+    'createBillPayment' : IDL.Func([BillPaymentInput], [BillPayment], []),
     'createBudget' : IDL.Func([BudgetInput], [Budget], []),
+    'createBudgetTemplate' : IDL.Func(
+        [BudgetTemplateInput],
+        [BudgetTemplate],
+        [],
+      ),
     'createExpense' : IDL.Func([ExpenseInput], [Expense], []),
     'createNote' : IDL.Func([IDL.Text, IDL.Text], [Note], []),
     'createRecurringTemplate' : IDL.Func(
@@ -319,11 +439,19 @@ export const idlFactory = ({ IDL }) => {
         [RecurringTemplate],
         [],
       ),
+    'deleteBillPayment' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'deleteBudget' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'deleteBudgetTemplate' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'deleteExpense' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteNote' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'deleteRecurringTemplate' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'getBillPayment' : IDL.Func([IDL.Text], [IDL.Opt(BillPayment)], ['query']),
     'getBudget' : IDL.Func([IDL.Nat], [IDL.Opt(Budget)], ['query']),
+    'getBudgetTemplate' : IDL.Func(
+        [IDL.Text],
+        [IDL.Opt(BudgetTemplate)],
+        ['query'],
+      ),
     'getCategoryBreakdown' : IDL.Func(
         [IDL.Nat, IDL.Nat],
         [IDL.Vec(CategoryBreakdownPoint)],
@@ -366,6 +494,12 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getUserSettings' : IDL.Func([], [UserSettings], ['query']),
+    'listBillPayments' : IDL.Func(
+        [IDL.Nat, IDL.Nat],
+        [IDL.Vec(BillPayment)],
+        ['query'],
+      ),
+    'listBudgetTemplates' : IDL.Func([], [IDL.Vec(BudgetTemplate)], ['query']),
     'listBudgets' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Vec(Budget)], ['query']),
     'listExpenses' : IDL.Func([IDL.Nat], [IDL.Vec(Expense)], ['query']),
     'listNotes' : IDL.Func([], [IDL.Vec(Note)], ['query']),
@@ -386,7 +520,17 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(Expense)],
         ['query'],
       ),
+    'updateBillPayment' : IDL.Func(
+        [IDL.Text, BillPaymentInput],
+        [IDL.Opt(BillPayment)],
+        [],
+      ),
     'updateBudget' : IDL.Func([IDL.Nat, BudgetInput], [IDL.Opt(Budget)], []),
+    'updateBudgetTemplate' : IDL.Func(
+        [IDL.Text, BudgetTemplateInput],
+        [IDL.Opt(BudgetTemplate)],
+        [],
+      ),
     'updateExpense' : IDL.Func([IDL.Nat, ExpenseInput], [IDL.Opt(Expense)], []),
     'updateNote' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text],

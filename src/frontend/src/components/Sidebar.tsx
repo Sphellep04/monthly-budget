@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BarChart2,
+  Bell,
+  BookTemplate,
   CalendarDays,
   LayoutDashboard,
   Lightbulb,
@@ -57,6 +59,18 @@ const navItems: NavItem[] = [
     href: "/insights",
     icon: <Lightbulb size={17} />,
     ocid: "sidebar.insights.link",
+  },
+  {
+    label: "Bills",
+    href: "/bills",
+    icon: <Bell size={17} />,
+    ocid: "sidebar.bills.link",
+  },
+  {
+    label: "Templates",
+    href: "/templates",
+    icon: <BookTemplate size={17} />,
+    ocid: "sidebar.templates.link",
   },
   {
     label: "Search",

@@ -19,10 +19,20 @@ export interface Budget {
     category: string;
 }
 export type Timestamp = bigint;
+export interface BudgetTemplateCategory {
+    limitCents: bigint;
+    name: string;
+    color: string;
+    category: string;
+}
 export interface MonthlyTrendPoint {
     month: bigint;
     totalSpentCents: bigint;
     year: bigint;
+}
+export interface BudgetTemplateInput {
+    categories: Array<BudgetTemplateCategory>;
+    name: string;
 }
 export interface CategoryBreakdownPoint {
     name: string;
@@ -83,6 +93,26 @@ export interface BudgetSummary {
     budget: Budget;
     remainingCents: bigint;
 }
+export interface BillPaymentInput {
+    month: bigint;
+    recurringTemplateId: string;
+    year: bigint;
+    paidDate?: Timestamp;
+    paidAmountCents?: bigint;
+    dueDay: bigint;
+    notes?: string;
+}
+export interface BillPayment {
+    id: string;
+    month: bigint;
+    recurringTemplateId: string;
+    owner: UserId;
+    year: bigint;
+    paidDate?: Timestamp;
+    paidAmountCents?: bigint;
+    dueDay: bigint;
+    notes?: string;
+}
 export interface UserSettings {
     alertThresholdPercent: bigint;
 }
@@ -101,6 +131,13 @@ export interface BudgetInput {
     year: bigint;
     category: string;
 }
+export interface BudgetTemplate {
+    id: string;
+    categories: Array<BudgetTemplateCategory>;
+    owner: UserId;
+    name: string;
+    createdAt: Timestamp;
+}
 export interface Note {
     id: string;
     title: string;
@@ -110,16 +147,23 @@ export interface Note {
     updatedAt: Timestamp;
 }
 export interface backendInterface {
+    applyBudgetTemplate(templateId: string, year: bigint, month: bigint): Promise<Array<Budget>>;
     applyRecurringTemplates(year: bigint, month: bigint): Promise<Array<Expense>>;
+    createBillPayment(input: BillPaymentInput): Promise<BillPayment>;
     createBudget(input: BudgetInput): Promise<Budget>;
+    createBudgetTemplate(input: BudgetTemplateInput): Promise<BudgetTemplate>;
     createExpense(input: ExpenseInput): Promise<Expense>;
     createNote(title: string, content: string): Promise<Note>;
     createRecurringTemplate(input: RecurringTemplateInput): Promise<RecurringTemplate>;
+    deleteBillPayment(id: string): Promise<boolean>;
     deleteBudget(id: bigint): Promise<boolean>;
+    deleteBudgetTemplate(id: string): Promise<boolean>;
     deleteExpense(id: bigint): Promise<boolean>;
     deleteNote(id: string): Promise<boolean>;
     deleteRecurringTemplate(id: bigint): Promise<boolean>;
+    getBillPayment(id: string): Promise<BillPayment | null>;
     getBudget(id: bigint): Promise<Budget | null>;
+    getBudgetTemplate(id: string): Promise<BudgetTemplate | null>;
     getCategoryBreakdown(year: bigint, month: bigint): Promise<Array<CategoryBreakdownPoint>>;
     getCategoryBreakdownForRange(startDate: string, endDate: string): Promise<Array<CategoryBreakdownPoint>>;
     getCategoryTrend(budgetId: bigint, months: bigint, currentYear: bigint, currentMonth: bigint): Promise<Array<CategoryTrendPoint>>;
@@ -130,12 +174,16 @@ export interface backendInterface {
     getMonthlyTrend(months: bigint, currentYear: bigint, currentMonth: bigint): Promise<Array<MonthlyTrendPoint>>;
     getRecurringTemplate(id: bigint): Promise<RecurringTemplate | null>;
     getUserSettings(): Promise<UserSettings>;
+    listBillPayments(year: bigint, month: bigint): Promise<Array<BillPayment>>;
+    listBudgetTemplates(): Promise<Array<BudgetTemplate>>;
     listBudgets(year: bigint, month: bigint): Promise<Array<Budget>>;
     listExpenses(budgetId: bigint): Promise<Array<Expense>>;
     listNotes(): Promise<Array<Note>>;
     listRecurringTemplates(budgetId: bigint): Promise<Array<RecurringTemplate>>;
     searchExpenses(startDate: string, endDate: string, queryText: string | null, categoryId: bigint | null, minAmountCents: bigint | null, maxAmountCents: bigint | null): Promise<Array<Expense>>;
+    updateBillPayment(id: string, input: BillPaymentInput): Promise<BillPayment | null>;
     updateBudget(id: bigint, input: BudgetInput): Promise<Budget | null>;
+    updateBudgetTemplate(id: string, input: BudgetTemplateInput): Promise<BudgetTemplate | null>;
     updateExpense(id: bigint, input: ExpenseInput): Promise<Expense | null>;
     updateNote(id: string, title: string, content: string): Promise<Note | null>;
     updateRecurringTemplate(id: bigint, input: RecurringTemplateInput): Promise<RecurringTemplate | null>;
