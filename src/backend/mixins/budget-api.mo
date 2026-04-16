@@ -92,4 +92,68 @@ mixin (state : BudgetLib.State) {
   public shared query ({ caller }) func getCategoryTrend(budgetId : Nat, months : Nat, currentYear : Nat, currentMonth : Nat) : async [Types.CategoryTrendPoint] {
     BudgetLib.getCategoryTrend(state, caller, budgetId, months, currentYear, currentMonth);
   };
+
+  // ---- Notes endpoints ----
+
+  public shared ({ caller }) func createNote(title : Text, content : Text) : async Types.Note {
+    BudgetLib.createNote(state, caller, title, content);
+  };
+
+  public shared query ({ caller }) func listNotes() : async [Types.Note] {
+    BudgetLib.listNotes(state, caller);
+  };
+
+  public shared ({ caller }) func updateNote(id : Text, title : Text, content : Text) : async ?Types.Note {
+    BudgetLib.updateNote(state, caller, id, title, content);
+  };
+
+  public shared ({ caller }) func deleteNote(id : Text) : async Bool {
+    BudgetLib.deleteNote(state, caller, id);
+  };
+
+  // ---- Extra Chart endpoints ----
+
+  // Returns daily spending totals for the given month for the caller.
+  public shared query ({ caller }) func getDailySpending(year : Nat, month : Nat) : async [Types.DailySpendingPoint] {
+    BudgetLib.getDailySpending(state, caller, year, month);
+  };
+
+  // Returns total spending per budget/category for the given month for the caller.
+  public shared query ({ caller }) func getCategoryBreakdown(year : Nat, month : Nat) : async [Types.CategoryBreakdownPoint] {
+    BudgetLib.getCategoryBreakdown(state, caller, year, month);
+  };
+
+  // ---- Search / Custom Range endpoints ----
+
+  // Full search: filter by date range and optionally by query text, budget/category, and amount range.
+  public shared query ({ caller }) func searchExpenses(
+    startDate : Text,
+    endDate : Text,
+    queryText : ?Text,
+    categoryId : ?Nat,
+    minAmountCents : ?Nat,
+    maxAmountCents : ?Nat,
+  ) : async [Types.Expense] {
+    BudgetLib.searchExpenses(state, caller, startDate, endDate, queryText, categoryId, minAmountCents, maxAmountCents);
+  };
+
+  // Simple range query: all expenses between startDate and endDate, no filters.
+  public shared query ({ caller }) func getExpensesInRange(startDate : Text, endDate : Text) : async [Types.Expense] {
+    BudgetLib.getExpensesInRange(state, caller, startDate, endDate);
+  };
+
+  // Category breakdown aggregated for a custom date range.
+  public shared query ({ caller }) func getCategoryBreakdownForRange(startDate : Text, endDate : Text) : async [Types.CategoryBreakdownPoint] {
+    BudgetLib.getCategoryBreakdownForRange(state, caller, startDate, endDate);
+  };
+
+  // ---- User Settings endpoints ----
+
+  public shared query ({ caller }) func getUserSettings() : async Types.UserSettings {
+    BudgetLib.getUserSettings(state, caller);
+  };
+
+  public shared ({ caller }) func updateUserSettings(settings : Types.UserSettings) : async Types.UserSettings {
+    BudgetLib.updateUserSettings(state, caller, settings);
+  };
 };

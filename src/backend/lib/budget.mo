@@ -1,6 +1,7 @@
 import Map "mo:core/Map";
 import List "mo:core/List";
 import Iter "mo:core/Iter";
+import Nat "mo:core/Nat";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
@@ -11,9 +12,12 @@ module {
     budgets : Map.Map<Nat, Types.Budget>;
     expenses : Map.Map<Nat, Types.Expense>;
     recurringTemplates : Map.Map<Nat, Types.RecurringTemplate>;
+    notes : Map.Map<Text, Types.Note>;
+    userSettings : Map.Map<Types.UserId, Types.UserSettings>;
     var nextBudgetId : Nat;
     var nextExpenseId : Nat;
     var nextRecurringTemplateId : Nat;
+    var nextNoteId : Nat;
   };
 
   public func newState() : State {
@@ -21,9 +25,12 @@ module {
       budgets = Map.empty<Nat, Types.Budget>();
       expenses = Map.empty<Nat, Types.Expense>();
       recurringTemplates = Map.empty<Nat, Types.RecurringTemplate>();
+      notes = Map.empty<Text, Types.Note>();
+      userSettings = Map.empty<Types.UserId, Types.UserSettings>();
       var nextBudgetId = 1;
       var nextExpenseId = 1;
       var nextRecurringTemplateId = 1;
+      var nextNoteId = 1;
     };
   };
 
@@ -557,4 +564,328 @@ module {
     };
     points.toArray();
   };
+
+  // ---- Notes CRUD ----
+
+  public func createNote(
+    state : State,
+    caller : Types.UserId,
+    title : Text,
+    content : Text,
+  ) : Types.Note {
+    let id = caller.toText() # "-" # state.nextNoteId.toText();
+    state.nextNoteId += 1;
+    let now = Time.now();
+    let note : Types.Note = {
+      id;
+      userId = caller;
+      title;
+      content;
+      createdAt = now;
+      updatedAt = now;
+    };
+    state.notes.add(id, note);
+    note;
+  };
+
+  public func listNotes(
+    state : State,
+    caller : Types.UserId,
+  ) : [Types.Note] {
+    let results = List.empty<Types.Note>();
+    for ((_, note) in state.notes.entries()) {
+      if (Principal.equal(note.userId, caller)) {
+        results.add(note);
+      };
+    };
+    results.toArray();
+  };
+
+  public func updateNote(
+    state : State,
+    caller : Types.UserId,
+    id : Text,
+    title : Text,
+    content : Text,
+  ) : ?Types.Note {
+    switch (state.notes.get(id)) {
+      case (?existing) {
+        if (not Principal.equal(existing.userId, caller)) { return null };
+        let updated : Types.Note = {
+          existing with
+          title;
+          content;
+          updatedAt = Time.now();
+        };
+        state.notes.add(id, updated);
+        ?updated;
+      };
+      case null { null };
+    };
+  };
+
+  public func deleteNote(
+    state : State,
+    caller : Types.UserId,
+    id : Text,
+  ) : Bool {
+    switch (state.notes.get(id)) {
+      case (?note) {
+        if (not Principal.equal(note.userId, caller)) { return false };
+        state.notes.remove(id);
+        true;
+      };
+      case null { false };
+    };
+  };
+
+  // ---- Daily Spending Query ----
+
+  // Returns total spending per day for the given month for the caller.
+  public func getDailySpending(
+    state : State,
+    caller : Types.UserId,
+    year : Nat,
+    month : Nat,
+  ) : [Types.DailySpendingPoint] {
+    let monthText = if (month < 10) { "0" # month.toText() } else { month.toText() };
+    let prefix = year.toText() # "-" # monthText # "-";
+    // Accumulate per-day totals using a Map keyed by day number
+    let dayTotals = Map.empty<Nat, Int>();
+    for ((_, exp) in state.expenses.entries()) {
+      if (Principal.equal(exp.owner, caller) and exp.date.startsWith(#text prefix)) {
+        // Extract day from date string "YYYY-MM-DD"
+        let parts = exp.date.split(#char '-');
+        let partsArr = parts.toArray();
+        if (partsArr.size() == 3) {
+          switch (Nat.fromText(partsArr[2])) {
+            case (?day) {
+              let current : Int = switch (dayTotals.get(day)) {
+                case (?v) { v };
+                case null { 0 };
+              };
+              dayTotals.add(day, current + exp.amountCents.toInt());
+            };
+            case null {};
+          };
+        };
+      };
+    };
+    let results = List.empty<Types.DailySpendingPoint>();
+    for ((day, amountCents) in dayTotals.entries()) {
+      results.add({ day; amountCents });
+    };
+    results.toArray();
+  };
+
+  // ---- Category Breakdown Query ----
+
+  // Returns total spending per budget/category for the given month for the caller.
+  public func getCategoryBreakdown(
+    state : State,
+    caller : Types.UserId,
+    year : Nat,
+    month : Nat,
+  ) : [Types.CategoryBreakdownPoint] {
+    let monthText = if (month < 10) { "0" # month.toText() } else { month.toText() };
+    let prefix = year.toText() # "-" # monthText # "-";
+
+    // Get all caller budgets for this month
+    let callerBudgets = listBudgets(state, caller, year, month);
+
+    let results = List.empty<Types.CategoryBreakdownPoint>();
+    for (budget in callerBudgets.values()) {
+      var spent : Int = 0;
+      for ((_, exp) in state.expenses.entries()) {
+        if (
+          Principal.equal(exp.owner, caller) and
+          exp.budgetId == budget.id and
+          exp.date.startsWith(#text prefix)
+        ) {
+          spent += exp.amountCents.toInt();
+        };
+      };
+      results.add({
+        budgetId = budget.id.toText();
+        name = budget.name;
+        amountCents = spent;
+        color = budget.color;
+      });
+    };
+    results.toArray();
+  };
+
+  // ---- Search / Custom Range Queries ----
+
+  // Returns all expenses in the given ISO date range [startDate, endDate] for the caller,
+  // with optional filters: text query (notes or budget name), categoryId (matches budget.category),
+  // minAmountCents, maxAmountCents.
+  public func searchExpenses(
+    state : State,
+    caller : Types.UserId,
+    startDate : Text,
+    endDate : Text,
+    queryText : ?Text,
+    categoryId : ?Nat,
+    minAmountCents : ?Nat,
+    maxAmountCents : ?Nat,
+  ) : [Types.Expense] {
+    let results = List.empty<Types.Expense>();
+    let lowerQuery = switch (queryText) {
+      case (?q) { ?(q.toLower()) };
+      case null { null };
+    };
+
+    for ((_, exp) in state.expenses.entries()) {
+      if (not Principal.equal(exp.owner, caller)) {}
+      else if (exp.date < startDate or exp.date > endDate) {}
+      else {
+        // Amount range filters
+        let passesMin = switch (minAmountCents) {
+          case (?min) { exp.amountCents >= min };
+          case null { true };
+        };
+        let passesMax = switch (maxAmountCents) {
+          case (?max) { exp.amountCents <= max };
+          case null { true };
+        };
+
+        if (passesMin and passesMax) {
+          // Category filter: look up the budget and match its category field as a Nat if possible
+          let passesCat = switch (categoryId) {
+            case (?catId) {
+              switch (state.budgets.get(exp.budgetId)) {
+                case (?budget) {
+                  // Compare budget.id (the category identifier linking budgets) — requirement says
+                  // "categoryId maps to a Budget which has category field". We interpret categoryId
+                  // as the budget ID (budgetId == categoryId).
+                  exp.budgetId == catId;
+                };
+                case null { false };
+              };
+            };
+            case null { true };
+          };
+
+          if (passesCat) {
+            // Text query filter: check notes and budget name
+            let passesQuery = switch (lowerQuery) {
+              case (?lq) {
+                // Check notes
+                let notesMatch = switch (exp.notes) {
+                  case (?n) { n.toLower().contains(#text lq) };
+                  case null { false };
+                };
+                // Check budget name
+                let nameMatch = switch (state.budgets.get(exp.budgetId)) {
+                  case (?budget) { budget.name.toLower().contains(#text lq) };
+                  case null { false };
+                };
+                notesMatch or nameMatch;
+              };
+              case null { true };
+            };
+
+            if (passesQuery) {
+              results.add(exp);
+            };
+          };
+        };
+      };
+    };
+    results.toArray();
+  };
+
+  // Returns all expenses in the given ISO date range [startDate, endDate] for the caller (no additional filters).
+  public func getExpensesInRange(
+    state : State,
+    caller : Types.UserId,
+    startDate : Text,
+    endDate : Text,
+  ) : [Types.Expense] {
+    let results = List.empty<Types.Expense>();
+    for ((_, exp) in state.expenses.entries()) {
+      if (
+        Principal.equal(exp.owner, caller) and
+        exp.date >= startDate and
+        exp.date <= endDate
+      ) {
+        results.add(exp);
+      };
+    };
+    results.toArray();
+  };
+
+  // Returns aggregated spending per budget/category for the given date range for the caller.
+  public func getCategoryBreakdownForRange(
+    state : State,
+    caller : Types.UserId,
+    startDate : Text,
+    endDate : Text,
+  ) : [Types.CategoryBreakdownPoint] {
+    // Accumulate per-budget spending in a Map keyed by budgetId
+    let budgetTotals = Map.empty<Nat, Int>();
+
+    for ((_, exp) in state.expenses.entries()) {
+      if (
+        Principal.equal(exp.owner, caller) and
+        exp.date >= startDate and
+        exp.date <= endDate
+      ) {
+        let current : Int = switch (budgetTotals.get(exp.budgetId)) {
+          case (?v) { v };
+          case null { 0 };
+        };
+        budgetTotals.add(exp.budgetId, current + exp.amountCents.toInt());
+      };
+    };
+
+    // Build result points with budget metadata
+    let results = List.empty<Types.CategoryBreakdownPoint>();
+    for ((budgetId, amountCents) in budgetTotals.entries()) {
+      switch (state.budgets.get(budgetId)) {
+        case (?budget) {
+          if (Principal.equal(budget.owner, caller)) {
+            results.add({
+              budgetId = budgetId.toText();
+              name = budget.name;
+              amountCents;
+              color = budget.color;
+            });
+          };
+        };
+        case null {};
+      };
+    };
+    results.toArray();
+  };
+
+  // ---- User Settings ----
+
+  let defaultSettings : Types.UserSettings = { alertThresholdPercent = 80 };
+
+  public func getUserSettings(
+    state : State,
+    caller : Types.UserId,
+  ) : Types.UserSettings {
+    switch (state.userSettings.get(caller)) {
+      case (?s) { s };
+      case null { defaultSettings };
+    };
+  };
+
+  public func updateUserSettings(
+    state : State,
+    caller : Types.UserId,
+    settings : Types.UserSettings,
+  ) : Types.UserSettings {
+    let clamped : Types.UserSettings = {
+      alertThresholdPercent = if (settings.alertThresholdPercent < 50) { 50 }
+        else if (settings.alertThresholdPercent > 100) { 100 }
+        else { settings.alertThresholdPercent };
+    };
+    state.userSettings.add(caller, clamped);
+    clamped;
+  };
+
 };

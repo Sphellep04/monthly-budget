@@ -1,4 +1,4 @@
-// Version: 3.0.0
+// Version: 1.0.0
 type Budget__278125643 =
   {
     category : Text;
@@ -36,25 +36,14 @@ type Nat__490723111 = Nat__920180692;
 type Nat__920180692 = Nat;
 type Node__46230540<K, V> =
   {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
-type OldExpense__340868419 =
+type Note__178829401 =
   {
-    amountCents : Nat;
-    budgetId : Nat;
+    content : Text;
     createdAt : Timestamp__118761982;
-    date : Text;
-    id : Nat;
-    notes : ?Text;
-    owner : UserId__513714410;
-    recurringTemplateId : ?Nat
-  };
-type OldStateRecord__978680138 =
-  {
-    budgets : Map__605269027<Nat, Budget__278125643>;
-    expenses : Map__605269027<Nat, OldExpense__340868419>;
-    var nextBudgetId : Nat;
-    var nextExpenseId : Nat;
-    var nextRecurringTemplateId : Nat;
-    recurringTemplates : Map__605269027<Nat, RecurringTemplate__1063638852>
+    id : Text;
+    title : Text;
+    updatedAt : Timestamp__118761982;
+    userId : Principal
   };
 type RecurringTemplate__1063638852 =
   {
@@ -71,16 +60,19 @@ type Timestamp__118761982 = Timestamp__301639476;
 type Timestamp__301639476 = Int;
 type UserId__158757552 = Principal;
 type UserId__513714410 = UserId__158757552;
-actor ({
-  in state : OldStateRecord__978680138
-}, {
+type UserSettings__414068732 = {alertThresholdPercent : Nat};
+actor {
   stable state :
     {
       budgets : Map__605269027<Nat, Budget__278125643>;
       expenses : Map__605269027<Nat, Expense__316178970>;
       var nextBudgetId : Nat;
       var nextExpenseId : Nat;
+      var nextNoteId : Nat;
       var nextRecurringTemplateId : Nat;
-      recurringTemplates : Map__605269027<Nat, RecurringTemplate__1063638852>
+      notes : Map__605269027<Text, Note__178829401>;
+      recurringTemplates : Map__605269027<Nat, RecurringTemplate__1063638852>;
+      userSettings :
+        Map__605269027<UserId__513714410, UserSettings__414068732>
     }
-}) ;
+};

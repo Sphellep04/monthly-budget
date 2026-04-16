@@ -11,10 +11,11 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { createActor } from "../backend";
+import { AlertsPanel } from "../components/AlertsPanel";
 import { BudgetCard } from "../components/BudgetCard";
 import { MonthSelector } from "../components/MonthSelector";
 import { MonthlySummaryHeader } from "../components/MonthlySummaryHeader";
-import { useMonthlySummary } from "../hooks/useBudget";
+import { useMonthlySummary, useUserSettings } from "../hooks/useBudget";
 import type { Expense } from "../types";
 import { getMonthName } from "../types";
 
@@ -182,6 +183,9 @@ export function DashboardPage() {
   const [month, setMonth] = useState(now.getMonth() + 1);
 
   const { data: summary, isLoading } = useMonthlySummary(year, month);
+  const { data: userSettings } = useUserSettings();
+  const alertThreshold = userSettings?.alertThresholdPercent ?? 80;
+
   const budgets = summary?.budgets ?? [];
   const hasBudgets = budgets.length > 0;
 
@@ -232,6 +236,11 @@ export function DashboardPage() {
       {/* ── Monthly summary ── */}
       <MonthlySummaryHeader summary={summary} isLoading={isLoading} />
 
+      {/* ── Alerts panel ── */}
+      {hasBudgets && (
+        <AlertsPanel summaries={budgets} alertThreshold={alertThreshold} />
+      )}
+
       {/* ── Budget grid ── */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -270,6 +279,7 @@ export function DashboardPage() {
                 key={bs.budget.id.toString()}
                 summary={bs}
                 index={i + 1}
+                alertThreshold={alertThreshold}
               />
             ))}
           </div>

@@ -13,6 +13,7 @@ import type { BudgetSummary } from "../types";
 interface BudgetCardProps {
   summary: BudgetSummary;
   index: number;
+  alertThreshold?: number;
 }
 
 const STATUS_CONFIG = {
@@ -69,9 +70,13 @@ function ProgressBar({ pct, barClass }: { pct: number; barClass: string }) {
   );
 }
 
-export function BudgetCard({ summary, index }: BudgetCardProps) {
+export function BudgetCard({
+  summary,
+  index,
+  alertThreshold = 80,
+}: BudgetCardProps) {
   const { budget, totalSpentCents, remainingCents } = summary;
-  const status = getBudgetStatus(summary);
+  const status = getBudgetStatus(summary, alertThreshold);
   const limit = Number(budget.limitCents);
   const spent = Number(totalSpentCents);
   const remaining = Number(remainingCents);
@@ -114,14 +119,28 @@ export function BudgetCard({ summary, index }: BudgetCardProps) {
             </div>
           </div>
 
-          {/* Status badge */}
-          <Badge
-            variant="outline"
-            className={`text-[10px] font-semibold flex-shrink-0 gap-1 px-2 py-0.5 rounded-full border font-body ${cfg.badgeClass} ${status !== "on-track" ? cfg.glowClass : ""}`}
-          >
-            <StatusIcon className="h-2.5 w-2.5" />
-            {cfg.label}
-          </Badge>
+          {/* Status badge + pulse alert icon */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {status === "warning" && (
+              <AlertTriangle
+                className="h-4 w-4 text-warning animate-pulse"
+                aria-label="Nearing budget limit"
+              />
+            )}
+            {status === "over-budget" && (
+              <AlertCircle
+                className="h-4 w-4 text-destructive animate-bounce"
+                aria-label="Over budget"
+              />
+            )}
+            <Badge
+              variant="outline"
+              className={`text-[10px] font-semibold gap-1 px-2 py-0.5 rounded-full border font-body ${cfg.badgeClass} ${status !== "on-track" ? cfg.glowClass : ""}`}
+            >
+              <StatusIcon className="h-2.5 w-2.5" />
+              {cfg.label}
+            </Badge>
+          </div>
         </div>
 
         {/* ── Amount row ── */}

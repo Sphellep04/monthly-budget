@@ -84,6 +84,21 @@ module {
     notes : ?Text;
   };
 
+  // ---- Notes ----
+  public type Note = {
+    id : Text;
+    userId : Principal;
+    title : Text;
+    content : Text;
+    createdAt : Timestamp;
+    updatedAt : Timestamp;
+  };
+
+  // ---- User Settings ----
+  public type UserSettings = {
+    alertThresholdPercent : Nat; // 50–100; default 80
+  };
+
   // ---- Chart / Trend types ----
 
   // Total spending across all budgets for a given month
@@ -101,5 +116,19 @@ module {
     budgetName : Text;
     spentCents : Nat;
     limitCents : Nat;
+  };
+
+  // Per-budget spending for a given month (category breakdown)
+  public type CategoryBreakdownPoint = {
+    budgetId : Text;
+    name : Text;
+    amountCents : Int;
+    color : Text;
+  };
+
+  // Daily spending totals for a given month
+  public type DailySpendingPoint = {
+    day : Nat;
+    amountCents : Int;
   };
 };

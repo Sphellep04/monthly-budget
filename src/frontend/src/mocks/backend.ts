@@ -3,10 +3,13 @@ import type {
   backendInterface,
   Budget,
   BudgetSummary,
+  CategoryBreakdownPoint,
   CategoryTrendPoint,
+  DailySpendingPoint,
   Expense,
   MonthlyTrendPoint,
   MonthlySummary,
+  Note,
   RecurringTemplate,
 } from "../backend.d";
 
@@ -148,4 +151,56 @@ export const mockBackend: backendInterface = {
     }
     return points;
   },
+  // New chart methods
+  getCategoryBreakdown: async () => {
+    return mockBudgets.map((b): CategoryBreakdownPoint => ({
+      budgetId: b.id.toString(),
+      name: b.name,
+      amountCents: BigInt(Math.round(Number(b.limitCents) * (0.3 + Math.random() * 0.7))),
+      color: b.color,
+    }));
+  },
+  getDailySpending: async (_year, _month) => {
+    const points: DailySpendingPoint[] = [];
+    for (let d = 1; d <= 30; d++) {
+      if (Math.random() > 0.4) {
+        points.push({ day: BigInt(d), amountCents: BigInt(Math.round(1000 + Math.random() * 15000)) });
+      }
+    }
+    return points;
+  },
+  // Notes methods
+  createNote: async (title, content) => ({
+    id: crypto.randomUUID(),
+    title,
+    content,
+    userId: stubOwner,
+    createdAt: BigInt(Date.now()) * BigInt(1_000_000),
+    updatedAt: BigInt(Date.now()) * BigInt(1_000_000),
+  } as Note),
+  deleteNote: async () => true,
+  listNotes: async () => [] as Note[],
+  updateNote: async (id, title, content) => ({
+    id,
+    title,
+    content,
+    userId: stubOwner,
+    createdAt: BigInt(Date.now()) * BigInt(1_000_000),
+    updatedAt: BigInt(Date.now()) * BigInt(1_000_000),
+  } as Note),
+  // User settings
+  getUserSettings: async () => ({ alertThresholdPercent: BigInt(80) }),
+  updateUserSettings: async (settings) => settings,
+  // Range-based queries
+  getExpensesInRange: async (_startDate, _endDate) => mockExpenses,
+  getCategoryBreakdownForRange: async (_startDate, _endDate) => {
+    return mockBudgets.map((b): CategoryBreakdownPoint => ({
+      budgetId: b.id.toString(),
+      name: b.name,
+      amountCents: BigInt(Math.round(Number(b.limitCents) * (0.3 + Math.random() * 0.7))),
+      color: b.color,
+    }));
+  },
+  // Search
+  searchExpenses: async () => mockExpenses,
 };

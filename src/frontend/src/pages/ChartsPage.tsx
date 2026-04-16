@@ -1,19 +1,26 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BarChart2,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   LineChart as LineChartIcon,
+  PieChartIcon,
   Sparkles,
   TrendingUp,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { useState } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
-  Dot,
+  Legend,
   Line,
   LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -21,10 +28,12 @@ import {
 } from "recharts";
 import {
   useBudgets,
+  useCategoryBreakdown,
   useCategoryTrend,
+  useDailySpending,
   useMonthlyTrend,
 } from "../hooks/useBudget";
-import { getMonthName } from "../types";
+import { formatCents, getMonthName } from "../types";
 
 /* ─── Design-system chart palette ─── */
 const CHART_PALETTE = [
@@ -46,6 +55,63 @@ function formatMonthLabel(year: bigint, month: bigint) {
 
 function formatCurrency(v: number) {
   return `N$${v.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+}
+
+/* ─── Month Selector ─── */
+function MonthSelector({
+  year,
+  month,
+  onChange,
+}: {
+  year: number;
+  month: number;
+  onChange: (year: number, month: number) => void;
+}) {
+  function prev() {
+    if (month === 1) onChange(year - 1, 12);
+    else onChange(year, month - 1);
+  }
+  function next() {
+    const now = new Date();
+    const isCurrentOrFuture =
+      year > now.getFullYear() ||
+      (year === now.getFullYear() && month >= now.getMonth() + 1);
+    if (isCurrentOrFuture) return;
+    if (month === 12) onChange(year + 1, 1);
+    else onChange(year, month + 1);
+  }
+  const now = new Date();
+  const isLatest = year === now.getFullYear() && month === now.getMonth() + 1;
+
+  return (
+    <div
+      className="flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-subtle"
+      data-ocid="charts.month_selector"
+    >
+      <button
+        type="button"
+        onClick={prev}
+        className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors"
+        aria-label="Previous month"
+        data-ocid="charts.month_prev"
+      >
+        <ChevronLeft size={15} className="text-muted-foreground" />
+      </button>
+      <span className="min-w-[110px] text-center text-[0.8125rem] font-semibold text-foreground px-1 select-none">
+        {getMonthName(month)} {year}
+      </span>
+      <button
+        type="button"
+        onClick={next}
+        disabled={isLatest}
+        className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        aria-label="Next month"
+        data-ocid="charts.month_next"
+      >
+        <ChevronRight size={15} className="text-muted-foreground" />
+      </button>
+    </div>
+  );
 }
 
 /* ─── Custom Tooltip ─── */
@@ -119,7 +185,7 @@ const axisTickStyle = {
 };
 
 /* ─── Custom Line Dot ─── */
-function CustomLineDot(props: { cx?: number; cy?: number; r?: number }) {
+function CustomLineDot(props: { cx?: number; cy?: number }) {
   const { cx = 0, cy = 0 } = props;
   return (
     <circle
@@ -133,7 +199,54 @@ function CustomLineDot(props: { cx?: number; cy?: number; r?: number }) {
   );
 }
 
-/* ─── Spending Trend Chart ─── */
+/* ─── Section Header ─── */
+function SectionHeader({
+  icon,
+  title,
+  subtitle,
+  iconBg = "bg-primary/10",
+  iconColor = "text-primary",
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  iconBg?: string;
+  iconColor?: string;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <div
+        className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center shrink-0 mt-0.5`}
+      >
+        <span className={iconColor}>{icon}</span>
+      </div>
+      <div>
+        <h2 className="font-display text-base font-semibold text-foreground leading-tight">
+          {title}
+        </h2>
+        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+          {subtitle}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Chart Card Skeleton ─── */
+function ChartCardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-subtle space-y-4">
+      <div className="flex items-center gap-2.5">
+        <Skeleton className="w-3 h-3 rounded-full" />
+        <Skeleton className="h-4 w-28 rounded" />
+        <Skeleton className="h-3 w-16 rounded ml-auto" />
+      </div>
+      <Skeleton className="h-[180px] w-full rounded-xl" />
+    </div>
+  );
+}
+
+/* ─── Spending Trend Chart (12 months global) ─── */
 function SpendingTrendChart() {
   const { data: trend, isLoading } = useMonthlyTrend(12);
 
@@ -244,7 +357,7 @@ function SpendingTrendChart() {
   );
 }
 
-/* ─── Category Breakdown Chart ─── */
+/* ─── Per-Budget 6-Month Trend Chart ─── */
 function CategoryBreakdownChart({
   budgetId,
   colorIndex,
@@ -308,11 +421,7 @@ function CategoryBreakdownChart({
         />
         <Tooltip
           content={
-            <CustomTooltip
-              valueFormatter={(v, name) =>
-                name === "spent" ? `N$${v.toFixed(2)}` : `N$${v.toFixed(2)}`
-              }
-            />
+            <CustomTooltip valueFormatter={(v) => `N$${v.toFixed(2)}`} />
           }
           cursor={{ fill: "oklch(var(--muted) / 0.35)", radius: 6 }}
         />
@@ -340,56 +449,332 @@ function CategoryBreakdownChart({
   );
 }
 
-/* ─── Section Header ─── */
-function SectionHeader({
-  icon,
-  title,
-  subtitle,
-  iconBg = "bg-primary/10",
-  iconColor = "text-primary",
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  iconBg?: string;
-  iconColor?: string;
-}) {
-  return (
-    <div className="flex items-start gap-3">
+/* ─── Donut/Pie Chart for selected month ─── */
+function MonthlyPieChart({ year, month }: { year: number; month: number }) {
+  const { data: breakdown, isLoading } = useCategoryBreakdown(year, month);
+
+  if (isLoading) {
+    return <Skeleton className="h-[260px] w-full rounded-xl" />;
+  }
+
+  const chartData = (breakdown ?? [])
+    .filter((p) => Number(p.amountCents) > 0)
+    .map((p, i) => ({
+      name: p.name,
+      value: Number(p.amountCents) / 100,
+      color: p.color || CHART_PALETTE[i % CHART_PALETTE.length],
+    }));
+
+  if (chartData.length === 0) {
+    return (
       <div
-        className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center shrink-0 mt-0.5`}
+        className="flex flex-col items-center justify-center py-16 text-center"
+        data-ocid="charts.pie_empty_state"
       >
-        <span className={iconColor}>{icon}</span>
-      </div>
-      <div>
-        <h2 className="font-display text-base font-semibold text-foreground leading-tight">
-          {title}
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-          {subtitle}
+        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+          <PieChartIcon className="w-7 h-7 text-primary" />
+        </div>
+        <p className="font-display text-sm font-semibold text-foreground mb-1">
+          No spending this month
         </p>
+        <p className="text-xs text-muted-foreground max-w-[200px] leading-relaxed">
+          Log expenses to see how your spending is distributed across
+          categories.
+        </p>
+      </div>
+    );
+  }
+
+  const total = chartData.reduce((s, d) => s + d.value, 0);
+
+  return (
+    <div className="flex flex-col md:flex-row items-center gap-6">
+      <div className="relative shrink-0">
+        <ResponsiveContainer width={220} height={220}>
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={62}
+              outerRadius={100}
+              paddingAngle={2}
+              dataKey="value"
+            >
+              {chartData.map((entry, i) => (
+                <Cell key={`cell-${entry.name}-${i}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip
+              content={
+                <CustomTooltip valueFormatter={(v) => `N$${v.toFixed(2)}`} />
+              }
+            />
+          </PieChart>
+        </ResponsiveContainer>
+        {/* Center label */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+            Total
+          </span>
+          <span className="font-display text-base font-bold text-foreground leading-tight">
+            {formatCents(Math.round(total * 100))}
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-col gap-2 flex-1 min-w-0">
+        {chartData.map((entry) => (
+          <div key={entry.name} className="flex items-center gap-2.5 min-w-0">
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ background: entry.color }}
+            />
+            <span className="text-xs text-foreground truncate flex-1 min-w-0">
+              {entry.name}
+            </span>
+            <span className="text-xs font-semibold text-foreground tabular-nums shrink-0">
+              {formatCents(Math.round(entry.value * 100))}
+            </span>
+            <span className="text-[11px] text-muted-foreground tabular-nums shrink-0 w-10 text-right">
+              {total > 0
+                ? `${((entry.value / total) * 100).toFixed(0)}%`
+                : "0%"}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-/* ─── Chart Card skeleton ─── */
-function ChartCardSkeleton() {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-subtle space-y-4">
-      <div className="flex items-center gap-2.5">
-        <Skeleton className="w-3 h-3 rounded-full" />
-        <Skeleton className="h-4 w-28 rounded" />
-        <Skeleton className="h-3 w-16 rounded ml-auto" />
+/* ─── Budget vs Actual side-by-side bar chart ─── */
+function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
+  const { summaries, isLoading: summaryLoading } = useBudgets(year, month);
+  const { data: breakdown, isLoading: breakdownLoading } = useCategoryBreakdown(
+    year,
+    month,
+  );
+
+  if (summaryLoading || breakdownLoading) {
+    return <Skeleton className="h-[260px] w-full rounded-xl" />;
+  }
+
+  const breakdownMap = new Map(
+    (breakdown ?? []).map((p) => [p.budgetId, Number(p.amountCents) / 100]),
+  );
+
+  const chartData = summaries.map((bs) => ({
+    name:
+      bs.budget.name.length > 10
+        ? `${bs.budget.name.slice(0, 10)}…`
+        : bs.budget.name,
+    Budget: Number(bs.budget.limitCents) / 100,
+    Spent:
+      breakdownMap.get(bs.budget.id.toString()) ??
+      Number(bs.totalSpentCents) / 100,
+    color: bs.budget.color || CHART_PALETTE[0],
+  }));
+
+  if (chartData.length === 0) {
+    return (
+      <div
+        className="flex flex-col items-center justify-center py-16 text-center"
+        data-ocid="charts.budgetvsactual_empty_state"
+      >
+        <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4">
+          <BarChart2 className="w-7 h-7 text-secondary" />
+        </div>
+        <p className="font-display text-sm font-semibold text-foreground mb-1">
+          No budgets this month
+        </p>
+        <p className="text-xs text-muted-foreground max-w-[200px] leading-relaxed">
+          Create budgets for this month to compare limits with actual spending.
+        </p>
       </div>
-      <Skeleton className="h-[180px] w-full rounded-xl" />
-    </div>
+    );
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <BarChart
+        data={chartData}
+        margin={{ top: 8, right: 16, left: 0, bottom: 4 }}
+        barGap={4}
+      >
+        <CartesianGrid
+          strokeDasharray="3 6"
+          stroke="oklch(var(--border))"
+          opacity={0.6}
+          vertical={false}
+        />
+        <XAxis
+          dataKey="name"
+          tick={axisTickStyle}
+          tickLine={false}
+          axisLine={false}
+          dy={6}
+        />
+        <YAxis
+          tickFormatter={formatCurrency}
+          tick={axisTickStyle}
+          tickLine={false}
+          axisLine={false}
+          width={62}
+        />
+        <Tooltip
+          content={
+            <CustomTooltip valueFormatter={(v) => `N$${v.toFixed(2)}`} />
+          }
+          cursor={{ fill: "oklch(var(--muted) / 0.25)", radius: 6 }}
+        />
+        <Legend
+          wrapperStyle={{
+            fontSize: 11,
+            color: "oklch(var(--muted-foreground))",
+          }}
+          iconType="circle"
+          iconSize={8}
+        />
+        <Bar
+          dataKey="Budget"
+          radius={[4, 4, 0, 0]}
+          maxBarSize={32}
+          fill="oklch(var(--muted))"
+          opacity={0.8}
+        />
+        <Bar dataKey="Spent" radius={[4, 4, 0, 0]} maxBarSize={32}>
+          {chartData.map((entry, i) => (
+            <Cell
+              key={`spent-${entry.name}-${i}`}
+              fill={entry.color}
+              opacity={0.9}
+            />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+/* ─── Daily Spending Line Chart ─── */
+function DailySpendingChart({ year, month }: { year: number; month: number }) {
+  const { data: daily, isLoading } = useDailySpending(year, month);
+
+  if (isLoading) {
+    return <Skeleton className="h-[260px] w-full rounded-xl" />;
+  }
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const spendMap = new Map(
+    (daily ?? []).map((p) => [Number(p.day), Number(p.amountCents) / 100]),
+  );
+
+  const chartData = Array.from({ length: daysInMonth }, (_, i) => ({
+    day: i + 1,
+    spent: spendMap.get(i + 1) ?? 0,
+  }));
+
+  const hasData = chartData.some((d) => d.spent > 0);
+
+  if (!hasData) {
+    return (
+      <div
+        className="flex flex-col items-center justify-center py-16 text-center"
+        data-ocid="charts.daily_empty_state"
+      >
+        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+          <CalendarDays className="w-7 h-7 text-primary" />
+        </div>
+        <p className="font-display text-sm font-semibold text-foreground mb-1">
+          No daily data yet
+        </p>
+        <p className="text-xs text-muted-foreground max-w-[200px] leading-relaxed">
+          Log expenses this month to see your day-by-day spending pattern.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <LineChart
+        data={chartData}
+        margin={{ top: 8, right: 16, left: 0, bottom: 4 }}
+      >
+        <defs>
+          <linearGradient id="dailyGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop
+              offset="0%"
+              stopColor="oklch(0.6 0.18 142)"
+              stopOpacity={0.9}
+            />
+            <stop
+              offset="100%"
+              stopColor="oklch(0.52 0.15 250)"
+              stopOpacity={0.9}
+            />
+          </linearGradient>
+        </defs>
+        <CartesianGrid
+          strokeDasharray="3 6"
+          stroke="oklch(var(--border))"
+          opacity={0.6}
+          vertical={false}
+        />
+        <XAxis
+          dataKey="day"
+          tick={axisTickStyle}
+          tickLine={false}
+          axisLine={false}
+          dy={6}
+          tickFormatter={(v: number) =>
+            v % 5 === 1 || v === daysInMonth ? String(v) : ""
+          }
+        />
+        <YAxis
+          tickFormatter={formatCurrency}
+          tick={axisTickStyle}
+          tickLine={false}
+          axisLine={false}
+          width={62}
+        />
+        <Tooltip
+          content={
+            <CustomTooltip
+              labelFormatter={(label) => `Day ${label}`}
+              valueFormatter={(v) => `N$${v.toFixed(2)}`}
+            />
+          }
+          cursor={{
+            stroke: "oklch(var(--border))",
+            strokeWidth: 1,
+            strokeDasharray: "4 3",
+          }}
+        />
+        <Line
+          type="monotone"
+          dataKey="spent"
+          stroke="url(#dailyGradient)"
+          strokeWidth={2.5}
+          dot={false}
+          activeDot={{
+            r: 5,
+            fill: "oklch(0.6 0.18 142)",
+            stroke: "oklch(var(--card))",
+            strokeWidth: 2,
+          }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
   );
 }
 
 /* ─── Main ChartsPage ─── */
 export function ChartsPage() {
   const now = new Date();
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+
   const { summaries, isLoading: budgetsLoading } = useBudgets(
     now.getFullYear(),
     now.getMonth() + 1,
@@ -404,7 +789,7 @@ export function ChartsPage() {
       transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
     >
       {/* ── Page Header ── */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="w-4 h-4 text-primary opacity-70" />
@@ -416,13 +801,23 @@ export function ChartsPage() {
             Spending Charts
           </h1>
           <p className="text-sm text-muted-foreground mt-1.5 max-w-md leading-relaxed">
-            Track your financial patterns with interactive charts — monthly
-            totals, per-budget breakdowns, and 6-month trends at a glance.
+            Track your financial patterns — monthly totals, per-budget
+            breakdowns, daily trends, and more.
           </p>
+        </div>
+        <div className="shrink-0 mt-1">
+          <MonthSelector
+            year={selectedYear}
+            month={selectedMonth}
+            onChange={(y, m) => {
+              setSelectedYear(y);
+              setSelectedMonth(m);
+            }}
+          />
         </div>
       </div>
 
-      {/* ── Monthly Trend ── */}
+      {/* ── Monthly Trend (always 12-month global) ── */}
       <motion.section
         className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
         data-ocid="charts.monthly_trend.card"
@@ -430,7 +825,6 @@ export function ChartsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.06, ease: [0.4, 0, 0.2, 1] }}
       >
-        {/* Card header strip */}
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
           <SectionHeader
             icon={<TrendingUp className="w-4.5 h-4.5" />}
@@ -442,7 +836,6 @@ export function ChartsPage() {
           </span>
         </div>
         <SpendingTrendChart />
-        {/* Legend */}
         <div className="flex items-center gap-2 pt-1">
           <span
             className="inline-block w-8 h-[2.5px] rounded-full"
@@ -457,7 +850,7 @@ export function ChartsPage() {
         </div>
       </motion.section>
 
-      {/* ── Per-Budget Category Charts ── */}
+      {/* ── Per-Budget Category Trends ── */}
       <motion.section
         className="space-y-5"
         data-ocid="charts.category_trends.section"
@@ -522,7 +915,6 @@ export function ChartsPage() {
                   ease: [0.4, 0, 0.2, 1],
                 }}
               >
-                {/* Card header */}
                 <div className="flex items-center gap-2.5 pb-3 border-b border-border">
                   <div
                     className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
@@ -543,6 +935,76 @@ export function ChartsPage() {
             ))}
           </div>
         )}
+      </motion.section>
+
+      {/* ── Donut: Category Spending Breakdown ── */}
+      <motion.section
+        className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
+        data-ocid="charts.pie_section"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.18, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
+          <SectionHeader
+            icon={<PieChartIcon className="w-4.5 h-4.5" />}
+            title="Category Spending Breakdown"
+            subtitle={`How your spending is distributed across categories — ${getMonthName(selectedMonth)} ${selectedYear}`}
+            iconBg="bg-accent/20"
+            iconColor="text-accent-foreground"
+          />
+        </div>
+        <MonthlyPieChart year={selectedYear} month={selectedMonth} />
+      </motion.section>
+
+      {/* ── Budget vs Actual ── */}
+      <motion.section
+        className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
+        data-ocid="charts.budget_vs_actual.section"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.22, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
+          <SectionHeader
+            icon={<BarChart2 className="w-4.5 h-4.5" />}
+            title="Budget vs Actual"
+            subtitle={`Side-by-side comparison of limits vs real spend — ${getMonthName(selectedMonth)} ${selectedYear}`}
+            iconBg="bg-secondary/10"
+            iconColor="text-secondary"
+          />
+        </div>
+        <BudgetVsActualChart year={selectedYear} month={selectedMonth} />
+      </motion.section>
+
+      {/* ── Daily Spending ── */}
+      <motion.section
+        className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
+        data-ocid="charts.daily_spending.section"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.26, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
+          <SectionHeader
+            icon={<CalendarDays className="w-4.5 h-4.5" />}
+            title="Daily Spending"
+            subtitle={`Day-by-day spending pattern — ${getMonthName(selectedMonth)} ${selectedYear}`}
+            iconBg="bg-primary/10"
+            iconColor="text-primary"
+          />
+        </div>
+        <DailySpendingChart year={selectedYear} month={selectedMonth} />
+        <div className="flex items-center gap-2 pt-1">
+          <span
+            className="inline-block w-8 h-[2.5px] rounded-full"
+            style={{
+              background:
+                "linear-gradient(90deg, oklch(0.6 0.18 142), oklch(0.52 0.15 250))",
+            }}
+          />
+          <span className="text-xs text-muted-foreground">Daily spend</span>
+        </div>
       </motion.section>
     </motion.div>
   );

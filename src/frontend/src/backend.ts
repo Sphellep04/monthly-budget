@@ -89,14 +89,58 @@ export class ExternalBlob {
         return this;
     }
 }
-export type UserId = Principal;
+export interface Budget {
+    id: bigint;
+    month: bigint;
+    owner: UserId;
+    limitCents: bigint;
+    name: string;
+    createdAt: Timestamp;
+    color: string;
+    year: bigint;
+    category: string;
+}
 export type Timestamp = bigint;
+export interface MonthlyTrendPoint {
+    month: bigint;
+    totalSpentCents: bigint;
+    year: bigint;
+}
+export interface CategoryBreakdownPoint {
+    name: string;
+    color: string;
+    amountCents: bigint;
+    budgetId: string;
+}
+export interface MonthlySummary {
+    month: bigint;
+    totalSpentCents: bigint;
+    year: bigint;
+    totalBudgetCents: bigint;
+    budgets: Array<BudgetSummary>;
+}
+export interface Expense {
+    id: bigint;
+    recurringTemplateId?: bigint;
+    receiptUrl?: string;
+    owner: UserId;
+    date: string;
+    createdAt: Timestamp;
+    amountCents: bigint;
+    budgetId: bigint;
+    notes?: string;
+}
+export type UserId = Principal;
 export interface RecurringTemplateInput {
     name: string;
     dayOfMonth: bigint;
     amountCents: bigint;
     budgetId: bigint;
     notes?: string;
+}
+export interface DailySpendingPoint {
+    day: bigint;
+    amountCents: bigint;
 }
 export interface RecurringTemplate {
     id: bigint;
@@ -116,37 +160,17 @@ export interface CategoryTrendPoint {
     budgetId: bigint;
     budgetName: string;
 }
-export interface MonthlyTrendPoint {
-    month: bigint;
-    totalSpentCents: bigint;
-    year: bigint;
-}
 export interface BudgetSummary {
     totalSpentCents: bigint;
     budget: Budget;
     remainingCents: bigint;
 }
-export interface MonthlySummary {
-    month: bigint;
-    totalSpentCents: bigint;
-    year: bigint;
-    totalBudgetCents: bigint;
-    budgets: Array<BudgetSummary>;
+export interface UserSettings {
+    alertThresholdPercent: bigint;
 }
 export interface ExpenseInput {
     receiptUrl?: string;
     date: string;
-    amountCents: bigint;
-    budgetId: bigint;
-    notes?: string;
-}
-export interface Expense {
-    id: bigint;
-    recurringTemplateId?: bigint;
-    receiptUrl?: string;
-    owner: UserId;
-    date: string;
-    createdAt: Timestamp;
     amountCents: bigint;
     budgetId: bigint;
     notes?: string;
@@ -159,39 +183,47 @@ export interface BudgetInput {
     year: bigint;
     category: string;
 }
-export interface Budget {
-    id: bigint;
-    month: bigint;
-    owner: UserId;
-    limitCents: bigint;
-    name: string;
+export interface Note {
+    id: string;
+    title: string;
+    content: string;
+    userId: Principal;
     createdAt: Timestamp;
-    color: string;
-    year: bigint;
-    category: string;
+    updatedAt: Timestamp;
 }
 export interface backendInterface {
     applyRecurringTemplates(year: bigint, month: bigint): Promise<Array<Expense>>;
     createBudget(input: BudgetInput): Promise<Budget>;
     createExpense(input: ExpenseInput): Promise<Expense>;
+    createNote(title: string, content: string): Promise<Note>;
     createRecurringTemplate(input: RecurringTemplateInput): Promise<RecurringTemplate>;
     deleteBudget(id: bigint): Promise<boolean>;
     deleteExpense(id: bigint): Promise<boolean>;
+    deleteNote(id: string): Promise<boolean>;
     deleteRecurringTemplate(id: bigint): Promise<boolean>;
     getBudget(id: bigint): Promise<Budget | null>;
+    getCategoryBreakdown(year: bigint, month: bigint): Promise<Array<CategoryBreakdownPoint>>;
+    getCategoryBreakdownForRange(startDate: string, endDate: string): Promise<Array<CategoryBreakdownPoint>>;
     getCategoryTrend(budgetId: bigint, months: bigint, currentYear: bigint, currentMonth: bigint): Promise<Array<CategoryTrendPoint>>;
+    getDailySpending(year: bigint, month: bigint): Promise<Array<DailySpendingPoint>>;
     getExpense(id: bigint): Promise<Expense | null>;
+    getExpensesInRange(startDate: string, endDate: string): Promise<Array<Expense>>;
     getMonthlySummary(year: bigint, month: bigint): Promise<MonthlySummary>;
     getMonthlyTrend(months: bigint, currentYear: bigint, currentMonth: bigint): Promise<Array<MonthlyTrendPoint>>;
     getRecurringTemplate(id: bigint): Promise<RecurringTemplate | null>;
+    getUserSettings(): Promise<UserSettings>;
     listBudgets(year: bigint, month: bigint): Promise<Array<Budget>>;
     listExpenses(budgetId: bigint): Promise<Array<Expense>>;
+    listNotes(): Promise<Array<Note>>;
     listRecurringTemplates(budgetId: bigint): Promise<Array<RecurringTemplate>>;
+    searchExpenses(startDate: string, endDate: string, queryText: string | null, categoryId: bigint | null, minAmountCents: bigint | null, maxAmountCents: bigint | null): Promise<Array<Expense>>;
     updateBudget(id: bigint, input: BudgetInput): Promise<Budget | null>;
     updateExpense(id: bigint, input: ExpenseInput): Promise<Expense | null>;
+    updateNote(id: string, title: string, content: string): Promise<Note | null>;
     updateRecurringTemplate(id: bigint, input: RecurringTemplateInput): Promise<RecurringTemplate | null>;
+    updateUserSettings(settings: UserSettings): Promise<UserSettings>;
 }
-import type { Budget as _Budget, Expense as _Expense, ExpenseInput as _ExpenseInput, RecurringTemplate as _RecurringTemplate, RecurringTemplateInput as _RecurringTemplateInput, Timestamp as _Timestamp, UserId as _UserId } from "./declarations/backend.did.d.ts";
+import type { Budget as _Budget, Expense as _Expense, ExpenseInput as _ExpenseInput, Note as _Note, RecurringTemplate as _RecurringTemplate, RecurringTemplateInput as _RecurringTemplateInput, Timestamp as _Timestamp, UserId as _UserId } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async applyRecurringTemplates(arg0: bigint, arg1: bigint): Promise<Array<Expense>> {
@@ -236,6 +268,20 @@ export class Backend implements backendInterface {
             return from_candid_Expense_n2(this._uploadFile, this._downloadFile, result);
         }
     }
+    async createNote(arg0: string, arg1: string): Promise<Note> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createNote(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createNote(arg0, arg1);
+            return result;
+        }
+    }
     async createRecurringTemplate(arg0: RecurringTemplateInput): Promise<RecurringTemplate> {
         if (this.processError) {
             try {
@@ -278,6 +324,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async deleteNote(arg0: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteNote(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteNote(arg0);
+            return result;
+        }
+    }
     async deleteRecurringTemplate(arg0: bigint): Promise<boolean> {
         if (this.processError) {
             try {
@@ -306,6 +366,34 @@ export class Backend implements backendInterface {
             return from_candid_opt_n12(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getCategoryBreakdown(arg0: bigint, arg1: bigint): Promise<Array<CategoryBreakdownPoint>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCategoryBreakdown(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCategoryBreakdown(arg0, arg1);
+            return result;
+        }
+    }
+    async getCategoryBreakdownForRange(arg0: string, arg1: string): Promise<Array<CategoryBreakdownPoint>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCategoryBreakdownForRange(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCategoryBreakdownForRange(arg0, arg1);
+            return result;
+        }
+    }
     async getCategoryTrend(arg0: bigint, arg1: bigint, arg2: bigint, arg3: bigint): Promise<Array<CategoryTrendPoint>> {
         if (this.processError) {
             try {
@@ -317,6 +405,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getCategoryTrend(arg0, arg1, arg2, arg3);
+            return result;
+        }
+    }
+    async getDailySpending(arg0: bigint, arg1: bigint): Promise<Array<DailySpendingPoint>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getDailySpending(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getDailySpending(arg0, arg1);
             return result;
         }
     }
@@ -332,6 +434,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getExpense(arg0);
             return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getExpensesInRange(arg0: string, arg1: string): Promise<Array<Expense>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getExpensesInRange(arg0, arg1);
+                return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getExpensesInRange(arg0, arg1);
+            return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
         }
     }
     async getMonthlySummary(arg0: bigint, arg1: bigint): Promise<MonthlySummary> {
@@ -376,6 +492,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n14(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getUserSettings(): Promise<UserSettings> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getUserSettings();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getUserSettings();
+            return result;
+        }
+    }
     async listBudgets(arg0: bigint, arg1: bigint): Promise<Array<Budget>> {
         if (this.processError) {
             try {
@@ -404,6 +534,20 @@ export class Backend implements backendInterface {
             return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
         }
     }
+    async listNotes(): Promise<Array<Note>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listNotes();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listNotes();
+            return result;
+        }
+    }
     async listRecurringTemplates(arg0: bigint): Promise<Array<RecurringTemplate>> {
         if (this.processError) {
             try {
@@ -416,6 +560,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.listRecurringTemplates(arg0);
             return from_candid_vec_n15(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async searchExpenses(arg0: string, arg1: string, arg2: string | null, arg3: bigint | null, arg4: bigint | null, arg5: bigint | null): Promise<Array<Expense>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.searchExpenses(arg0, arg1, to_candid_opt_n16(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg3), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg4), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg5));
+                return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.searchExpenses(arg0, arg1, to_candid_opt_n16(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg3), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg4), to_candid_opt_n17(this._uploadFile, this._downloadFile, arg5));
+            return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
         }
     }
     async updateBudget(arg0: bigint, arg1: BudgetInput): Promise<Budget | null> {
@@ -446,6 +604,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
         }
     }
+    async updateNote(arg0: string, arg1: string, arg2: string): Promise<Note | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateNote(arg0, arg1, arg2);
+                return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateNote(arg0, arg1, arg2);
+            return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async updateRecurringTemplate(arg0: bigint, arg1: RecurringTemplateInput): Promise<RecurringTemplate | null> {
         if (this.processError) {
             try {
@@ -458,6 +630,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.updateRecurringTemplate(arg0, to_candid_RecurringTemplateInput_n8(this._uploadFile, this._downloadFile, arg1));
             return from_candid_opt_n14(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async updateUserSettings(arg0: UserSettings): Promise<UserSettings> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateUserSettings(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateUserSettings(arg0);
+            return result;
         }
     }
 }
@@ -475,6 +661,9 @@ function from_candid_opt_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
 }
 function from_candid_opt_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_RecurringTemplate]): RecurringTemplate | null {
     return value.length === 0 ? null : from_candid_RecurringTemplate_n10(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Note]): Note | null {
+    return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
     return value.length === 0 ? null : value[0];
@@ -556,6 +745,12 @@ function to_candid_ExpenseInput_n6(_uploadFile: (file: ExternalBlob) => Promise<
 }
 function to_candid_RecurringTemplateInput_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: RecurringTemplateInput): _RecurringTemplateInput {
     return to_candid_record_n9(_uploadFile, _downloadFile, value);
+}
+function to_candid_opt_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: string | null): [] | [string] {
+    return value === null ? candid_none() : candid_some(value);
+}
+function to_candid_opt_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: bigint | null): [] | [bigint] {
+    return value === null ? candid_none() : candid_some(value);
 }
 function to_candid_record_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     receiptUrl?: string;

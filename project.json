@@ -1,24 +1,28 @@
 {
-  "overview": "A personal finance tracker for monthly budgets with expense logging, category spending limits, analytics charts, recurring expense templates, receipt photo attachments, and CSV export — all in Namibian dollars (N$).",
+  "overview": "A responsive personal finance tracker with receipt scanning, budget categories, expense logging, recurring templates, analytics charts, annual summary, budget alerts, dark/light mode, and notes — all in Namibian dollars (N$).",
   "features": [
-    "Monthly budget categories with spending limits",
-    "Expense logging with optional receipt photo attachments",
-    "Namibian dollar (N$) currency display throughout",
-    "Spending trend charts (12-month line chart and category bar chart)",
-    "Recurring expense templates that auto-add each month",
-    "CSV export of monthly budget summary and expenses",
-    "Color-coded progress bars for budget status",
-    "Month switching to review past spending",
-    "User authentication with Internet Identity"
+    "Receipt scanning with camera to auto-fill expense amounts via OCR",
+    "Budget categories with monthly spending limits and color-coded progress bars",
+    "Expense logging with receipt photo attachments",
+    "Recurring expense templates",
+    "Analytics charts: trend, pie, budget vs actual, daily spending",
+    "Annual summary with 12-month comparison",
+    "Budget alerts with customizable threshold",
+    "Dark/light mode toggle",
+    "Notes section",
+    "CSV export with receipt links",
+    "All amounts in N$ (Namibian dollars)"
   ],
-  "category": "productivity",
+  "category": "finance",
   "tags": [
     "budget",
     "finance",
     "expense-tracker",
-    "namibia",
-    "receipts",
-    "personal-finance"
+    "receipt-scanning",
+    "ocr",
+    "analytics",
+    "personal-finance",
+    "namibia"
   ],
-  "last_updated": "2026-04-15T14:28:05.535Z"
+  "last_updated": "2026-04-16T08:37:00.508Z"
 }

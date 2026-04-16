@@ -4,12 +4,16 @@ import { createActor } from "../backend";
 import type {
   Budget,
   BudgetSummary,
+  CategoryBreakdownPoint,
   CategoryTrendPoint,
+  DailySpendingPoint,
   Expense,
   MonthlySummary,
   MonthlyTrendPoint,
+  Note,
   RecurringTemplate,
   RecurringTemplateInput,
+  UserSettings,
 } from "../types";
 
 export function useMonthlySummary(year: number, month: number) {
@@ -266,6 +270,307 @@ export function useCategoryTrend(budgetId: bigint, months: number) {
   });
 }
 
+export function useDailySpending(year: number, month: number) {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<DailySpendingPoint[]>({
+    queryKey: ["daily-spending", year, month],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.getDailySpending(BigInt(year), BigInt(month));
+      return result as unknown as DailySpendingPoint[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCategoryBreakdown(year: number, month: number) {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<CategoryBreakdownPoint[]>({
+    queryKey: ["category-breakdown", year, month],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.getCategoryBreakdown(
+        BigInt(year),
+        BigInt(month),
+      );
+      return result as unknown as CategoryBreakdownPoint[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ─── Notes ───────────────────────────────────────────────────────────────────
+
+export function useListNotes() {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<Note[]>({
+    queryKey: ["notes"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listNotes();
+      return result as unknown as Note[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateNote() {
+  const queryClient = useQueryClient();
+  const { actor } = useActor(createActor);
+  return useMutation({
+    mutationFn: async ({
+      title,
+      content,
+    }: { title: string; content: string }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.createNote(title, content);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+}
+
+export function useUpdateNote() {
+  const queryClient = useQueryClient();
+  const { actor } = useActor(createActor);
+  return useMutation({
+    mutationFn: async ({
+      id,
+      title,
+      content,
+    }: {
+      id: string;
+      title: string;
+      content: string;
+    }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.updateNote(id, title, content);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+}
+
+export function useDeleteNote() {
+  const queryClient = useQueryClient();
+  const { actor } = useActor(createActor);
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.deleteNote(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+}
+
+// ─── Annual Summary ───────────────────────────────────────────────────────────
+
+export interface MonthRow {
+  monthNum: number;
+  year: number;
+  totalBudgetCents: number;
+  totalSpentCents: number;
+  remainingCents: number;
+  isOverBudget: boolean;
+}
+
+export interface AnnualStats {
+  totalYearSpentCents: number;
+  totalYearBudgetedCents: number;
+  avgMonthlySpentCents: number;
+  bestMonth: MonthRow | null;
+  worstMonth: MonthRow | null;
+  highestOverspendMonth: MonthRow | null;
+}
+
+export function useAnnualSummary(year: number) {
+  const { actor, isFetching } = useActor(createActor);
+
+  return useQuery<{ monthRows: MonthRow[]; stats: AnnualStats }>({
+    queryKey: ["annual-summary", year],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+
+      const rows: MonthRow[] = await Promise.all(
+        Array.from({ length: 12 }, (_, i) => i + 1).map(async (m) => {
+          const result = await actor.getMonthlySummary(BigInt(year), BigInt(m));
+          const summary = result as unknown as MonthlySummary;
+          const spent = Number(summary.totalSpentCents);
+          const budgeted = Number(summary.totalBudgetCents);
+          return {
+            monthNum: m,
+            year,
+            totalBudgetCents: budgeted,
+            totalSpentCents: spent,
+            remainingCents: budgeted - spent,
+            isOverBudget: budgeted > 0 && spent > budgeted,
+          };
+        }),
+      );
+
+      const activeRows = rows.filter((r) => r.totalSpentCents > 0);
+      const totalYearSpentCents = rows.reduce(
+        (s, r) => s + r.totalSpentCents,
+        0,
+      );
+      const totalYearBudgetedCents = rows.reduce(
+        (s, r) => s + r.totalBudgetCents,
+        0,
+      );
+      const avgMonthlySpentCents =
+        activeRows.length > 0
+          ? Math.round(totalYearSpentCents / activeRows.length)
+          : 0;
+
+      const sortedBySpent = [...activeRows].sort(
+        (a, b) => a.totalSpentCents - b.totalSpentCents,
+      );
+      const bestMonth = sortedBySpent[0] ?? null;
+      const worstMonth = sortedBySpent[sortedBySpent.length - 1] ?? null;
+
+      const overBudgetRows = rows.filter((r) => r.isOverBudget);
+      const highestOverspendMonth =
+        overBudgetRows.length > 0
+          ? overBudgetRows.reduce((worst, r) =>
+              r.remainingCents < worst.remainingCents ? r : worst,
+            )
+          : null;
+
+      const stats: AnnualStats = {
+        totalYearSpentCents,
+        totalYearBudgetedCents,
+        avgMonthlySpentCents,
+        bestMonth,
+        worstMonth,
+        highestOverspendMonth,
+      };
+
+      return { monthRows: rows, stats };
+    },
+    enabled: !!actor && !isFetching,
+    select: (data) => data,
+  });
+}
+
+// ─── User Settings ────────────────────────────────────────────────────────────
+
+export function useUserSettings() {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<UserSettings>({
+    queryKey: ["user-settings"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.getUserSettings();
+      return {
+        alertThresholdPercent: Number(result.alertThresholdPercent),
+      };
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useUpdateUserSettings() {
+  const queryClient = useQueryClient();
+  const { actor } = useActor(createActor);
+  return useMutation({
+    mutationFn: async (settings: UserSettings) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.updateUserSettings({
+        alertThresholdPercent: BigInt(settings.alertThresholdPercent),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-settings"] });
+    },
+  });
+}
+
+// ─── Search ───────────────────────────────────────────────────────────────────
+
+export interface SearchExpensesParams {
+  startDate: string;
+  endDate: string;
+  query?: string;
+  categoryId?: bigint;
+  minAmountCents?: number;
+  maxAmountCents?: number;
+}
+
+export function useSearchExpenses(params: SearchExpensesParams | null) {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<Expense[]>({
+    queryKey: [
+      "search-expenses",
+      params?.startDate,
+      params?.endDate,
+      params?.query,
+      params?.categoryId?.toString(),
+      params?.minAmountCents,
+      params?.maxAmountCents,
+    ],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      if (!params) return [];
+      const result = await actor.searchExpenses(
+        params.startDate,
+        params.endDate,
+        params.query ?? null,
+        params.categoryId ?? null,
+        params.minAmountCents != null
+          ? BigInt(Math.round(params.minAmountCents * 100))
+          : null,
+        params.maxAmountCents != null
+          ? BigInt(Math.round(params.maxAmountCents * 100))
+          : null,
+      );
+      return result as unknown as Expense[];
+    },
+    enabled: !!actor && !isFetching && !!params,
+  });
+}
+
+export function useGetExpensesInRange(
+  startDate: string,
+  endDate: string,
+  enabled = true,
+) {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<Expense[]>({
+    queryKey: ["expenses-in-range", startDate, endDate],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.getExpensesInRange(startDate, endDate);
+      return result as unknown as Expense[];
+    },
+    enabled: !!actor && !isFetching && enabled,
+  });
+}
+
+export function useGetCategoryBreakdownForRange(
+  startDate: string,
+  endDate: string,
+  enabled = true,
+) {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<CategoryBreakdownPoint[]>({
+    queryKey: ["category-breakdown-range", startDate, endDate],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.getCategoryBreakdownForRange(
+        startDate,
+        endDate,
+      );
+      return result as unknown as CategoryBreakdownPoint[];
+    },
+    enabled: !!actor && !isFetching && enabled,
+  });
+}
+
 export type {
   MonthlySummary,
   Budget,
@@ -275,4 +580,8 @@ export type {
   RecurringTemplateInput,
   MonthlyTrendPoint,
   CategoryTrendPoint,
+  DailySpendingPoint,
+  CategoryBreakdownPoint,
+  Note,
+  UserSettings,
 };

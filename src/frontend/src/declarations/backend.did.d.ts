@@ -34,6 +34,12 @@ export interface BudgetSummary {
   'budget' : Budget,
   'remainingCents' : bigint,
 }
+export interface CategoryBreakdownPoint {
+  'name' : string,
+  'color' : string,
+  'amountCents' : bigint,
+  'budgetId' : string,
+}
 export interface CategoryTrendPoint {
   'month' : bigint,
   'limitCents' : bigint,
@@ -42,6 +48,7 @@ export interface CategoryTrendPoint {
   'budgetId' : bigint,
   'budgetName' : string,
 }
+export interface DailySpendingPoint { 'day' : bigint, 'amountCents' : bigint }
 export interface Expense {
   'id' : bigint,
   'recurringTemplateId' : [] | [bigint],
@@ -72,6 +79,14 @@ export interface MonthlyTrendPoint {
   'totalSpentCents' : bigint,
   'year' : bigint,
 }
+export interface Note {
+  'id' : string,
+  'title' : string,
+  'content' : string,
+  'userId' : Principal,
+  'createdAt' : Timestamp,
+  'updatedAt' : Timestamp,
+}
 export interface RecurringTemplate {
   'id' : bigint,
   'owner' : UserId,
@@ -91,38 +106,66 @@ export interface RecurringTemplateInput {
 }
 export type Timestamp = bigint;
 export type UserId = Principal;
+export interface UserSettings { 'alertThresholdPercent' : bigint }
 export interface _SERVICE {
   'applyRecurringTemplates' : ActorMethod<[bigint, bigint], Array<Expense>>,
   'createBudget' : ActorMethod<[BudgetInput], Budget>,
   'createExpense' : ActorMethod<[ExpenseInput], Expense>,
+  'createNote' : ActorMethod<[string, string], Note>,
   'createRecurringTemplate' : ActorMethod<
     [RecurringTemplateInput],
     RecurringTemplate
   >,
   'deleteBudget' : ActorMethod<[bigint], boolean>,
   'deleteExpense' : ActorMethod<[bigint], boolean>,
+  'deleteNote' : ActorMethod<[string], boolean>,
   'deleteRecurringTemplate' : ActorMethod<[bigint], boolean>,
   'getBudget' : ActorMethod<[bigint], [] | [Budget]>,
+  'getCategoryBreakdown' : ActorMethod<
+    [bigint, bigint],
+    Array<CategoryBreakdownPoint>
+  >,
+  'getCategoryBreakdownForRange' : ActorMethod<
+    [string, string],
+    Array<CategoryBreakdownPoint>
+  >,
   'getCategoryTrend' : ActorMethod<
     [bigint, bigint, bigint, bigint],
     Array<CategoryTrendPoint>
   >,
+  'getDailySpending' : ActorMethod<[bigint, bigint], Array<DailySpendingPoint>>,
   'getExpense' : ActorMethod<[bigint], [] | [Expense]>,
+  'getExpensesInRange' : ActorMethod<[string, string], Array<Expense>>,
   'getMonthlySummary' : ActorMethod<[bigint, bigint], MonthlySummary>,
   'getMonthlyTrend' : ActorMethod<
     [bigint, bigint, bigint],
     Array<MonthlyTrendPoint>
   >,
   'getRecurringTemplate' : ActorMethod<[bigint], [] | [RecurringTemplate]>,
+  'getUserSettings' : ActorMethod<[], UserSettings>,
   'listBudgets' : ActorMethod<[bigint, bigint], Array<Budget>>,
   'listExpenses' : ActorMethod<[bigint], Array<Expense>>,
+  'listNotes' : ActorMethod<[], Array<Note>>,
   'listRecurringTemplates' : ActorMethod<[bigint], Array<RecurringTemplate>>,
+  'searchExpenses' : ActorMethod<
+    [
+      string,
+      string,
+      [] | [string],
+      [] | [bigint],
+      [] | [bigint],
+      [] | [bigint],
+    ],
+    Array<Expense>
+  >,
   'updateBudget' : ActorMethod<[bigint, BudgetInput], [] | [Budget]>,
   'updateExpense' : ActorMethod<[bigint, ExpenseInput], [] | [Expense]>,
+  'updateNote' : ActorMethod<[string, string, string], [] | [Note]>,
   'updateRecurringTemplate' : ActorMethod<
     [bigint, RecurringTemplateInput],
     [] | [RecurringTemplate]
   >,
+  'updateUserSettings' : ActorMethod<[UserSettings], UserSettings>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

@@ -4,15 +4,21 @@ import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BarChart2,
+  CalendarDays,
   LayoutDashboard,
+  Lightbulb,
   LogOut,
   Menu,
+  Search,
+  Settings,
+  StickyNote,
   TrendingUp,
   Wallet,
   X,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { SettingsModal } from "./SettingsModal";
 
 interface NavItem {
   label: string;
@@ -40,9 +46,39 @@ const navItems: NavItem[] = [
     icon: <BarChart2 size={17} />,
     ocid: "sidebar.charts.link",
   },
+  {
+    label: "Annual Summary",
+    href: "/annual-summary",
+    icon: <CalendarDays size={17} />,
+    ocid: "sidebar.annual_summary.link",
+  },
+  {
+    label: "Insights",
+    href: "/insights",
+    icon: <Lightbulb size={17} />,
+    ocid: "sidebar.insights.link",
+  },
+  {
+    label: "Search",
+    href: "/search",
+    icon: <Search size={17} />,
+    ocid: "sidebar.search.link",
+  },
+  {
+    label: "Notes",
+    href: "/notes",
+    icon: <StickyNote size={17} />,
+    ocid: "sidebar.notes.link",
+  },
 ];
 
-function SidebarInner({ onNavClick }: { onNavClick?: () => void }) {
+function SidebarInner({
+  onNavClick,
+  onSettingsOpen,
+}: {
+  onNavClick?: () => void;
+  onSettingsOpen: () => void;
+}) {
   const { logout } = useAuth();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
@@ -111,8 +147,18 @@ function SidebarInner({ onNavClick }: { onNavClick?: () => void }) {
 
       <Separator className="bg-sidebar-border/60" />
 
-      {/* User section / Logout */}
+      {/* User section / Settings / Logout */}
       <div className="px-3 py-4 space-y-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onSettingsOpen}
+          data-ocid="sidebar.settings_button"
+          className="w-full justify-start gap-3 text-[0.8125rem] text-muted-foreground/70 hover:text-foreground hover:bg-muted/60 transition-colors-fast rounded-lg h-9 px-3"
+        >
+          <Settings size={15} className="flex-shrink-0" />
+          <span>Settings</span>
+        </Button>
         <Button
           variant="ghost"
           size="sm"
@@ -130,6 +176,7 @@ function SidebarInner({ onNavClick }: { onNavClick?: () => void }) {
 
 export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <>
@@ -182,13 +229,25 @@ export function Sidebar() {
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <SidebarInner onNavClick={() => setMobileOpen(false)} />
+        <SidebarInner
+          onNavClick={() => setMobileOpen(false)}
+          onSettingsOpen={() => {
+            setMobileOpen(false);
+            setSettingsOpen(true);
+          }}
+        />
       </aside>
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-64 flex-shrink-0 h-screen bg-sidebar border-r border-sidebar-border/80 flex-col sticky top-0 shadow-[1px_0_0_0_oklch(var(--sidebar-border)/0.8)]">
-        <SidebarInner />
+        <SidebarInner onSettingsOpen={() => setSettingsOpen(true)} />
       </aside>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </>
   );
 }

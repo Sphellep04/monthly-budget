@@ -27,6 +27,23 @@ const BudgetDetailPage = lazy(() =>
 const ChartsPage = lazy(() =>
   import("./pages/ChartsPage").then((m) => ({ default: m.ChartsPage })),
 );
+const NotesPage = lazy(() =>
+  import("./pages/NotesPage").then((m) => ({ default: m.NotesPage })),
+);
+const AnnualSummaryPage = lazy(() =>
+  import("./pages/AnnualSummaryPage").then((m) => ({
+    default: m.AnnualSummaryPage,
+  })),
+);
+const InsightsPage = lazy(() =>
+  import("./pages/InsightsPage").then((m) => ({ default: m.InsightsPage })),
+);
+const SearchPage = lazy(() =>
+  import("./pages/SearchPage").then((m) => ({ default: m.SearchPage })),
+);
+const ReportsPage = lazy(() =>
+  import("./pages/ReportsPage").then((m) => ({ default: m.ReportsPage })),
+);
 
 function PageLoader() {
   return (
@@ -140,6 +157,56 @@ const chartsRoute = createRoute({
   ),
 });
 
+const notesRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/notes",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <NotesPage />
+    </Suspense>
+  ),
+});
+
+const annualSummaryRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/annual-summary",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <AnnualSummaryPage />
+    </Suspense>
+  ),
+});
+
+const insightsRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/insights",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <InsightsPage />
+    </Suspense>
+  ),
+});
+
+const searchRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/search",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <SearchPage />
+    </Suspense>
+  ),
+});
+
+const reportsRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/reports",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <ReportsPage />
+    </Suspense>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   authRoute.addChildren([
     layoutRoute.addChildren([
@@ -147,6 +214,11 @@ const routeTree = rootRoute.addChildren([
       budgetsRoute,
       budgetDetailRoute,
       chartsRoute,
+      notesRoute,
+      annualSummaryRoute,
+      insightsRoute,
+      searchRoute,
+      reportsRoute,
     ]),
   ]),
 ]);
