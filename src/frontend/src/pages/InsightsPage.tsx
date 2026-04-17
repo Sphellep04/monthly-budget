@@ -443,7 +443,6 @@ function InsightCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.07 }}
       className="bg-card border border-border rounded-2xl p-5 shadow-sm hover:shadow-elevated transition-smooth flex flex-col gap-3"
-      data-ocid={`insights.card.${index + 1}`}
     >
       <div className="flex items-start gap-3">
         <div
@@ -519,7 +518,6 @@ function EmptyInsights() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col items-center justify-center py-24 text-center px-6"
-      data-ocid="insights.empty_state"
     >
       <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
         <Lightbulb size={28} className="text-primary/70" />
@@ -587,7 +585,7 @@ export function InsightsPage() {
       : [];
 
   return (
-    <div className="min-h-full bg-background" data-ocid="insights.page">
+    <div className="min-h-full bg-background">
       {/* Page header */}
       <div className="bg-card border-b border-border px-6 py-5">
         <motion.div
@@ -632,7 +630,6 @@ export function InsightsPage() {
             </div>
             <div
               className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
-              data-ocid="insights.list"
             >
               {insights.map((insight, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: stable computed list

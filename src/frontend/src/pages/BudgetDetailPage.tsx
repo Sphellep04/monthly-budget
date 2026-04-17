@@ -126,7 +126,6 @@ export function BudgetDetailPage() {
     return (
       <div
         className="p-4 md:p-8 space-y-5 max-w-2xl mx-auto"
-        data-ocid="budget_detail.loading_state"
       >
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-52 rounded-2xl" />
@@ -139,7 +138,6 @@ export function BudgetDetailPage() {
     return (
       <div
         className="p-4 md:p-8 max-w-2xl mx-auto text-center py-20"
-        data-ocid="budget_detail.error_state"
       >
         <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
           <ReceiptText className="w-7 h-7 text-muted-foreground" />
@@ -153,7 +151,6 @@ export function BudgetDetailPage() {
             variant="outline"
             size="sm"
             className="gap-1.5"
-            data-ocid="budget_detail.back_button"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Budgets
           </Button>
@@ -176,7 +173,6 @@ export function BudgetDetailPage() {
   return (
     <div
       className="p-4 md:p-8 space-y-6 max-w-2xl mx-auto page-enter"
-      data-ocid="budget_detail.page"
     >
       {/* Back nav */}
       <Link
@@ -184,13 +180,12 @@ export function BudgetDetailPage() {
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors-fast group"
       >
         <ChevronRight className="w-3.5 h-3.5 rotate-180 group-hover:-translate-x-0.5 transition-transform duration-150" />
-        <span data-ocid="budget_detail.back_button">All Budgets</span>
+        <span>All Budgets</span>
       </Link>
 
       {/* Header card */}
       <div
         className="rounded-2xl border border-border bg-card shadow-elevated space-y-6 overflow-hidden"
-        data-ocid="budget_detail.header.card"
       >
         {/* Top accent band */}
         <div
@@ -234,13 +229,11 @@ export function BudgetDetailPage() {
                 label: "Spent",
                 value: formatCents(spentCents),
                 className: "text-foreground",
-                ocid: "budget_detail.spent_amount",
               },
               {
                 label: "Limit",
                 value: formatCents(limitCents),
                 className: "text-muted-foreground",
-                ocid: "budget_detail.limit_amount",
               },
               {
                 label: remainingCents >= BigInt(0) ? "Remaining" : "Over by",
@@ -253,16 +246,14 @@ export function BudgetDetailPage() {
                     : Number(remainingCents) < Number(limitCents) / 4
                       ? "text-accent"
                       : "text-primary",
-                ocid: "budget_detail.remaining_amount",
               },
-            ].map(({ label, value, className, ocid }) => (
+            ].map(({ label, value, className }) => (
               <div key={label} className="bg-card px-4 py-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-1">
                   {label}
                 </p>
                 <p
                   className={`font-mono text-lg font-bold tabular-nums ${className}`}
-                  data-ocid={ocid}
                 >
                   {value}
                 </p>
@@ -285,7 +276,6 @@ export function BudgetDetailPage() {
         <div
           className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/8 px-4 py-3 shadow-subtle"
           role="alert"
-          data-ocid="budget_detail.overspent_banner"
         >
           <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
           <div>
@@ -319,7 +309,6 @@ export function BudgetDetailPage() {
             size="sm"
             className="gap-1.5 button-hover shadow-subtle"
             onClick={() => setExpenseFormOpen(true)}
-            data-ocid="budget_detail.add_expense_button"
           >
             <Plus className="w-3.5 h-3.5" />
             Add
@@ -357,7 +346,6 @@ export function BudgetDetailPage() {
               setEditingTemplate(null);
               setRecurringFormOpen(true);
             }}
-            data-ocid="budget_detail.add_recurring_button"
           >
             <Plus className="w-3.5 h-3.5" />
             Add

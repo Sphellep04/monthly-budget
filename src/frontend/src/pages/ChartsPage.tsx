@@ -86,14 +86,12 @@ function MonthSelector({
   return (
     <div
       className="flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-subtle"
-      data-ocid="charts.month_selector"
     >
       <button
         type="button"
         onClick={prev}
         className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors"
         aria-label="Previous month"
-        data-ocid="charts.month_prev"
       >
         <ChevronLeft size={15} className="text-muted-foreground" />
       </button>
@@ -106,7 +104,6 @@ function MonthSelector({
         disabled={isLatest}
         className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Next month"
-        data-ocid="charts.month_next"
       >
         <ChevronRight size={15} className="text-muted-foreground" />
       </button>
@@ -273,7 +270,6 @@ function SpendingTrendChart() {
     return (
       <div
         className="flex flex-col items-center justify-center py-16 text-center"
-        data-ocid="charts.trend_empty_state"
       >
         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
           <TrendingUp className="w-7 h-7 text-primary" />
@@ -469,7 +465,6 @@ function MonthlyPieChart({ year, month }: { year: number; month: number }) {
     return (
       <div
         className="flex flex-col items-center justify-center py-16 text-center"
-        data-ocid="charts.pie_empty_state"
       >
         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
           <PieChartIcon className="w-7 h-7 text-primary" />
@@ -579,7 +574,6 @@ function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
     return (
       <div
         className="flex flex-col items-center justify-center py-16 text-center"
-        data-ocid="charts.budgetvsactual_empty_state"
       >
         <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4">
           <BarChart2 className="w-7 h-7 text-secondary" />
@@ -680,7 +674,6 @@ function DailySpendingChart({ year, month }: { year: number; month: number }) {
     return (
       <div
         className="flex flex-col items-center justify-center py-16 text-center"
-        data-ocid="charts.daily_empty_state"
       >
         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
           <CalendarDays className="w-7 h-7 text-primary" />
@@ -783,7 +776,6 @@ export function ChartsPage() {
   return (
     <motion.div
       className="p-4 md:p-6 lg:p-8 space-y-8 max-w-5xl mx-auto"
-      data-ocid="charts.page"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
@@ -820,7 +812,6 @@ export function ChartsPage() {
       {/* ── Monthly Trend (always 12-month global) ── */}
       <motion.section
         className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
-        data-ocid="charts.monthly_trend.card"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.06, ease: [0.4, 0, 0.2, 1] }}
@@ -853,7 +844,6 @@ export function ChartsPage() {
       {/* ── Per-Budget Category Trends ── */}
       <motion.section
         className="space-y-5"
-        data-ocid="charts.category_trends.section"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.12, ease: [0.4, 0, 0.2, 1] }}
@@ -887,7 +877,6 @@ export function ChartsPage() {
         ) : summaries.length === 0 ? (
           <div
             className="flex flex-col items-center justify-center py-20 px-6 text-center rounded-2xl border border-dashed border-border/70 bg-muted/20"
-            data-ocid="charts.empty_state"
           >
             <div className="w-16 h-16 rounded-2xl bg-muted/60 flex items-center justify-center mb-5 shadow-inner-subtle">
               <LineChartIcon className="w-8 h-8 text-muted-foreground opacity-50" />
@@ -906,7 +895,6 @@ export function ChartsPage() {
               <motion.div
                 key={bs.budget.id.toString()}
                 className="rounded-2xl border border-border bg-card p-5 shadow-subtle card-hover space-y-4"
-                data-ocid={`charts.budget_chart.${i + 1}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -940,7 +928,6 @@ export function ChartsPage() {
       {/* ── Donut: Category Spending Breakdown ── */}
       <motion.section
         className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
-        data-ocid="charts.pie_section"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.18, ease: [0.4, 0, 0.2, 1] }}
@@ -960,7 +947,6 @@ export function ChartsPage() {
       {/* ── Budget vs Actual ── */}
       <motion.section
         className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
-        data-ocid="charts.budget_vs_actual.section"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.22, ease: [0.4, 0, 0.2, 1] }}
@@ -980,7 +966,6 @@ export function ChartsPage() {
       {/* ── Daily Spending ── */}
       <motion.section
         className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
-        data-ocid="charts.daily_spending.section"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.26, ease: [0.4, 0, 0.2, 1] }}

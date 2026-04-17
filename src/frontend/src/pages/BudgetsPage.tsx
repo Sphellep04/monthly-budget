@@ -82,7 +82,6 @@ export function BudgetsPage() {
   return (
     <div
       className="max-w-3xl mx-auto px-4 py-8 space-y-8 page-enter"
-      data-ocid="budgets.page"
     >
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -99,7 +98,6 @@ export function BudgetsPage() {
           </p>
         </div>
         <Button
-          data-ocid="budgets.add_button"
           onClick={() => setDialogOpen(true)}
           className="gap-2 self-start sm:self-auto button-hover shadow-elevated"
         >
@@ -110,13 +108,11 @@ export function BudgetsPage() {
 
       {/* Month navigator */}
       <div
-        data-ocid="budgets.month_nav"
         className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border shadow-subtle"
       >
         <Button
           variant="ghost"
           size="icon"
-          data-ocid="budgets.month_prev"
           onClick={prev}
           aria-label="Previous month"
           className="h-9 w-9 rounded-xl hover:bg-muted transition-colors-fast"
@@ -141,7 +137,6 @@ export function BudgetsPage() {
         <Button
           variant="ghost"
           size="icon"
-          data-ocid="budgets.month_next"
           onClick={next}
           disabled={isCurrent}
           aria-label="Next month"
@@ -199,7 +194,6 @@ export function BudgetsPage() {
       {/* Add Budget Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent
-          data-ocid="budget.dialog"
           className="max-w-md shadow-premium backdrop-blur-md"
           onInteractOutside={(e) => {
             if (createBudget.isPending) e.preventDefault();

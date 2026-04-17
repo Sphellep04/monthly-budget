@@ -110,7 +110,6 @@ interface StatCardProps {
   iconBg: string;
   iconColor: string;
   delay?: number;
-  ocid: string;
 }
 
 function StatCard({
@@ -121,12 +120,10 @@ function StatCard({
   iconBg,
   iconColor,
   delay = 0,
-  ocid,
 }: StatCardProps) {
   return (
     <motion.div
       className="rounded-2xl border border-border bg-card p-5 shadow-elevated space-y-3"
-      data-ocid={ocid}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay, ease: [0.4, 0, 0.2, 1] }}
@@ -185,7 +182,6 @@ function AnnualBarChart({
     return (
       <div
         className="flex flex-col items-center justify-center py-16 text-center"
-        data-ocid="annual.chart_empty_state"
       >
         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
           <BarChart3 className="w-7 h-7 text-primary" />
@@ -338,7 +334,7 @@ function MonthTable({
           </span>
         ))}
       </div>
-      <div className="min-w-[520px] space-y-1" data-ocid="annual.month_table">
+      <div className="min-w-[520px] space-y-1">
         {rows.map((row, i) => {
           const isFuture =
             row.totalBudgetCents === 0 && row.totalSpentCents === 0;
@@ -346,7 +342,6 @@ function MonthTable({
             <motion.button
               key={row.monthNum}
               type="button"
-              data-ocid={`annual.month_row.${i + 1}`}
               className="w-full grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-2 items-center px-4 py-3 rounded-xl border border-border/60 bg-card hover:bg-muted/40 hover:border-border transition-colors text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
               onClick={() =>
                 navigate({
@@ -476,7 +471,6 @@ export function AnnualSummaryPage() {
   return (
     <motion.div
       className="p-4 md:p-6 lg:p-8 space-y-8 max-w-5xl mx-auto"
-      data-ocid="annual.page"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
@@ -502,14 +496,12 @@ export function AnnualSummaryPage() {
         {/* Year Selector */}
         <div
           className="flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-subtle shrink-0 mt-1"
-          data-ocid="annual.year_selector"
         >
           <button
             type="button"
             onClick={prevYear}
             className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors"
             aria-label="Previous year"
-            data-ocid="annual.year_prev"
           >
             <ChevronLeft size={15} className="text-muted-foreground" />
           </button>
@@ -522,7 +514,6 @@ export function AnnualSummaryPage() {
             disabled={selectedYear >= currentYear}
             className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label="Next year"
-            data-ocid="annual.year_next"
           >
             <ChevronRight size={15} className="text-muted-foreground" />
           </button>
@@ -532,7 +523,6 @@ export function AnnualSummaryPage() {
       {/* ── Stat Cards 2×2 ── */}
       <div
         className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-        data-ocid="annual.stats_section"
       >
         {isLoading ? (
           <>
@@ -544,7 +534,6 @@ export function AnnualSummaryPage() {
         ) : (
           <>
             <StatCard
-              ocid="annual.stat_total_spent"
               icon={<Wallet size={18} />}
               label="Total Spent"
               value={formatCents(stats.totalYearSpentCents)}
@@ -554,7 +543,6 @@ export function AnnualSummaryPage() {
               delay={0.08}
             />
             <StatCard
-              ocid="annual.stat_avg_monthly"
               icon={<BarChart3 size={18} />}
               label="Avg Monthly Spend"
               value={formatCents(stats.avgMonthlySpentCents)}
@@ -564,7 +552,6 @@ export function AnnualSummaryPage() {
               delay={0.12}
             />
             <StatCard
-              ocid="annual.stat_best_month"
               icon={<TrendingDown size={18} />}
               label="Best Month"
               value={
@@ -580,7 +567,6 @@ export function AnnualSummaryPage() {
               delay={0.16}
             />
             <StatCard
-              ocid="annual.stat_worst_month"
               icon={<TrendingUp size={18} />}
               label="Worst Month"
               value={
@@ -602,7 +588,6 @@ export function AnnualSummaryPage() {
       {/* ── 12-Month Bar Chart ── */}
       <motion.section
         className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
-        data-ocid="annual.bar_chart.section"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.24, ease: [0.4, 0, 0.2, 1] }}
@@ -649,7 +634,6 @@ export function AnnualSummaryPage() {
       {/* ── 12-Month Table ── */}
       <motion.section
         className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-5"
-        data-ocid="annual.month_table.section"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
@@ -678,7 +662,6 @@ export function AnnualSummaryPage() {
       {/* ── Yearly Totals ── */}
       <motion.section
         className="rounded-2xl border border-border bg-card p-6 shadow-elevated space-y-2"
-        data-ocid="annual.yearly_totals.section"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.36, ease: [0.4, 0, 0.2, 1] }}

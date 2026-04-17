@@ -53,7 +53,6 @@ function ReceiptBadge({ url }: { url: string }) {
       onClick={() => openReceiptInTab(url)}
       title="View receipt"
       className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/8 border border-primary/20 text-primary hover:bg-primary/15 transition-colors text-[10px] font-medium shrink-0"
-      data-ocid="expense_list.receipt_link"
     >
       <ImageIcon className="w-3 h-3" />
       <span>Receipt</span>
@@ -85,7 +84,7 @@ export function ExpenseList({
 
   if (isLoading) {
     return (
-      <div className="space-y-2" data-ocid="expense_list.loading_state">
+      <div className="space-y-2">
         {[1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-16 rounded-xl" />
         ))}
@@ -97,7 +96,6 @@ export function ExpenseList({
     return (
       <div
         className="flex flex-col items-center justify-center py-14 text-center gap-3 rounded-2xl border border-dashed border-border bg-muted/20"
-        data-ocid="expense_list.empty_state"
       >
         <div className="w-12 h-12 rounded-xl bg-card border border-border shadow-subtle flex items-center justify-center">
           <Receipt className="w-5 h-5 text-muted-foreground" />
@@ -115,7 +113,6 @@ export function ExpenseList({
           size="sm"
           onClick={onAddFirst}
           className="mt-1 button-hover text-xs"
-          data-ocid="expense_list.add_first_button"
         >
           Add First Expense
         </Button>
@@ -124,7 +121,7 @@ export function ExpenseList({
   }
 
   return (
-    <div className="space-y-1" data-ocid="expense_list.list">
+    <div className="space-y-1">
       {/* Column headers */}
       <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 pb-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
         <span>Date &amp; Notes</span>
@@ -138,7 +135,6 @@ export function ExpenseList({
           <div
             key={expense.id.toString()}
             className="group grid grid-cols-[1fr_auto_auto] gap-3 items-center px-4 py-3.5 hover:bg-muted/30 transition-colors-fast"
-            data-ocid={`expense_list.item.${idx + 1}`}
           >
             {/* Date + notes + receipt badge */}
             <div className="min-w-0">
@@ -170,7 +166,6 @@ export function ExpenseList({
               onClick={() => handleDelete(expense.id)}
               disabled={deleteExpense.isPending}
               aria-label="Delete expense"
-              data-ocid={`expense_list.delete_button.${idx + 1}`}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
@@ -181,7 +176,6 @@ export function ExpenseList({
       {/* Subtotal */}
       <div
         className="flex items-center justify-between px-4 pt-3 pb-1"
-        data-ocid="expense_list.subtotal"
       >
         <span className="text-xs font-medium text-muted-foreground">
           {expenses.length} expense{expenses.length !== 1 ? "s" : ""} total

@@ -32,7 +32,7 @@ export function RecurringTemplateList({
 
   if (isLoading) {
     return (
-      <div className="space-y-2" data-ocid="recurring.loading_state">
+      <div className="space-y-2">
         <Skeleton className="h-16 rounded-xl" />
         <Skeleton className="h-16 rounded-xl" />
       </div>
@@ -43,7 +43,6 @@ export function RecurringTemplateList({
     return (
       <div
         className="flex flex-col items-center justify-center py-10 px-6 text-center rounded-2xl border border-dashed border-border bg-muted/20"
-        data-ocid="recurring.empty_state"
       >
         <div className="w-10 h-10 rounded-xl bg-secondary/8 flex items-center justify-center mb-3">
           <CalendarClock className="w-5 h-5 text-secondary" />
@@ -60,12 +59,11 @@ export function RecurringTemplateList({
 
   return (
     <>
-      <div className="space-y-2" data-ocid="recurring.list">
+      <div className="space-y-2">
         {templates.map((t, i) => (
           <div
             key={t.id.toString()}
             className="group flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card hover:bg-muted/20 hover:border-secondary/20 hover:shadow-subtle transition-smooth"
-            data-ocid={`recurring.item.${i + 1}`}
           >
             <div className="flex items-center gap-3 min-w-0">
               {/* Icon */}
@@ -104,7 +102,6 @@ export function RecurringTemplateList({
                 size="icon"
                 className="h-7 w-7 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground hover:bg-muted transition-smooth rounded-lg"
                 onClick={() => onEdit(t.id)}
-                data-ocid={`recurring.edit_button.${i + 1}`}
                 aria-label={`Edit ${t.name}`}
               >
                 <Pencil className="w-3.5 h-3.5" />
@@ -114,7 +111,6 @@ export function RecurringTemplateList({
                 size="icon"
                 className="h-7 w-7 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg"
                 onClick={() => setDeleteId(t.id)}
-                data-ocid={`recurring.delete_button.${i + 1}`}
                 aria-label={`Delete ${t.name}`}
               >
                 <Trash2 className="w-3.5 h-3.5" />

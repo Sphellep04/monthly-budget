@@ -121,7 +121,7 @@ function StatCard({
 
 function ReportSkeleton() {
   return (
-    <div className="space-y-5" data-ocid="reports.loading_state">
+    <div className="space-y-5">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="h-20 rounded-xl" />
@@ -139,7 +139,6 @@ function EmptyState({ message }: { message: string }) {
   return (
     <div
       className="flex flex-col items-center justify-center py-20 text-center"
-      data-ocid="reports.empty_state"
     >
       <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
         <FileText className="w-8 h-8 text-muted-foreground" />
@@ -257,7 +256,6 @@ export function ReportsPage() {
             variant="outline"
             size="sm"
             onClick={handleExport}
-            data-ocid="reports.export_button"
             className="gap-2 shrink-0"
           >
             <Download className="w-4 h-4" />
@@ -267,7 +265,7 @@ export function ReportsPage() {
       </div>
 
       {/* ── Date range picker ── */}
-      <Card className="shadow-subtle" data-ocid="reports.date_range_panel">
+      <Card className="shadow-subtle">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Date Range
@@ -287,7 +285,6 @@ export function ReportsPage() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                data-ocid="reports.start_date_input"
                 className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground input-focus w-full"
               />
             </div>
@@ -303,14 +300,12 @@ export function ReportsPage() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                data-ocid="reports.end_date_input"
                 className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground input-focus w-full"
               />
             </div>
             {startDate && endDate && startDate > endDate && (
               <p
                 className="text-xs text-destructive self-end pb-2"
-                data-ocid="reports.date_error_state"
               >
                 End date must be after start date
               </p>
@@ -331,7 +326,6 @@ export function ReportsPage() {
           {/* ── Summary stats ── */}
           <div
             className="grid grid-cols-2 md:grid-cols-4 gap-4"
-            data-ocid="reports.stats_section"
           >
             <StatCard label="Total Spent" value={formatCents(stats.total)} />
             <StatCard
@@ -351,7 +345,6 @@ export function ReportsPage() {
           {chartData.length > 0 && (
             <Card
               className="shadow-subtle"
-              data-ocid="reports.category_chart_section"
             >
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold">
@@ -419,7 +412,6 @@ export function ReportsPage() {
           {/* ── Expense table ── */}
           <Card
             className="shadow-subtle"
-            data-ocid="reports.expense_table_section"
           >
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -460,7 +452,6 @@ export function ReportsPage() {
                         <TableRow
                           key={expense.id.toString()}
                           className="border-b border-border/50 hover:bg-muted/30 transition-colors-fast"
-                          data-ocid={`reports.expense_item.${idx + 1}`}
                         >
                           <TableCell className="pl-6 text-sm text-muted-foreground whitespace-nowrap">
                             {formatDisplayDate(expense.date)}
@@ -496,7 +487,6 @@ export function ReportsPage() {
                                 target="_blank"
                                 rel="noreferrer"
                                 title="View receipt"
-                                data-ocid={`reports.receipt_link.${idx + 1}`}
                                 className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors-fast"
                               >
                                 <Receipt className="w-3.5 h-3.5" />

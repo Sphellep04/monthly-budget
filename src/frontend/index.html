@@ -2,15 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>BudgetWise — Monthly Budget Tracker</title>
     <meta name="description" content="Track your monthly budgets and expenses with clarity." />
-    <meta property="og:title" content="BudgetWise — Monthly Budget Tracker" />
-    <meta property="og:description" content="Built with caffeine.ai" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- PWA -->
+    <meta name="application-name" content="BudgetWise" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BudgetWise" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#4b60c4" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Icons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <meta name="theme-color" content="#1e1e2e" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/pwa-192x192.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="BudgetWise — Monthly Budget Tracker" />
+    <meta property="og:description" content="Track your monthly budgets and expenses with clarity." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
   </head>
   <body>
     <div id="root"></div>

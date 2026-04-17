@@ -30,7 +30,6 @@ export function DeleteConfirmDialog({
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
-        data-ocid="delete.dialog"
         className="max-w-md shadow-premium backdrop-blur-md"
       >
         <AlertDialogHeader>
@@ -49,14 +48,12 @@ export function DeleteConfirmDialog({
 
         <AlertDialogFooter className="gap-2.5 mt-2">
           <AlertDialogCancel
-            data-ocid="delete.cancel_button"
             disabled={isPending}
             className="button-hover"
           >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            data-ocid="delete.confirm_button"
             onClick={(e) => {
               e.preventDefault();
               onConfirm();

@@ -51,7 +51,6 @@ function BudgetRow({ budget, index }: BudgetRowProps) {
   return (
     <>
       <div
-        data-ocid={`budget.item.${index}`}
         className="group flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-hover hover:border-primary/20 hover:shadow-elevated"
       >
         {/* Icon + color dot */}
@@ -113,7 +112,6 @@ function BudgetRow({ budget, index }: BudgetRowProps) {
           <Button
             variant="ghost"
             size="icon"
-            data-ocid={`budget.delete_button.${index}`}
             onClick={() => setConfirmOpen(true)}
             className="w-8 h-8 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-destructive hover:bg-destructive/8"
             aria-label={`Delete ${budget.name}`}
@@ -142,7 +140,7 @@ export function BudgetList({
 }: BudgetListProps) {
   if (isLoading) {
     return (
-      <div className="space-y-3" data-ocid="budget.loading_state">
+      <div className="space-y-3">
         {[1, 2, 3].map((i) => (
           <BudgetRowSkeleton key={i} />
         ))}
@@ -153,7 +151,6 @@ export function BudgetList({
   if (budgets.length === 0) {
     return (
       <div
-        data-ocid="budget.empty_state"
         className="flex flex-col items-center justify-center py-20 px-6 rounded-2xl border border-dashed border-border bg-card/40 text-center"
       >
         <div className="w-16 h-16 rounded-2xl bg-primary/8 flex items-center justify-center mb-5 shadow-subtle">
@@ -167,7 +164,6 @@ export function BudgetList({
           goes — and stay in control.
         </p>
         <Button
-          data-ocid="budget.empty_state_add_button"
           onClick={onAddBudget}
           className="gap-2 button-hover shadow-elevated"
         >
@@ -179,7 +175,7 @@ export function BudgetList({
   }
 
   return (
-    <div className="space-y-3" data-ocid="budget.list">
+    <div className="space-y-3">
       {budgets.map((budget, i) => (
         <BudgetRow key={budget.id.toString()} budget={budget} index={i + 1} />
       ))}

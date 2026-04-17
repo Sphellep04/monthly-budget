@@ -104,7 +104,6 @@ function NoteModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      data-ocid="notes.dialog"
     >
       {/* Backdrop */}
       <div
@@ -141,7 +140,6 @@ function NoteModal({
             onClick={handleClose}
             className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
             aria-label="Close"
-            data-ocid="notes.close_button"
           >
             <X size={15} />
           </button>
@@ -162,13 +160,11 @@ function NoteModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="rounded-lg"
-              data-ocid="notes.title_input"
               autoFocus
             />
             {error && (
               <p
                 className="text-xs text-destructive"
-                data-ocid="notes.title_field_error"
               >
                 {error}
               </p>
@@ -188,7 +184,6 @@ function NoteModal({
               onChange={(e) => setContent(e.target.value)}
               rows={6}
               className="rounded-lg resize-none"
-              data-ocid="notes.content_textarea"
             />
           </div>
           <div className="flex gap-3 pt-1">
@@ -197,7 +192,6 @@ function NoteModal({
               variant="outline"
               className="flex-1"
               onClick={handleClose}
-              data-ocid="notes.cancel_button"
             >
               Cancel
             </Button>
@@ -205,7 +199,6 @@ function NoteModal({
               type="submit"
               className="flex-1"
               disabled={isPending}
-              data-ocid="notes.submit_button"
             >
               {isPending ? (
                 <span className="flex items-center gap-2">
@@ -240,7 +233,6 @@ function NoteCard({
   return (
     <motion.div
       className="group relative rounded-2xl border border-border bg-card p-5 shadow-subtle card-hover space-y-3"
-      data-ocid={`notes.item.${index}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -256,7 +248,6 @@ function NoteCard({
           onClick={() => onEdit(note)}
           className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
           aria-label="Edit note"
-          data-ocid={`notes.edit_button.${index}`}
         >
           <Edit2 size={13} />
         </button>
@@ -265,7 +256,6 @@ function NoteCard({
           onClick={() => onDelete(note)}
           className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
           aria-label="Delete note"
-          data-ocid={`notes.delete_button.${index}`}
         >
           <Trash2 size={13} />
         </button>
@@ -330,7 +320,6 @@ export function NotesPage() {
     <>
       <motion.div
         className="p-4 md:p-6 lg:p-8 space-y-8 max-w-5xl mx-auto"
-        data-ocid="notes.page"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
@@ -355,7 +344,6 @@ export function NotesPage() {
           <Button
             onClick={openCreate}
             className="gap-2 shrink-0 mt-1"
-            data-ocid="notes.new_note_button"
           >
             <Plus size={15} />
             New Note
@@ -380,7 +368,6 @@ export function NotesPage() {
         ) : sortedNotes.length === 0 ? (
           <motion.div
             className="flex flex-col items-center justify-center py-24 px-6 text-center rounded-2xl border border-dashed border-border/70 bg-muted/20"
-            data-ocid="notes.empty_state"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
@@ -398,7 +385,6 @@ export function NotesPage() {
             <Button
               onClick={openCreate}
               className="gap-2"
-              data-ocid="notes.empty_new_button"
             >
               <Plus size={15} />
               Create your first note
@@ -442,7 +428,7 @@ export function NotesPage() {
           if (!open) setDeleteTarget(undefined);
         }}
       >
-        <AlertDialogContent data-ocid="notes.delete_dialog">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete note?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -451,13 +437,12 @@ export function NotesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-ocid="notes.delete_cancel_button">
+            <AlertDialogCancel>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              data-ocid="notes.delete_confirm_button"
             >
               Delete
             </AlertDialogAction>

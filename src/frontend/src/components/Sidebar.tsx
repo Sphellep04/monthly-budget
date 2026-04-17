@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
@@ -25,66 +24,95 @@ import { SettingsModal } from "./SettingsModal";
 interface NavItem {
   label: string;
   href: string;
-  icon: React.ReactNode;
-  ocid: string;
+  icon: React.ElementType;
 }
 
-const navItems: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/",
-    icon: <LayoutDashboard size={17} />,
-    ocid: "sidebar.dashboard.link",
-  },
-  {
-    label: "Budgets",
-    href: "/budgets",
-    icon: <Wallet size={17} />,
-    ocid: "sidebar.budgets.link",
-  },
-  {
-    label: "Charts",
-    href: "/charts",
-    icon: <BarChart2 size={17} />,
-    ocid: "sidebar.charts.link",
-  },
-  {
-    label: "Annual Summary",
-    href: "/annual-summary",
-    icon: <CalendarDays size={17} />,
-    ocid: "sidebar.annual_summary.link",
-  },
-  {
-    label: "Insights",
-    href: "/insights",
-    icon: <Lightbulb size={17} />,
-    ocid: "sidebar.insights.link",
-  },
-  {
-    label: "Bills",
-    href: "/bills",
-    icon: <Bell size={17} />,
-    ocid: "sidebar.bills.link",
-  },
-  {
-    label: "Templates",
-    href: "/templates",
-    icon: <BookTemplate size={17} />,
-    ocid: "sidebar.templates.link",
-  },
-  {
-    label: "Search",
-    href: "/search",
-    icon: <Search size={17} />,
-    ocid: "sidebar.search.link",
-  },
-  {
-    label: "Notes",
-    href: "/notes",
-    icon: <StickyNote size={17} />,
-    ocid: "sidebar.notes.link",
-  },
+const NAV_MAIN: NavItem[] = [
+  { label: "Dashboard",      href: "/",               icon: LayoutDashboard },
+  { label: "Budgets",        href: "/budgets",         icon: Wallet          },
+  { label: "Charts",         href: "/charts",          icon: BarChart2       },
+  { label: "Annual Summary", href: "/annual-summary",  icon: CalendarDays    },
+  { label: "Insights",       href: "/insights",        icon: Lightbulb       },
+  { label: "Bills",          href: "/bills",           icon: Bell            },
 ];
+
+const NAV_TOOLS: NavItem[] = [
+  { label: "Templates", href: "/templates", icon: BookTemplate },
+  { label: "Search",    href: "/search",    icon: Search       },
+  { label: "Notes",     href: "/notes",     icon: StickyNote   },
+];
+
+function NavLink({
+  item,
+  isActive,
+  onClick,
+  delay,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  onClick?: () => void;
+  delay: number;
+}) {
+  const Icon = item.icon;
+  return (
+    <Link
+      to={item.href}
+      onClick={onClick}
+      style={{ animationDelay: `${delay}ms` }}
+      className={cn(
+        "group flex items-center gap-3 px-3 py-2 rounded-xl text-[0.8125rem] font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+        isActive
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+      )}
+    >
+      <Icon
+        size={16}
+        strokeWidth={isActive ? 2.5 : 2}
+        className={cn(
+          "flex-shrink-0 transition-all duration-150",
+          isActive ? "text-primary-foreground" : "text-muted-foreground/60 group-hover:text-sidebar-accent-foreground",
+        )}
+      />
+      <span className="truncate">{item.label}</span>
+    </Link>
+  );
+}
+
+function NavSection({
+  label,
+  items,
+  pathname,
+  onNavClick,
+  startDelay,
+}: {
+  label: string;
+  items: NavItem[];
+  pathname: string;
+  onNavClick?: () => void;
+  startDelay: number;
+}) {
+  return (
+    <div className="space-y-0.5">
+      <p className="px-3 mb-2 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">
+        {label}
+      </p>
+      {items.map((item, i) => {
+        const isActive =
+          item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+        return (
+          <NavLink
+            key={item.href}
+            item={item}
+            isActive={isActive}
+            onClick={onNavClick}
+            delay={startDelay + i * 35}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 function SidebarInner({
   onNavClick,
@@ -99,89 +127,62 @@ function SidebarInner({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Brand */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
-        <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-primary/20 text-primary shadow-glow-sm">
-          <TrendingUp size={17} strokeWidth={2.2} />
-          {/* Inner glow ring */}
-          <div className="absolute inset-0 rounded-xl ring-1 ring-primary/30" />
-        </div>
-        <div className="flex flex-col">
-          <span className="font-display font-bold text-[1.05rem] text-sidebar-foreground tracking-tight leading-none">
-            BudgetWise
-          </span>
-          <span className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 tracking-wider">
-            FINANCE TRACKER
-          </span>
+      {/* ── Brand ── */}
+      <div className="px-5 pt-6 pb-5">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-glow-sm">
+              <TrendingUp size={18} strokeWidth={2.5} className="text-primary-foreground" />
+            </div>
+          </div>
+          <div>
+            <p className="font-display font-bold text-[1.05rem] text-sidebar-foreground tracking-tight leading-none">
+              BudgetWise
+            </p>
+            <p className="text-[10px] text-muted-foreground/50 font-mono mt-0.5 tracking-widest uppercase">
+              Finance
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
-        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.12em] px-3 mb-3">
-          Navigation
-        </p>
-        {navItems.map((item, i) => {
-          const isActive =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              data-ocid={item.ocid}
-              onClick={onNavClick}
-              style={{ animationDelay: `${i * 40}ms` }}
-              className={cn(
-                "group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[0.8375rem] font-medium transition-colors-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-1",
-                isActive
-                  ? "nav-active-indicator bg-primary/12 text-primary"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )}
-            >
-              <span
-                className={cn(
-                  "flex-shrink-0 transition-colors-fast",
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground/70 group-hover:text-sidebar-accent-foreground",
-                )}
-              >
-                {item.icon}
-              </span>
-              <span className="truncate">{item.label}</span>
-              {isActive && (
-                <span className="ml-auto flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_oklch(var(--primary)/0.6)]" />
-              )}
-            </Link>
-          );
-        })}
+      {/* ── Nav ── */}
+      <nav className="flex-1 px-3 space-y-5 overflow-y-auto pb-4">
+        <NavSection
+          label="Overview"
+          items={NAV_MAIN}
+          pathname={pathname}
+          onNavClick={onNavClick}
+          startDelay={0}
+        />
+        <NavSection
+          label="Tools"
+          items={NAV_TOOLS}
+          pathname={pathname}
+          onNavClick={onNavClick}
+          startDelay={NAV_MAIN.length * 35}
+        />
       </nav>
 
-      <Separator className="bg-sidebar-border/60" />
-
-      {/* User section / Settings / Logout */}
-      <div className="px-3 py-4 space-y-1">
+      {/* ── Bottom ── */}
+      <div className="px-3 py-4 border-t border-sidebar-border/50 space-y-0.5">
         <Button
           variant="ghost"
           size="sm"
           onClick={onSettingsOpen}
-          data-ocid="sidebar.settings_button"
-          className="w-full justify-start gap-3 text-[0.8125rem] text-muted-foreground/70 hover:text-foreground hover:bg-muted/60 transition-colors-fast rounded-lg h-9 px-3"
+          className="w-full justify-start gap-3 text-[0.8125rem] text-muted-foreground/70 hover:text-foreground hover:bg-muted/60 rounded-xl h-9 px-3 font-medium"
         >
-          <Settings size={15} className="flex-shrink-0" />
-          <span>Settings</span>
+          <Settings size={15} strokeWidth={2} className="flex-shrink-0" />
+          Settings
         </Button>
         <Button
           variant="ghost"
           size="sm"
           onClick={logout}
-          data-ocid="sidebar.logout_button"
-          className="w-full justify-start gap-3 text-[0.8125rem] text-muted-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-colors-fast rounded-lg h-9 px-3"
+          className="w-full justify-start gap-3 text-[0.8125rem] text-muted-foreground/70 hover:text-destructive hover:bg-destructive/8 rounded-xl h-9 px-3 font-medium"
         >
-          <LogOut size={15} className="flex-shrink-0" />
-          <span>Sign out</span>
+          <LogOut size={15} strokeWidth={2} className="flex-shrink-0" />
+          Sign out
         </Button>
       </div>
     </div>
@@ -197,21 +198,12 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         type="button"
-        className={cn(
-          "fixed top-4 left-4 z-50 md:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-card border border-border shadow-elevated transition-spring",
-          "hover:bg-muted active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
-        )}
+        className="fixed top-4 left-4 z-50 md:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-card border border-border shadow-elevated hover:bg-muted active:scale-95 transition-spring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
         onClick={() => setMobileOpen((o) => !o)}
         aria-label="Toggle sidebar"
-        data-ocid="sidebar.toggle"
       >
-        <span
-          className={cn(
-            "transition-spring",
-            mobileOpen ? "rotate-90" : "rotate-0",
-          )}
-        >
-          {mobileOpen ? <X size={17} /> : <Menu size={17} />}
+        <span className={cn("transition-spring", mobileOpen ? "rotate-90" : "rotate-0")}>
+          {mobileOpen ? <X size={16} /> : <Menu size={16} />}
         </span>
       </button>
 
@@ -219,15 +211,9 @@ export function Sidebar() {
       <div
         className={cn(
           "fixed inset-0 z-40 md:hidden transition-smooth",
-          mobileOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none",
+          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
         )}
-        style={{
-          background: "oklch(0 0 0 / 0.5)",
-          backdropFilter: "blur(4px)",
-          WebkitBackdropFilter: "blur(4px)",
-        }}
+        style={{ background: "oklch(0 0 0 / 0.45)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
         role="button"
         tabIndex={0}
         aria-label="Close sidebar"
@@ -238,30 +224,22 @@ export function Sidebar() {
       {/* Mobile drawer */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-full w-64 bg-sidebar border-r border-sidebar-border shadow-premium md:hidden",
-          "transition-smooth",
+          "fixed top-0 left-0 z-40 h-full w-64 bg-sidebar border-r border-sidebar-border shadow-premium md:hidden transition-smooth",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <SidebarInner
           onNavClick={() => setMobileOpen(false)}
-          onSettingsOpen={() => {
-            setMobileOpen(false);
-            setSettingsOpen(true);
-          }}
+          onSettingsOpen={() => { setMobileOpen(false); setSettingsOpen(true); }}
         />
       </aside>
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 h-screen bg-sidebar border-r border-sidebar-border/80 flex-col sticky top-0 shadow-[1px_0_0_0_oklch(var(--sidebar-border)/0.8)]">
+      <aside className="hidden md:flex w-[220px] flex-shrink-0 h-screen bg-sidebar border-r border-sidebar-border/70 flex-col sticky top-0">
         <SidebarInner onSettingsOpen={() => setSettingsOpen(true)} />
       </aside>
 
-      {/* Settings Modal */}
-      <SettingsModal
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-      />
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
   );
 }

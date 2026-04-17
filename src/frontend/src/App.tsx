@@ -78,8 +78,19 @@ function RecurringTemplateApplier() {
   return null;
 }
 
+const IS_MOCK = import.meta.env.VITE_USE_MOCK === "true";
+
 function AuthGuard() {
   const { isAuthenticated, isLoading } = useAuth();
+
+  if (IS_MOCK) {
+    return (
+      <>
+        <RecurringTemplateApplier />
+        <Outlet />
+      </>
+    );
+  }
 
   if (isLoading) {
     return (

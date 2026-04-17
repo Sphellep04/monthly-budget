@@ -182,7 +182,6 @@ export function SearchPage() {
         {/* Filter panel */}
         <div
           className="bg-card border border-border rounded-xl shadow-subtle p-5 space-y-4"
-          data-ocid="search.filter_panel"
         >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -194,7 +193,6 @@ export function SearchPage() {
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                data-ocid="search.clear_filters_button"
                 className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive gap-1"
               >
                 <X size={12} />
@@ -218,7 +216,6 @@ export function SearchPage() {
               />
               <Input
                 id="search-query"
-                data-ocid="search.search_input"
                 placeholder="Search by notes or description…"
                 value={filters.query}
                 onChange={(e) => set("query", e.target.value)}
@@ -238,7 +235,6 @@ export function SearchPage() {
               </Label>
               <select
                 id="search-category"
-                data-ocid="search.category_select"
                 value={filters.categoryId}
                 onChange={(e) => set("categoryId", e.target.value)}
                 className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/60 text-foreground"
@@ -262,7 +258,6 @@ export function SearchPage() {
               </Label>
               <Input
                 id="search-start"
-                data-ocid="search.start_date_input"
                 type="date"
                 value={filters.startDate}
                 max={filters.endDate}
@@ -281,7 +276,6 @@ export function SearchPage() {
               </Label>
               <Input
                 id="search-end"
-                data-ocid="search.end_date_input"
                 type="date"
                 value={filters.endDate}
                 min={filters.startDate}
@@ -298,7 +292,6 @@ export function SearchPage() {
               </Label>
               <div className="flex items-center gap-1.5">
                 <Input
-                  data-ocid="search.min_amount_input"
                   placeholder="Min"
                   type="number"
                   min={0}
@@ -310,7 +303,6 @@ export function SearchPage() {
                   –
                 </span>
                 <Input
-                  data-ocid="search.max_amount_input"
                   placeholder="Max"
                   type="number"
                   min={0}
@@ -327,7 +319,6 @@ export function SearchPage() {
         {!isLoading && results.length > 0 && (
           <div
             className="grid grid-cols-2 gap-4"
-            data-ocid="search.summary_section"
           >
             <div className="bg-card border border-border rounded-xl p-4 shadow-subtle">
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">
@@ -357,7 +348,6 @@ export function SearchPage() {
         {/* Results */}
         <div
           className="bg-card border border-border rounded-xl shadow-subtle overflow-hidden"
-          data-ocid="search.results_panel"
         >
           <div className="px-5 py-3.5 border-b border-border flex items-center justify-between">
             <span className="text-sm font-semibold text-foreground">
@@ -373,7 +363,7 @@ export function SearchPage() {
           </div>
 
           {isLoading ? (
-            <div className="p-5 space-y-3" data-ocid="search.loading_state">
+            <div className="p-5 space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-12 rounded-lg" />
               ))}
@@ -381,7 +371,6 @@ export function SearchPage() {
           ) : results.length === 0 ? (
             <div
               className="flex flex-col items-center justify-center py-16 px-6 text-center"
-              data-ocid="search.empty_state"
             >
               <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-4 text-2xl">
                 🔍
@@ -399,7 +388,6 @@ export function SearchPage() {
                   variant="outline"
                   size="sm"
                   onClick={clearFilters}
-                  data-ocid="search.empty_clear_button"
                   className="mt-4 gap-2"
                 >
                   <X size={13} />
@@ -438,7 +426,6 @@ export function SearchPage() {
                     return (
                       <TableRow
                         key={expense.id.toString()}
-                        data-ocid={`search.result.item.${idx + 1}`}
                         className="hover:bg-muted/30 transition-colors duration-150"
                       >
                         <TableCell className="text-xs text-muted-foreground font-mono">
@@ -486,7 +473,6 @@ export function SearchPage() {
                               href={expense.receiptUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              data-ocid={`search.receipt_link.${idx + 1}`}
                             >
                               <Badge
                                 variant="secondary"

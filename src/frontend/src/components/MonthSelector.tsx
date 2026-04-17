@@ -46,14 +46,12 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
   return (
     <div
       className="flex items-center gap-0.5 bg-card border border-border rounded-xl px-1 py-1 shadow-subtle"
-      data-ocid="month-selector"
     >
       <Button
         variant="ghost"
         size="icon"
         className="h-8 w-8 rounded-lg hover:bg-muted transition-spring active:scale-95"
         onClick={goBack}
-        data-ocid="month-selector.prev"
         aria-label="Previous month"
       >
         <ChevronLeft size={15} className="text-muted-foreground" />
@@ -61,7 +59,6 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
 
       <div
         className="flex items-center gap-2 px-3 min-w-[156px] justify-center overflow-hidden"
-        data-ocid="month-selector.label"
       >
         <div className={`flex items-center gap-2 ${labelAnim}`}>
           <div className="flex flex-col items-center leading-none">
@@ -86,7 +83,6 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
         className="h-8 w-8 rounded-lg hover:bg-muted transition-spring active:scale-95 disabled:opacity-30"
         onClick={goForward}
         disabled={isCurrentMonth}
-        data-ocid="month-selector.next"
         aria-label="Next month"
       >
         <ChevronRight size={15} className="text-muted-foreground" />

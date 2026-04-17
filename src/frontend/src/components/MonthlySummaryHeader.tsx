@@ -9,98 +9,21 @@ interface MonthlySummaryHeaderProps {
   isLoading: boolean;
 }
 
-interface StatCardProps {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  sub?: string;
-  valueClass?: string;
-  iconBg?: string;
-  iconColor?: string;
-  index: number;
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  sub,
-  valueClass,
-  iconBg = "bg-primary/15",
-  iconColor = "text-primary",
-  index,
-}: StatCardProps) {
-  const staggerClass = `animate-stagger-${index}`;
-  return (
-    <div
-      className={`relative bg-card border border-border rounded-2xl p-4 shadow-subtle overflow-hidden slide-up ${staggerClass}`}
-      data-ocid={`summary-header.stat.${index}`}
-    >
-      {/* Decorative gradient accent */}
-      <div
-        className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-[0.04] blur-2xl bg-primary pointer-events-none"
-        aria-hidden="true"
-      />
-
-      <div className="flex items-start gap-3">
-        <div
-          className={`flex-shrink-0 w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shadow-subtle`}
-        >
-          <Icon className={`h-5 w-5 ${iconColor}`} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-semibold text-muted-foreground font-body uppercase tracking-widest mb-1">
-            {label}
-          </p>
-          <p
-            className={`font-mono text-2xl font-bold leading-none tabular-nums ${valueClass ?? "text-foreground"}`}
-          >
-            {value}
-          </p>
-          {sub && (
-            <p className="text-[11px] text-muted-foreground font-body mt-1">
-              {sub}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** Animated gradient progress bar */
-function GlobalProgressBar({
-  pct,
-  barColorClass,
-}: { pct: number; barColorClass: string }) {
+function AnimatedBar({ pct, colorClass }: { pct: number; colorClass: string }) {
   const [mounted, setMounted] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     timerRef.current = setTimeout(() => setMounted(true), 120);
-    return () => {
-      if (timerRef.current !== null)
-        clearTimeout(timerRef.current ?? undefined);
-    };
+    return () => { if (timerRef.current !== null) clearTimeout(timerRef.current); };
   }, []);
 
-  const gradientClass =
-    pct >= 100
-      ? "from-destructive via-destructive to-destructive/80"
-      : pct >= 80
-        ? "from-warning via-warning to-warning/70"
-        : "from-primary via-primary/70 to-primary/80";
-
   return (
-    <div
-      className="h-2.5 bg-muted rounded-full overflow-hidden shadow-inner-subtle"
-      aria-hidden="true"
-      data-ocid="summary-header.progress"
-    >
+    <div className="h-2 bg-muted/60 rounded-full overflow-hidden" aria-hidden="true">
       <div
-        className={`h-full rounded-full bg-gradient-to-r ${gradientClass} ${barColorClass}`}
+        className={`h-full rounded-full transition-all ${colorClass}`}
         style={{
-          width: mounted ? `${pct}%` : "0%",
+          width: mounted ? `${Math.min(pct, 100)}%` : "0%",
           transition: "width 0.9s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       />
@@ -108,121 +31,107 @@ function GlobalProgressBar({
   );
 }
 
-export function MonthlySummaryHeader({
-  summary,
-  isLoading,
-}: MonthlySummaryHeaderProps) {
+export function MonthlySummaryHeader({ summary, isLoading }: MonthlySummaryHeaderProps) {
   if (isLoading || !summary) {
-    return (
-      <div className="space-y-3" data-ocid="summary-header.loading_state">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Skeleton className="h-[88px] rounded-2xl" />
-          <Skeleton className="h-[88px] rounded-2xl" />
-          <Skeleton className="h-[88px] rounded-2xl" />
-        </div>
-        <Skeleton className="h-[72px] rounded-2xl" />
-      </div>
-    );
+    return <Skeleton className="h-[148px] rounded-2xl" />;
   }
 
   const totalBudget = Number(summary.totalBudgetCents);
   const totalSpent = Number(summary.totalSpentCents);
   const remaining = totalBudget - totalSpent;
-  const pct =
-    totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
-
-  const barColorClass =
-    pct >= 100 ? "bg-destructive" : pct >= 80 ? "bg-warning" : "bg-primary";
+  const pct = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
 
   const isOverBudget = remaining < 0;
-  const isNearLimit =
-    !isOverBudget && remaining / Math.max(totalBudget, 1) < 0.2;
+  const isNearLimit = !isOverBudget && remaining / Math.max(totalBudget, 1) < 0.2;
+
+  const barColorClass = isOverBudget
+    ? "bg-destructive"
+    : isNearLimit
+      ? "bg-amber-500"
+      : "bg-primary";
 
   const remainingValueClass = isOverBudget
     ? "text-destructive"
     : isNearLimit
-      ? "text-warning"
+      ? "text-amber-600 dark:text-amber-400"
       : "text-emerald-700 dark:text-emerald-400";
 
   const remainingSub = isOverBudget
-    ? `${formatCents(Math.abs(remaining))} over budget`
+    ? `${formatCents(Math.abs(remaining))} over limit`
     : isNearLimit
       ? "Approaching limit"
       : "You're doing great";
 
-  const spentPctLabel = `${pct.toFixed(1)}% of budget used`;
+  const stats = [
+    {
+      icon: Wallet,
+      label: "Total Budget",
+      value: formatCents(summary.totalBudgetCents),
+      sub: `${summary.budgets.length} categor${summary.budgets.length === 1 ? "y" : "ies"}`,
+      valueClass: "text-foreground",
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
+    },
+    {
+      icon: TrendingUp,
+      label: "Total Spent",
+      value: formatCents(summary.totalSpentCents),
+      sub: `${pct.toFixed(1)}% of budget`,
+      valueClass: "text-foreground",
+      iconBg: "bg-secondary/10",
+      iconColor: "text-secondary",
+    },
+    {
+      icon: isOverBudget ? TrendingDown : PiggyBank,
+      label: isOverBudget ? "Over Budget" : "Remaining",
+      value: formatCents(Math.abs(remaining)),
+      sub: remainingSub,
+      valueClass: remainingValueClass,
+      iconBg: isOverBudget ? "bg-destructive/10" : isNearLimit ? "bg-amber-500/10" : "bg-emerald-500/10",
+      iconColor: isOverBudget ? "text-destructive" : isNearLimit ? "text-amber-600 dark:text-amber-400" : "text-emerald-700 dark:text-emerald-400",
+    },
+  ];
 
   return (
-    <div className="space-y-3" data-ocid="summary-header">
-      {/* ── Stat cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <StatCard
-          index={1}
-          icon={Wallet}
-          label="Total Budget"
-          value={formatCents(summary.totalBudgetCents)}
-          sub={`${summary.budgets.length} categor${summary.budgets.length === 1 ? "y" : "ies"}`}
-          iconBg="bg-primary/12"
-          iconColor="text-primary"
-        />
-        <StatCard
-          index={2}
-          icon={TrendingUp}
-          label="Total Spent"
-          value={formatCents(summary.totalSpentCents)}
-          sub={spentPctLabel}
-          iconBg="bg-secondary/12"
-          iconColor="text-secondary"
-        />
-        <StatCard
-          index={3}
-          icon={isOverBudget ? TrendingDown : PiggyBank}
-          label={isOverBudget ? "Over Budget" : "Remaining"}
-          value={formatCents(Math.abs(remaining))}
-          sub={remainingSub}
-          valueClass={remainingValueClass}
-          iconBg={
-            isOverBudget
-              ? "bg-destructive/12"
-              : isNearLimit
-                ? "bg-warning/12"
-                : "bg-emerald-500/12"
-          }
-          iconColor={
-            isOverBudget
-              ? "text-destructive"
-              : isNearLimit
-                ? "text-warning"
-                : "text-emerald-700 dark:text-emerald-400"
-          }
-        />
+    <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-subtle slide-up animate-stagger-1">
+      {/* Stat columns */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/60">
+        {stats.map(({ icon: Icon, label, value, sub, valueClass, iconBg, iconColor }) => (
+          <div key={label} className="flex items-start gap-3 px-5 py-4">
+            <div className={`flex-shrink-0 w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center`}>
+              <Icon className={`h-4 w-4 ${iconColor}`} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
+                {label}
+              </p>
+              <p className={`font-mono text-2xl font-bold tabular-nums leading-none ${valueClass}`}>
+                {value}
+              </p>
+              {sub && (
+                <p className="text-[11px] text-muted-foreground mt-1">{sub}</p>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* ── Global progress bar card ── */}
-      <div className="bg-card border border-border rounded-2xl px-5 py-4 shadow-subtle slide-up animate-stagger-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <span className="text-[10px] font-semibold text-muted-foreground font-body uppercase tracking-widest">
-              Monthly Progress
-            </span>
-            <p className="text-xs text-muted-foreground font-body mt-0.5">
-              {formatCents(summary.totalSpentCents)} spent of{" "}
-              {formatCents(summary.totalBudgetCents)} budget
-            </p>
-          </div>
-          <span
-            className={`font-mono text-lg font-bold tabular-nums ${barColorClass === "bg-destructive" ? "text-destructive" : barColorClass === "bg-warning" ? "text-warning" : "text-primary"}`}
-          >
+      {/* Integrated progress strip */}
+      <div className="border-t border-border/60 px-5 py-3 bg-muted/20">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em]">
+            Monthly Progress
+          </span>
+          <span className={`font-mono text-xs font-bold tabular-nums ${isOverBudget ? "text-destructive" : isNearLimit ? "text-amber-600 dark:text-amber-400" : "text-primary"}`}>
             {pct.toFixed(1)}%
           </span>
         </div>
-        <GlobalProgressBar pct={pct} barColorClass={barColorClass} />
-        {/* Progress milestones */}
+        <AnimatedBar pct={pct} colorClass={barColorClass} />
         <div className="flex justify-between mt-1.5">
           {[0, 25, 50, 75, 100].map((m) => (
             <span
               key={m}
-              className={`text-[9px] font-mono tabular-nums ${pct >= m ? "text-muted-foreground" : "text-muted-foreground/40"}`}
+              className={`text-[9px] font-mono tabular-nums ${pct >= m ? "text-muted-foreground" : "text-muted-foreground/35"}`}
             >
               {m}%
             </span>

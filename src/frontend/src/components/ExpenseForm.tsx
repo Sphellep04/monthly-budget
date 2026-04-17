@@ -323,7 +323,6 @@ export function ExpenseForm({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         className="sm:max-w-md bg-card border-border shadow-premium backdrop-blur-md"
-        data-ocid="expense_form.dialog"
       >
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-bold text-foreground">
@@ -350,7 +349,6 @@ export function ExpenseForm({
               onChange={(e) => setDate(e.target.value)}
               required
               className="input-focus h-10 font-mono text-sm"
-              data-ocid="expense_form.date.input"
             />
           </div>
 
@@ -376,7 +374,6 @@ export function ExpenseForm({
                 onChange={(e) => setAmountStr(e.target.value)}
                 onBlur={() => validateAmount(amountStr)}
                 className={`pl-9 input-focus h-10 font-mono text-sm ${amountError ? "border-destructive focus:border-destructive" : ""}`}
-                data-ocid="expense_form.amount.input"
                 aria-invalid={!!amountError}
               />
               {scanState === "done" && (
@@ -391,7 +388,6 @@ export function ExpenseForm({
             {amountError && (
               <p
                 className="flex items-center gap-1.5 text-xs text-destructive mt-1"
-                data-ocid="expense_form.amount.field_error"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {amountError}
@@ -417,7 +413,6 @@ export function ExpenseForm({
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
               className="input-focus text-sm resize-none"
-              data-ocid="expense_form.notes.textarea"
             />
           </div>
 
@@ -442,7 +437,6 @@ export function ExpenseForm({
                 {scanState === "scanning" && (
                   <div
                     className="absolute inset-0 bg-background/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2"
-                    data-ocid="expense_form.scan.loading_state"
                   >
                     <div className="relative w-10 h-10">
                       <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -462,7 +456,6 @@ export function ExpenseForm({
                   disabled={scanState === "scanning"}
                   className="absolute top-2 right-2 w-6 h-6 rounded-full bg-card/90 border border-border shadow-subtle flex items-center justify-center hover:bg-destructive/10 hover:border-destructive/40 transition-colors disabled:opacity-40"
                   aria-label="Remove receipt"
-                  data-ocid="expense_form.receipt_remove_button"
                 >
                   <X className="w-3 h-3 text-foreground" />
                 </button>
@@ -488,7 +481,6 @@ export function ExpenseForm({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full rounded-xl border border-dashed border-border bg-muted/20 hover:bg-muted/40 hover:border-primary/40 transition-colors px-4 py-4 flex flex-col items-center gap-2 group"
-                  data-ocid="expense_form.receipt.dropzone"
                 >
                   <div className="w-9 h-9 rounded-lg bg-card border border-border shadow-subtle flex items-center justify-center group-hover:border-primary/30 transition-colors">
                     <ImagePlus className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -506,7 +498,6 @@ export function ExpenseForm({
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
                   className="w-full rounded-xl border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors px-4 py-3 flex items-center justify-center gap-2.5 group"
-                  data-ocid="expense_form.scan_receipt_button"
                 >
                   <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                     <Camera className="w-3.5 h-3.5 text-primary" />
@@ -531,7 +522,6 @@ export function ExpenseForm({
               accept="image/jpeg,image/png,image/gif,image/webp"
               className="hidden"
               onChange={handleFileChange}
-              data-ocid="expense_form.receipt_file_input"
             />
             {/* Camera capture input — capture="environment" opens rear camera on mobile */}
             <input
@@ -541,13 +531,11 @@ export function ExpenseForm({
               capture="environment"
               className="hidden"
               onChange={handleCameraCapture}
-              data-ocid="expense_form.camera_input"
             />
 
             {receiptError && (
               <p
                 className="flex items-center gap-1.5 text-xs text-destructive mt-1"
-                data-ocid="expense_form.receipt.error_state"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {receiptError}
@@ -558,7 +546,6 @@ export function ExpenseForm({
             {isUploading && (
               <div
                 className="mt-2 space-y-1"
-                data-ocid="expense_form.receipt.loading_state"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1.5">
@@ -586,7 +573,6 @@ export function ExpenseForm({
               variant="outline"
               className="flex-1 button-hover"
               onClick={() => handleClose(false)}
-              data-ocid="expense_form.cancel_button"
               disabled={isBusy}
             >
               Cancel
@@ -595,7 +581,6 @@ export function ExpenseForm({
               type="submit"
               className="flex-1 button-hover shadow-elevated"
               disabled={isBusy}
-              data-ocid="expense_form.submit_button"
             >
               {isBusy ? (
                 <>

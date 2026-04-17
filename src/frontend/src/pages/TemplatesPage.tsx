@@ -101,7 +101,6 @@ function SaveBudgetDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        data-ocid="save_template.dialog"
         className="max-w-lg shadow-premium"
       >
         <DialogHeader>
@@ -131,7 +130,6 @@ function SaveBudgetDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
-              data-ocid="save_template.name_input"
               className="h-9"
               autoFocus
             />
@@ -183,7 +181,6 @@ function SaveBudgetDialog({
               variant="outline"
               size="sm"
               onClick={() => onOpenChange(false)}
-              data-ocid="save_template.cancel_button"
             >
               Cancel
             </Button>
@@ -191,7 +188,6 @@ function SaveBudgetDialog({
               size="sm"
               onClick={handleSave}
               disabled={createTemplate.isPending || !name.trim()}
-              data-ocid="save_template.submit_button"
               className="min-w-[110px]"
             >
               {createTemplate.isPending ? (
@@ -239,7 +235,6 @@ function RenameDialog({
   return (
     <Dialog open={!!template} onOpenChange={() => onClose()}>
       <DialogContent
-        data-ocid="rename_template.dialog"
         className="max-w-sm shadow-premium"
       >
         <DialogHeader>
@@ -255,7 +250,6 @@ function RenameDialog({
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleRename()}
-            data-ocid="rename_template.name_input"
             placeholder="Template name"
             autoFocus
           />
@@ -264,7 +258,6 @@ function RenameDialog({
               variant="outline"
               size="sm"
               onClick={onClose}
-              data-ocid="rename_template.cancel_button"
             >
               Cancel
             </Button>
@@ -272,7 +265,6 @@ function RenameDialog({
               size="sm"
               onClick={handleRename}
               disabled={updateTemplate.isPending || !name.trim()}
-              data-ocid="rename_template.save_button"
             >
               {updateTemplate.isPending ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -324,7 +316,6 @@ function ApplyTemplateDialog({
   return (
     <Dialog open={!!template} onOpenChange={() => onClose()}>
       <DialogContent
-        data-ocid="apply_template.dialog"
         className="max-w-sm shadow-premium"
       >
         <DialogHeader>
@@ -349,7 +340,6 @@ function ApplyTemplateDialog({
             variant="outline"
             size="sm"
             onClick={onClose}
-            data-ocid="apply_template.cancel_button"
           >
             Cancel
           </Button>
@@ -357,7 +347,6 @@ function ApplyTemplateDialog({
             size="sm"
             onClick={handleApply}
             disabled={applyTemplate.isPending}
-            data-ocid="apply_template.confirm_button"
             className="min-w-[90px]"
           >
             {applyTemplate.isPending ? (
@@ -396,7 +385,6 @@ function TemplateCard({
 
   return (
     <article
-      data-ocid={`templates.item.${index}`}
       className="group flex flex-col bg-card border border-border/60 rounded-xl shadow-subtle hover:shadow-elevated transition-shadow duration-200 overflow-hidden"
     >
       {/* Header stripe */}
@@ -459,7 +447,6 @@ function TemplateCard({
         <Button
           size="sm"
           onClick={() => onApply(template)}
-          data-ocid={`templates.apply_button.${index}`}
           className="flex-1 h-8 text-xs font-medium"
         >
           <Layers size={13} className="mr-1.5" />
@@ -469,7 +456,6 @@ function TemplateCard({
           variant="outline"
           size="sm"
           onClick={() => onRename(template)}
-          data-ocid={`templates.rename_button.${index}`}
           className="h-8 w-8 p-0"
           aria-label="Rename template"
         >
@@ -479,7 +465,6 @@ function TemplateCard({
           variant="outline"
           size="sm"
           onClick={() => onDelete(template)}
-          data-ocid={`templates.delete_button.${index}`}
           className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
           aria-label="Delete template"
         >
@@ -531,7 +516,6 @@ export function TemplatesPage() {
             <div>
               <h1
                 className="font-display text-xl font-bold text-foreground tracking-tight"
-                data-ocid="templates.page"
               >
                 Budget Templates
               </h1>
@@ -542,7 +526,6 @@ export function TemplatesPage() {
           </div>
           <Button
             onClick={() => setSaveOpen(true)}
-            data-ocid="templates.save_current_button"
             className="flex items-center gap-2 self-start sm:self-auto"
           >
             <Plus size={15} />
@@ -556,7 +539,6 @@ export function TemplatesPage() {
         {isLoading ? (
           <div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-            data-ocid="templates.loading_state"
           >
             {[1, 2, 3].map((k) => (
               <Skeleton key={k} className="h-64 rounded-xl" />
@@ -566,7 +548,6 @@ export function TemplatesPage() {
           /* Empty state */
           <div
             className="flex flex-col items-center justify-center py-16 px-6 text-center"
-            data-ocid="templates.empty_state"
           >
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5 shadow-subtle">
               <BookTemplate size={28} />
@@ -580,7 +561,6 @@ export function TemplatesPage() {
             </p>
             <Button
               onClick={() => setSaveOpen(true)}
-              data-ocid="templates.empty_save_button"
               className="flex items-center gap-2"
             >
               <Save size={15} />

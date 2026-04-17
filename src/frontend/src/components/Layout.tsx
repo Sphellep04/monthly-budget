@@ -12,18 +12,10 @@ export function Layout() {
             <Outlet />
           </div>
         </main>
-        <footer className="bg-card/80 border-t border-border/60 backdrop-blur-sm px-6 py-3.5 flex items-center justify-center gap-1.5">
-          <span className="text-xs text-muted-foreground/70">
-            © {new Date().getFullYear()}.
+        <footer className="bg-card/80 border-t border-border/60 backdrop-blur-sm px-6 py-3.5 flex items-center justify-center">
+          <span className="text-xs text-muted-foreground/50">
+            © {new Date().getFullYear()} BudgetWise
           </span>
-          <a
-            href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs text-muted-foreground/70 hover:text-foreground transition-colors-fast underline-offset-2 hover:underline"
-          >
-            Built with love using caffeine.ai
-          </a>
         </footer>
       </div>
     </div>

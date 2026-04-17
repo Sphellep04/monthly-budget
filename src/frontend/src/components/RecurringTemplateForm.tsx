@@ -142,7 +142,6 @@ export function RecurringTemplateForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-md shadow-premium backdrop-blur-md"
-        data-ocid="recurring_form.dialog"
       >
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
@@ -174,7 +173,6 @@ export function RecurringTemplateForm({
               placeholder="e.g. Netflix subscription"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              data-ocid="recurring_form.name_input"
               autoFocus
               className={`input-focus h-10 ${errors.name ? "border-destructive" : ""}`}
             />
@@ -207,7 +205,6 @@ export function RecurringTemplateForm({
                 placeholder="0.00"
                 value={amountStr}
                 onChange={(e) => setAmountStr(e.target.value)}
-                data-ocid="recurring_form.amount_input"
                 className={`pl-9 input-focus h-10 font-mono text-sm ${errors.amount ? "border-destructive" : ""}`}
               />
             </div>
@@ -236,7 +233,6 @@ export function RecurringTemplateForm({
               placeholder="1–31"
               value={dayOfMonth}
               onChange={(e) => setDayOfMonth(e.target.value)}
-              data-ocid="recurring_form.day_input"
               className={`input-focus h-10 font-mono w-32 ${errors.day ? "border-destructive" : ""}`}
             />
             {errors.day ? (
@@ -269,7 +265,6 @@ export function RecurringTemplateForm({
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              data-ocid="recurring_form.notes_textarea"
               className="input-focus text-sm resize-none"
             />
           </div>
@@ -279,7 +274,6 @@ export function RecurringTemplateForm({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              data-ocid="recurring_form.cancel_button"
               className="button-hover"
               disabled={isPending}
             >
@@ -288,7 +282,6 @@ export function RecurringTemplateForm({
             <Button
               type="submit"
               disabled={isPending}
-              data-ocid="recurring_form.submit_button"
               className="button-hover shadow-elevated min-w-[120px]"
             >
               {isPending ? (

@@ -43,7 +43,6 @@ interface BudgetFormProps {
 function FieldError({ message, id }: { message: string; id: string }) {
   return (
     <p
-      data-ocid={id}
       className="flex items-center gap-1.5 text-xs text-destructive mt-1 slide-up"
     >
       <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -110,7 +109,6 @@ export function BudgetForm({
         <FieldLabel htmlFor="budget-name">Budget Name</FieldLabel>
         <Input
           id="budget-name"
-          data-ocid="budget_form.name_input"
           placeholder="e.g. Grocery Fund"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -134,7 +132,6 @@ export function BudgetForm({
           </div>
           <Input
             id="budget-limit"
-            data-ocid="budget_form.limit_input"
             type="number"
             min="0.01"
             step="0.01"
@@ -163,7 +160,6 @@ export function BudgetForm({
           disabled={isPending}
         >
           <SelectTrigger
-            data-ocid="budget_form.category_select"
             aria-invalid={!!errors.category}
             className={`input-focus h-10 ${errors.category ? "border-destructive" : ""}`}
           >
@@ -200,7 +196,6 @@ export function BudgetForm({
               key={c}
               type="button"
               aria-pressed={color === c}
-              data-ocid="budget_form.color_swatch"
               onClick={() => setColor(c)}
               disabled={isPending}
               className={`w-8 h-8 rounded-full transition-spring focus-visible-ring relative flex items-center justify-center ${
@@ -236,7 +231,6 @@ export function BudgetForm({
         <Button
           type="button"
           variant="outline"
-          data-ocid="budget_form.cancel_button"
           onClick={onCancel}
           disabled={isPending}
           className="button-hover"
@@ -245,7 +239,6 @@ export function BudgetForm({
         </Button>
         <Button
           type="submit"
-          data-ocid="budget_form.submit_button"
           disabled={isPending}
           className="button-hover shadow-elevated min-w-[110px]"
         >

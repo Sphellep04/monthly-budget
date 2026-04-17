@@ -22,7 +22,6 @@ export function AlertsPanel({
     return (
       <div
         className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-emerald-500/8 border border-emerald-500/20"
-        data-ocid="alerts-panel.empty_state"
       >
         <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center">
           <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -42,7 +41,6 @@ export function AlertsPanel({
   return (
     <div
       className="rounded-xl border border-border bg-card shadow-subtle overflow-hidden"
-      data-ocid="alerts-panel.panel"
     >
       {/* Header */}
       <div className="flex items-center gap-2.5 px-4 py-3 border-b border-border bg-muted/30">
@@ -74,7 +72,6 @@ export function AlertsPanel({
               <div
                 key={s.budget.id.toString()}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-muted/20 transition-colors duration-150"
-                data-ocid={`alerts-panel.item.${i + 1}`}
               >
                 {/* Category icon */}
                 <div

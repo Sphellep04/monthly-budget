@@ -1,11 +1,6 @@
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import {
-  AlertCircle,
-  AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CATEGORY_ICONS, formatCents, getBudgetStatus } from "../types";
 import type { BudgetSummary } from "../types";
@@ -19,169 +14,129 @@ interface BudgetCardProps {
 const STATUS_CONFIG = {
   "on-track": {
     label: "On Track",
-    badgeClass:
-      "bg-emerald-500/10 text-emerald-700 border-emerald-500/30 dark:text-emerald-400",
-    icon: CheckCircle2,
-    barClass: "bg-primary",
-    glowClass: "glow-success",
+    dot: "bg-emerald-500",
+    labelClass: "text-emerald-700 dark:text-emerald-400",
+    barClass: "bg-emerald-500",
+    remainingClass: "text-emerald-700 dark:text-emerald-400",
   },
   warning: {
     label: "Near Limit",
-    badgeClass: "bg-warning/10 text-warning border-warning/30",
-    icon: AlertTriangle,
-    barClass: "bg-warning",
-    glowClass: "glow-warning",
+    dot: "bg-amber-500",
+    labelClass: "text-amber-600 dark:text-amber-400",
+    barClass: "bg-amber-500",
+    remainingClass: "text-amber-600 dark:text-amber-400",
   },
   "over-budget": {
     label: "Over Budget",
-    badgeClass: "bg-destructive/10 text-destructive border-destructive/30",
-    icon: AlertCircle,
+    dot: "bg-destructive",
+    labelClass: "text-destructive",
     barClass: "bg-destructive",
-    glowClass: "glow-danger",
+    remainingClass: "text-destructive",
   },
 } as const;
 
-/** Animated progress bar that fills on mount */
-function ProgressBar({ pct, barClass }: { pct: number; barClass: string }) {
+function ProgressBar({ pct, color }: { pct: number; color: string }) {
   const [mounted, setMounted] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    timerRef.current = setTimeout(() => setMounted(true), 80);
-    return () => {
-      if (timerRef.current !== null)
-        clearTimeout(timerRef.current ?? undefined);
-    };
+    timer.current = setTimeout(() => setMounted(true), 80);
+    return () => { if (timer.current) clearTimeout(timer.current); };
   }, []);
 
   return (
-    <div
-      className="h-1.5 bg-muted rounded-full overflow-hidden shadow-inner-subtle"
-      aria-hidden="true"
-    >
+    <div className="h-1.5 bg-muted/70 rounded-full overflow-hidden" aria-hidden>
       <div
-        className={`h-full rounded-full ${barClass}`}
+        className="h-full rounded-full transition-all"
         style={{
-          width: mounted ? `${pct}%` : "0%",
-          transition: "width 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+          width: mounted ? `${Math.min(pct, 100)}%` : "0%",
+          background: color,
+          transition: "width 0.75s cubic-bezier(0.4, 0, 0.2, 1)",
+          boxShadow: pct > 80 ? `0 0 6px ${color}60` : undefined,
         }}
       />
     </div>
   );
 }
 
-export function BudgetCard({
-  summary,
-  index,
-  alertThreshold = 80,
-}: BudgetCardProps) {
+export function BudgetCard({ summary, index, alertThreshold = 80 }: BudgetCardProps) {
   const { budget, totalSpentCents, remainingCents } = summary;
   const status = getBudgetStatus(summary, alertThreshold);
   const limit = Number(budget.limitCents);
   const spent = Number(totalSpentCents);
   const remaining = Number(remainingCents);
-  const pct = limit > 0 ? Math.min((spent / limit) * 100, 100) : 0;
+  const pct = limit > 0 ? (spent / limit) * 100 : 0;
   const icon = CATEGORY_ICONS[budget.category] ?? CATEGORY_ICONS.Other;
   const cfg = STATUS_CONFIG[status];
-  const StatusIcon = cfg.icon;
-
-  // Derive a soft tint from the budget's stored color for the icon bubble
-  const iconBg = budget.color ? `${budget.color}20` : undefined;
-
-  const staggerClass = `animate-stagger-${Math.min(index, 6)}`;
+  const accentColor = budget.color ?? "#6366f1";
+  const staggerClass = `animate-stagger-${Math.min(index + 1, 6)}`;
 
   return (
     <Link
       to="/budgets/$id"
       params={{ id: budget.id.toString() }}
-      className={`group block slide-up ${staggerClass}`}
-      data-ocid={`budget-card.item.${index}`}
+      className={cn("group block slide-up", staggerClass)}
     >
-      <div className="bg-card border border-border rounded-2xl p-4 card-hover h-full flex flex-col gap-3 hover:border-primary/30">
-        {/* ── Header row ── */}
-        <div className="flex items-start justify-between gap-2">
-          {/* Icon bubble + name */}
-          <div className="flex items-center gap-3 min-w-0">
+      <div className="relative bg-card border border-border/80 rounded-2xl overflow-hidden h-full flex flex-col transition-all duration-200 hover:border-border hover:shadow-elevated hover:-translate-y-0.5">
+
+        {/* Top color accent */}
+        <div className="h-[3px] w-full flex-shrink-0" style={{ background: accentColor }} />
+
+        <div className="flex flex-col gap-4 p-5 flex-1">
+
+          {/* Header: icon + name + status */}
+          <div className="flex items-start gap-3">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-subtle"
-              style={{ background: iconBg ?? "oklch(var(--primary)/0.12)" }}
-              aria-hidden="true"
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+              style={{ background: `${accentColor}18` }}
+              aria-hidden
             >
               {icon}
             </div>
-            <div className="min-w-0">
-              <h3 className="font-display font-semibold text-sm text-foreground truncate leading-tight">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-display font-semibold text-[0.875rem] text-foreground truncate leading-tight">
                 {budget.name}
               </h3>
-              <p className="text-xs text-muted-foreground font-body mt-0.5">
-                {budget.category}
-              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{budget.category}</p>
+            </div>
+            {/* Status pill */}
+            <div className={cn("flex items-center gap-1.5 flex-shrink-0 px-2 py-1 rounded-full bg-muted/60 text-[10px] font-semibold", cfg.labelClass)}>
+              <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", cfg.dot)} />
+              {cfg.label}
             </div>
           </div>
 
-          {/* Status badge + pulse alert icon */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {status === "warning" && (
-              <AlertTriangle
-                className="h-4 w-4 text-warning animate-pulse"
-                aria-label="Nearing budget limit"
-              />
-            )}
-            {status === "over-budget" && (
-              <AlertCircle
-                className="h-4 w-4 text-destructive animate-bounce"
-                aria-label="Over budget"
-              />
-            )}
-            <Badge
-              variant="outline"
-              className={`text-[10px] font-semibold gap-1 px-2 py-0.5 rounded-full border font-body ${cfg.badgeClass} ${status !== "on-track" ? cfg.glowClass : ""}`}
-            >
-              <StatusIcon className="h-2.5 w-2.5" />
-              {cfg.label}
-            </Badge>
+          {/* Hero number: remaining / over */}
+          <div className="flex-1">
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] mb-1.5">
+              {remaining >= 0 ? "Remaining" : "Over budget"}
+            </p>
+            <p className={cn("font-mono text-[1.75rem] font-bold tabular-nums leading-none", cfg.remainingClass)}>
+              {formatCents(remaining < 0 ? BigInt(Math.abs(remaining)) : remainingCents)}
+            </p>
+          </div>
+
+          {/* Progress + stats */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-mono text-muted-foreground tabular-nums">
+                {formatCents(totalSpentCents)}
+                <span className="text-muted-foreground/40 mx-1">/</span>
+                {formatCents(budget.limitCents)}
+              </span>
+              <span className={cn("font-mono font-semibold tabular-nums", cfg.labelClass)}>
+                {Math.min(pct, 999).toFixed(0)}%
+              </span>
+            </div>
+            <ProgressBar pct={pct} color={pct >= 100 ? "#ef4444" : pct >= alertThreshold ? "#f59e0b" : accentColor} />
           </div>
         </div>
 
-        {/* ── Amount row ── */}
-        <div className="flex items-baseline gap-1">
-          <span className="font-mono text-xl font-bold tabular-nums text-foreground leading-none">
-            {formatCents(totalSpentCents)}
-          </span>
-          <span className="text-xs text-muted-foreground font-body">of</span>
-          <span className="font-mono text-sm text-muted-foreground tabular-nums">
-            {formatCents(budget.limitCents)}
-          </span>
-          <span className="ml-auto font-mono text-xs font-semibold tabular-nums text-muted-foreground">
-            {pct.toFixed(0)}%
-          </span>
-        </div>
-
-        {/* ── Progress bar ── */}
-        <ProgressBar pct={pct} barClass={cfg.barClass} />
-
-        {/* ── Remaining + CTA row ── */}
-        <div className="flex items-center justify-between mt-auto">
-          <p className="text-xs font-mono tabular-nums">
-            {remaining >= 0 ? (
-              <>
-                <span
-                  className={`font-semibold ${status === "warning" ? "text-warning" : "text-emerald-700 dark:text-emerald-400"}`}
-                >
-                  {formatCents(remainingCents)}
-                </span>
-                <span className="text-muted-foreground"> left</span>
-              </>
-            ) : (
-              <span className="font-semibold text-destructive">
-                {formatCents(Math.abs(remaining))} over
-              </span>
-            )}
-          </p>
-
-          <span className="flex items-center gap-0.5 text-xs text-muted-foreground group-hover:text-primary transition-colors duration-200 font-body">
-            Details
-            <ArrowRight className="h-3 w-3 translate-x-0 group-hover:translate-x-0.5 transition-transform duration-200" />
+        {/* Footer CTA */}
+        <div className="px-5 py-3 border-t border-border/40 bg-muted/20">
+          <span className="flex items-center justify-end gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-primary transition-colors duration-150">
+            View details
+            <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform duration-150" />
           </span>
         </div>
       </div>

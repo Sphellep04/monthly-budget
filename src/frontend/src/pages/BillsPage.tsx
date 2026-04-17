@@ -194,7 +194,7 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
 
   return (
     <Dialog open={!!bill} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-sm" data-ocid="bills.mark_paid.dialog">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="font-display text-base">
             Mark as Paid — {bill?.template.name}
@@ -212,7 +212,6 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
               max={today}
               onChange={(e) => setPaidDate(e.target.value)}
               required
-              data-ocid="bills.paid_date.input"
             />
           </div>
           <div className="space-y-1.5">
@@ -227,7 +226,6 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
               value={paidAmount}
               onChange={(e) => setPaidAmount(e.target.value)}
               required
-              data-ocid="bills.paid_amount.input"
             />
           </div>
           <div className="flex gap-2 pt-1">
@@ -236,7 +234,6 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
               variant="outline"
               className="flex-1"
               onClick={onClose}
-              data-ocid="bills.mark_paid.cancel_button"
             >
               Cancel
             </Button>
@@ -244,7 +241,6 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
               type="submit"
               className="flex-1"
               disabled={isPending}
-              data-ocid="bills.mark_paid.confirm_button"
             >
               {isPending ? "Saving…" : "Confirm Payment"}
             </Button>
@@ -272,7 +268,6 @@ function BillCard({ bill, index, onMarkPaid }: BillCardProps) {
   return (
     <div
       className="group relative bg-card border border-border rounded-2xl p-4 shadow-subtle hover:shadow-elevated transition-all duration-200 hover:-translate-y-0.5"
-      data-ocid={`bills.item.${index + 1}`}
     >
       <div className="flex items-start gap-3">
         {/* Icon */}
@@ -326,7 +321,6 @@ function BillCard({ bill, index, onMarkPaid }: BillCardProps) {
               variant={status === "overdue" ? "destructive" : "default"}
               className="h-7 text-xs px-3 rounded-lg"
               onClick={() => onMarkPaid(bill)}
-              data-ocid={`bills.mark_paid_button.${index + 1}`}
             >
               Mark Paid
             </Button>
@@ -433,7 +427,6 @@ export function BillsPage() {
   return (
     <div
       className="p-4 md:p-6 space-y-5 max-w-3xl mx-auto"
-      data-ocid="bills.page"
     >
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -460,7 +453,6 @@ export function BillsPage() {
               size="sm"
               className="gap-1.5 h-9 rounded-xl text-xs"
               onClick={() => exportBillsCSV(bills, year, month)}
-              data-ocid="bills.export_button"
             >
               <Download size={13} />
               Export CSV
@@ -493,14 +485,12 @@ export function BillsPage() {
       {!isLoading && budgets.length > 0 && (
         <div
           className="flex gap-1 p-1 bg-muted/50 rounded-xl border border-border w-fit"
-          data-ocid="bills.filter.tab"
         >
           {filterTabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
               onClick={() => setActiveFilter(tab.key)}
-              data-ocid={`bills.filter.${tab.key}`}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
                 activeFilter === tab.key
                   ? "bg-card text-foreground shadow-subtle"
@@ -526,7 +516,7 @@ export function BillsPage() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="space-y-3" data-ocid="bills.loading_state">
+        <div className="space-y-3">
           {[1, 2, 3].map((k) => (
             <Skeleton key={k} className="h-20 rounded-2xl" />
           ))}
@@ -536,7 +526,6 @@ export function BillsPage() {
       ) : filteredBills.length === 0 ? (
         <div
           className="flex flex-col items-center justify-center py-16 text-center rounded-2xl border border-dashed border-border bg-card/40"
-          data-ocid="bills.empty_state"
         >
           <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
             <Bell size={22} className="text-muted-foreground" />
@@ -552,7 +541,6 @@ export function BillsPage() {
             size="sm"
             className="mt-3 text-xs"
             onClick={() => setActiveFilter("all")}
-            data-ocid="bills.clear_filter_button"
           >
             Clear filter
           </Button>
@@ -625,7 +613,6 @@ function EmptyStateNoTemplates() {
   return (
     <div
       className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle"
-      data-ocid="bills.empty_state"
     >
       <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 shadow-elevated">
         <Bell size={26} className="text-primary" />
@@ -637,7 +624,7 @@ function EmptyStateNoTemplates() {
         Bill reminders are derived from your recurring expense templates. Add a
         recurring template in a budget to start tracking bills here.
       </p>
-      <Link to="/budgets" data-ocid="bills.go_to_budgets_button">
+      <Link to="/budgets">
         <Button className="gap-2 rounded-xl h-10 shadow-elevated">
           <ExternalLink size={15} />
           Go to Budgets
@@ -665,7 +652,6 @@ function BillsSummary({ bills }: { bills: BillItem[] }) {
   return (
     <div
       className="grid grid-cols-3 gap-3 pt-1"
-      data-ocid="bills.summary.section"
     >
       <div className="bg-card border border-border rounded-2xl p-4 shadow-subtle text-center">
         <p className="text-xs text-muted-foreground mb-1">Still Due</p>

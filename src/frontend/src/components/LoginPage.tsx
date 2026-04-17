@@ -11,6 +11,12 @@ import {
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
+const trustPoints = [
+  "No password or email required",
+  "Cryptographically signed with your identity",
+  "Data stored decentralized on-chain",
+];
+
 const features = [
   {
     icon: Shield,
@@ -25,8 +31,8 @@ const features = [
     label: "Visual Insights",
     description: "Charts and trends at a glance",
     color: "text-chart-1",
-    bg: "bg-[oklch(var(--chart-1)/0.08)]",
-    border: "border-[oklch(var(--chart-1)/0.2)]",
+    bg: "bg-[oklch(0.72_0.19_141/0.1)]",
+    border: "border-[oklch(0.72_0.19_141/0.2)]",
   },
   {
     icon: RefreshCcw,
@@ -36,157 +42,388 @@ const features = [
     bg: "bg-accent/10",
     border: "border-accent/20",
   },
-] as const;
+];
 
-const trustPoints = [
-  "No password or email required",
-  "Cryptographically signed with your identity",
-  "Data stored decentralized on-chain",
+const previewCards = [
+  {
+    title: "April Budget",
+    value: "$3,200",
+    sub: "$2,154 spent",
+    pct: 67,
+    tag: "67% used",
+    tagBg: "rgba(251,191,36,0.18)",
+    tagColor: "#fbbf24",
+    barColor: "#fbbf24",
+    animDelay: "0s",
+    rotate: "-3deg",
+    style: { top: "0%", left: "0%" },
+    zIndex: 10,
+  },
+  {
+    title: "Savings Goal",
+    value: "$1,048",
+    sub: "of $3,200 target",
+    pct: 33,
+    tag: "On track",
+    tagBg: "rgba(52,211,153,0.18)",
+    tagColor: "#34d399",
+    barColor: "#34d399",
+    animDelay: "1.3s",
+    rotate: "2.5deg",
+    style: { top: "26%", right: "0%" },
+    zIndex: 20,
+  },
+  {
+    title: "Bills Due",
+    value: "3 pending",
+    sub: "Next due: Apr 22",
+    pct: 40,
+    tag: "Up to date",
+    tagBg: "rgba(96,165,250,0.18)",
+    tagColor: "#60a5fa",
+    barColor: "#60a5fa",
+    animDelay: "0.7s",
+    rotate: "-1.5deg",
+    style: { bottom: "0%", left: "8%" },
+    zIndex: 30,
+  },
 ];
 
 export function LoginPage() {
   const { login, isLoading } = useAuth();
 
   return (
-    <div
-      className="relative min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 overflow-hidden"
-      data-ocid="login.page"
-    >
-      {/* Background depth layers */}
+    <div className="min-h-screen flex overflow-hidden">
+      {/* ── Left Hero Panel ── */}
       <div
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        aria-hidden
+        className="hidden lg:flex w-[58%] relative flex-col justify-between p-12 overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(145deg, oklch(0.14 0.025 268) 0%, oklch(0.10 0.018 260) 55%, oklch(0.07 0.01 248) 100%)",
+        }}
       >
-        {/* Primary orb — top right */}
-        <div
-          className="absolute -top-48 -right-24 w-[520px] h-[520px] rounded-full opacity-30"
-          style={{
-            background:
-              "radial-gradient(circle, oklch(0.67 0.16 250) 0%, transparent 70%)",
-            filter: "blur(60px)",
-          }}
-        />
-        {/* Accent orb — bottom left */}
-        <div
-          className="absolute -bottom-32 -left-16 w-[420px] h-[420px] rounded-full opacity-20"
-          style={{
-            background:
-              "radial-gradient(circle, oklch(0.77 0.18 48) 0%, transparent 70%)",
-            filter: "blur(70px)",
-          }}
-        />
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage:
-              "linear-gradient(oklch(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, oklch(var(--foreground)) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
+        {/* Background atmosphere */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          {/* Primary glow — upper right */}
+          <div
+            className="absolute -top-32 -right-20 w-[580px] h-[580px] rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.67 0.16 250 / 0.28) 0%, transparent 65%)",
+              filter: "blur(70px)",
+            }}
+          />
+          {/* Green glow — lower left */}
+          <div
+            className="absolute -bottom-24 -left-16 w-[460px] h-[460px] rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.72 0.19 141 / 0.16) 0%, transparent 65%)",
+              filter: "blur(80px)",
+            }}
+          />
+          {/* Warm accent — center */}
+          <div
+            className="absolute top-[45%] left-[38%] w-72 h-72 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.77 0.18 48 / 0.1) 0%, transparent 65%)",
+              filter: "blur(55px)",
+            }}
+          />
+          {/* Dot grid texture */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(oklch(1 0 0 / 0.06) 1px, transparent 1px)",
+              backgroundSize: "26px 26px",
+            }}
+          />
+          {/* Faint diagonal lines */}
+          <div
+            className="absolute inset-0 opacity-[0.025]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(45deg, oklch(1 0 0) 0, oklch(1 0 0) 1px, transparent 0, transparent 50%)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+        </div>
+
+        {/* Top: Logo */}
+        <div className="relative z-10 flex items-center gap-3">
+          <div
+            className="flex items-center justify-center w-10 h-10 rounded-xl border"
+            style={{
+              background: "oklch(0.67 0.16 250 / 0.2)",
+              borderColor: "oklch(0.67 0.16 250 / 0.35)",
+            }}
+          >
+            <TrendingUp size={20} style={{ color: "oklch(0.8 0.12 250)" }} />
+          </div>
+          <span
+            className="font-display text-xl font-bold tracking-tight"
+            style={{ color: "oklch(0.95 0.005 250)" }}
+          >
+            BudgetWise
+          </span>
+        </div>
+
+        {/* Center: Headline + floating preview cards */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center gap-10 mt-10">
+          <div>
+            <p
+              className="text-xs font-bold tracking-[0.2em] uppercase mb-4"
+              style={{ color: "oklch(0.67 0.16 250 / 0.7)" }}
+            >
+              Personal Finance
+            </p>
+            <h2
+              className="font-display text-[2.8rem] leading-[1.08] font-bold mb-5"
+              style={{
+                background:
+                  "linear-gradient(128deg, oklch(0.97 0.005 0) 0%, oklch(0.78 0.06 250) 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              Know where
+              <br />
+              every dollar
+              <br />
+              goes.
+            </h2>
+            <p
+              className="text-[0.9375rem] leading-relaxed max-w-[340px]"
+              style={{ color: "oklch(0.60 0.02 265)" }}
+            >
+              Track budgets, spot trends, and stay on top of recurring bills —
+              all with on-chain privacy.
+            </p>
+          </div>
+
+          {/* Floating preview cards */}
+          <div className="relative h-80 w-full">
+            {previewCards.map((card) => (
+              <div
+                key={card.title}
+                className="absolute w-60 rounded-2xl p-4"
+                style={{
+                  ...card.style,
+                  zIndex: card.zIndex,
+                  background: "oklch(0.18 0.022 268 / 0.88)",
+                  border: "1px solid oklch(1 0 0 / 0.09)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  boxShadow:
+                    "0 24px 48px -12px oklch(0 0 0 / 0.55), inset 0 1px 0 0 oklch(1 0 0 / 0.07)",
+                  transform: `rotate(${card.rotate})`,
+                  animation: `float 4s ease-in-out ${card.animDelay} infinite`,
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span
+                    className="text-xs font-semibold"
+                    style={{ color: "oklch(0.65 0.02 265)" }}
+                  >
+                    {card.title}
+                  </span>
+                  <span
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    style={{
+                      background: card.tagBg,
+                      color: card.tagColor,
+                    }}
+                  >
+                    {card.tag}
+                  </span>
+                </div>
+                <p
+                  className="text-[1.3rem] font-bold mb-0.5 leading-none"
+                  style={{ color: "oklch(0.94 0.005 250)" }}
+                >
+                  {card.value}
+                </p>
+                <p
+                  className="text-xs mb-3"
+                  style={{ color: "oklch(0.48 0.02 265)" }}
+                >
+                  {card.sub}
+                </p>
+                <div
+                  className="h-1.5 rounded-full overflow-hidden"
+                  style={{ background: "oklch(1 0 0 / 0.08)" }}
+                >
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${card.pct}%`,
+                      background: card.barColor,
+                      boxShadow: `0 0 8px ${card.barColor}80`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom: Feature pills */}
+        <div className="relative z-10 flex flex-wrap gap-2.5">
+          {features.map(({ icon: Icon, label }) => (
+            <div
+              key={label}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-medium"
+              style={{
+                background: "oklch(1 0 0 / 0.05)",
+                border: "1px solid oklch(1 0 0 / 0.09)",
+                color: "oklch(0.58 0.02 265)",
+              }}
+            >
+              <Icon size={11} style={{ color: "oklch(0.52 0.04 265)" }} />
+              {label}
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="relative w-full max-w-[420px] flex flex-col items-center gap-8 animate-fade-in">
-        {/* Logo / Brand mark */}
-        <div
-          className="text-center animate-slide-up"
-          style={{ animationDelay: "0ms" }}
-        >
-          <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5">
-            {/* Glow ring */}
-            <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-md scale-110" />
-            <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/15 border border-primary/30 shadow-elevated">
-              <TrendingUp size={28} className="text-primary" strokeWidth={2} />
+      {/* ── Right Auth Panel ── */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-10 bg-background relative overflow-hidden">
+        {/* Subtle background */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div
+            className="absolute -top-40 -right-24 w-96 h-96 rounded-full opacity-[0.18]"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.67 0.16 250) 0%, transparent 70%)",
+              filter: "blur(64px)",
+            }}
+          />
+          <div
+            className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full opacity-[0.1]"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.77 0.18 48) 0%, transparent 70%)",
+              filter: "blur(64px)",
+            }}
+          />
+        </div>
+
+        <div className="relative w-full max-w-sm flex flex-col gap-7 animate-slide-up">
+          {/* Mobile-only brand header */}
+          <div
+            className="flex flex-col items-center lg:hidden"
+            style={{ animationDelay: "0ms" }}
+          >
+            <div className="relative mb-4">
+              <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-lg scale-125" />
+              <div className="relative flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/15 border border-primary/30 shadow-elevated">
+                <TrendingUp size={24} className="text-primary" strokeWidth={2} />
+              </div>
             </div>
-          </div>
-          <h1 className="font-display text-4xl font-bold text-foreground tracking-tight mb-2 leading-none">
-            BudgetWise
-          </h1>
-          <p className="text-muted-foreground font-body text-[0.9375rem] leading-relaxed">
-            Premium monthly budget tracking.
-            <br />
-            <span className="text-muted-foreground/60 text-sm">
+            <h1 className="font-display text-3xl font-bold text-foreground tracking-tight mb-1">
+              BudgetWise
+            </h1>
+            <p className="text-sm text-muted-foreground">
               Private. Decentralized. Yours.
-            </span>
-          </p>
-        </div>
+            </p>
+          </div>
 
-        {/* Main card */}
-        <div
-          className="w-full bg-card border border-border/80 rounded-2xl shadow-premium overflow-hidden animate-slide-up"
-          style={{ animationDelay: "60ms" }}
-        >
-          {/* Card top accent bar */}
-          <div className="h-0.5 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+          {/* Desktop heading above card */}
+          <div className="hidden lg:block">
+            <h2 className="font-display text-3xl font-bold text-foreground tracking-tight leading-tight">
+              Welcome back
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              Sign in to continue managing your finances.
+            </p>
+          </div>
 
-          <div className="p-8">
-            <div className="mb-6">
-              <h2 className="font-display text-[1.25rem] font-semibold text-card-foreground tracking-tight mb-1.5">
-                Sign in to continue
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Use Internet Identity for secure, passwordless authentication.
-              </p>
-            </div>
+          {/* Auth card */}
+          <div className="bg-card border border-border/80 rounded-2xl shadow-premium overflow-hidden">
+            {/* Top accent line */}
+            <div className="h-[3px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-80" />
 
-            {/* CTA Button */}
-            <Button
-              size="lg"
-              className={cn(
-                "w-full gap-2.5 font-semibold text-[0.9375rem] h-12 rounded-xl shadow-elevated button-hover",
-                "bg-primary hover:bg-primary/90 text-primary-foreground",
-                "border border-primary/20",
-                "relative overflow-hidden group",
-              )}
-              onClick={login}
-              disabled={isLoading}
-              data-ocid="login.submit_button"
-            >
-              {/* Shimmer overlay on hover */}
-              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-smooth bg-gradient-to-r from-transparent via-primary-foreground/10 to-transparent -skew-x-12 translate-x-[-120%] group-hover:translate-x-[120%] duration-700" />
+            <div className="p-7">
+              {/* Mobile heading inside card */}
+              <div className="lg:hidden mb-5">
+                <h2 className="font-display text-xl font-bold text-foreground tracking-tight">
+                  Sign in to continue
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Use Internet Identity — no password needed.
+                </p>
+              </div>
 
-              {isLoading ? (
-                <>
-                  <Loader2 size={17} className="animate-spin flex-shrink-0" />
-                  <span>Connecting…</span>
-                </>
-              ) : (
-                <>
-                  <span>Sign in with Internet Identity</span>
-                  <ArrowRight
-                    size={16}
-                    className="flex-shrink-0 transition-spring group-hover:translate-x-0.5"
-                  />
-                </>
-              )}
-            </Button>
-
-            {/* Trust points */}
-            <div className="mt-5 space-y-2">
-              {trustPoints.map((point) => (
-                <div key={point} className="flex items-center gap-2.5">
-                  <CheckCircle2
-                    size={13}
-                    className="text-[oklch(var(--chart-1))] flex-shrink-0"
-                  />
-                  <span className="text-xs text-muted-foreground">{point}</span>
+              {/* Internet Identity logo area */}
+              <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/50 border border-border/50 mb-5">
+                <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 border border-primary/25 flex-shrink-0">
+                  <Shield size={16} className="text-primary" strokeWidth={2} />
                 </div>
-              ))}
+                <div>
+                  <p className="text-xs font-semibold text-foreground">
+                    Internet Identity
+                  </p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    Secure, passwordless authentication
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <Button
+                size="lg"
+                className={cn(
+                  "w-full gap-2.5 font-semibold text-[0.9375rem] h-12 rounded-xl button-hover",
+                  "bg-primary hover:bg-primary/90 text-primary-foreground",
+                  "relative overflow-hidden group shadow-elevated",
+                )}
+                onClick={login}
+                disabled={isLoading}
+              >
+                <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-smooth bg-gradient-to-r from-transparent via-primary-foreground/10 to-transparent -skew-x-12 translate-x-[-120%] group-hover:translate-x-[120%] duration-700" />
+                {isLoading ? (
+                  <>
+                    <Loader2 size={17} className="animate-spin flex-shrink-0" />
+                    <span>Connecting…</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Continue with Internet Identity</span>
+                    <ArrowRight
+                      size={16}
+                      className="flex-shrink-0 transition-spring group-hover:translate-x-0.5"
+                    />
+                  </>
+                )}
+              </Button>
+
+              {/* Trust points */}
+              <div className="mt-5 space-y-2.5 pt-5 border-t border-border/50">
+                {trustPoints.map((point) => (
+                  <div key={point} className="flex items-start gap-2.5">
+                    <CheckCircle2
+                      size={13}
+                      className="text-chart-1 flex-shrink-0 mt-0.5"
+                    />
+                    <span className="text-xs text-muted-foreground leading-relaxed">
+                      {point}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Feature cards */}
-        <div
-          className="grid grid-cols-3 gap-3 w-full animate-slide-up"
-          style={{ animationDelay: "120ms" }}
-        >
-          {features.map(
-            ({ icon: Icon, label, description, color, bg, border }) => (
+          {/* Feature cards — shown on right panel on both mobile + desktop */}
+          <div className="grid grid-cols-3 gap-2.5">
+            {features.map(({ icon: Icon, label, description, color, bg, border }) => (
               <div
                 key={label}
                 className={cn(
-                  "group bg-card border rounded-xl px-3 py-4 flex flex-col items-center gap-2 text-center shadow-subtle card-hover",
+                  "group bg-card border rounded-xl px-2.5 py-3.5 flex flex-col items-center gap-2 text-center shadow-subtle card-hover",
                   border,
                 )}
               >
@@ -196,10 +433,10 @@ export function LoginPage() {
                     bg,
                   )}
                 >
-                  <Icon size={15} className={color} strokeWidth={2} />
+                  <Icon size={14} className={color} strokeWidth={2} />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-foreground leading-tight">
+                  <p className="text-[11px] font-semibold text-foreground leading-tight">
                     {label}
                   </p>
                   <p className="text-[10px] text-muted-foreground/70 mt-0.5 leading-tight">
@@ -207,25 +444,14 @@ export function LoginPage() {
                   </p>
                 </div>
               </div>
-            ),
-          )}
-        </div>
+            ))}
+          </div>
 
-        {/* Footer */}
-        <p
-          className="text-xs text-muted-foreground/50 text-center animate-fade-in"
-          style={{ animationDelay: "180ms" }}
-        >
-          © {new Date().getFullYear()}.{" "}
-          <a
-            href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-muted-foreground transition-colors-fast underline-offset-2 hover:underline"
-          >
-            Built with love using caffeine.ai
-          </a>
-        </p>
+          {/* Footer */}
+          <p className="text-xs text-muted-foreground/40 text-center">
+            © {new Date().getFullYear()} BudgetWise
+          </p>
+        </div>
       </div>
     </div>
   );

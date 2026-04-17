@@ -1,6 +1,5 @@
-import { useActor } from "@caffeineai/core-infrastructure";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createActor } from "../backend";
+import { useActorOrMock } from "./useActorOrMock";
 import type {
   BillPayment,
   BillPaymentInput,
@@ -19,7 +18,7 @@ import type {
 } from "../types";
 
 export function useMonthlySummary(year: number, month: number) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<MonthlySummary>({
     queryKey: ["monthly-summary", year, month],
     queryFn: async () => {
@@ -51,7 +50,7 @@ export function useBudgetSummary(
 }
 
 export function useExpenses(budgetId: bigint) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<Expense[]>({
     queryKey: ["expenses", budgetId.toString()],
     queryFn: async () => {
@@ -65,7 +64,7 @@ export function useExpenses(budgetId: bigint) {
 
 export function useCreateBudget() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (budget: Omit<Budget, "id" | "owner" | "createdAt">) => {
       if (!actor) throw new Error("Actor not ready");
@@ -86,7 +85,7 @@ export function useCreateBudget() {
 
 export function useAddExpense() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (
       expense: Omit<
@@ -114,7 +113,7 @@ export function useAddExpense() {
 
 export function useDeleteExpense() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (id: bigint) => {
       if (!actor) throw new Error("Actor not ready");
@@ -129,7 +128,7 @@ export function useDeleteExpense() {
 
 export function useDeleteBudget() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (id: bigint) => {
       if (!actor) throw new Error("Actor not ready");
@@ -144,7 +143,7 @@ export function useDeleteBudget() {
 // ─── Recurring Templates ──────────────────────────────────────────────────────
 
 export function useRecurringTemplates(budgetId: bigint) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<RecurringTemplate[]>({
     queryKey: ["recurring-templates", budgetId.toString()],
     queryFn: async () => {
@@ -158,7 +157,7 @@ export function useRecurringTemplates(budgetId: bigint) {
 
 export function useCreateRecurringTemplate() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (input: RecurringTemplateInput) => {
       if (!actor) throw new Error("Actor not ready");
@@ -174,7 +173,7 @@ export function useCreateRecurringTemplate() {
 
 export function useUpdateRecurringTemplate() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async ({
       id,
@@ -196,7 +195,7 @@ export function useUpdateRecurringTemplate() {
 
 export function useDeleteRecurringTemplate() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async ({
       id,
@@ -217,7 +216,7 @@ export function useDeleteRecurringTemplate() {
 }
 
 export function useApplyRecurringTemplates(year: number, month: number) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<Expense[]>({
     queryKey: ["apply-recurring", year, month],
     queryFn: async () => {
@@ -236,7 +235,7 @@ export function useApplyRecurringTemplates(year: number, month: number) {
 // ─── Charts / Trends ─────────────────────────────────────────────────────────
 
 export function useMonthlyTrend(months: number) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   const now = new Date();
   return useQuery<MonthlyTrendPoint[]>({
     queryKey: ["monthly-trend", months],
@@ -254,7 +253,7 @@ export function useMonthlyTrend(months: number) {
 }
 
 export function useCategoryTrend(budgetId: bigint, months: number) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   const now = new Date();
   return useQuery<CategoryTrendPoint[]>({
     queryKey: ["category-trend", budgetId.toString(), months],
@@ -273,7 +272,7 @@ export function useCategoryTrend(budgetId: bigint, months: number) {
 }
 
 export function useDailySpending(year: number, month: number) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<DailySpendingPoint[]>({
     queryKey: ["daily-spending", year, month],
     queryFn: async () => {
@@ -286,7 +285,7 @@ export function useDailySpending(year: number, month: number) {
 }
 
 export function useCategoryBreakdown(year: number, month: number) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<CategoryBreakdownPoint[]>({
     queryKey: ["category-breakdown", year, month],
     queryFn: async () => {
@@ -304,7 +303,7 @@ export function useCategoryBreakdown(year: number, month: number) {
 // ─── Notes ───────────────────────────────────────────────────────────────────
 
 export function useListNotes() {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<Note[]>({
     queryKey: ["notes"],
     queryFn: async () => {
@@ -318,7 +317,7 @@ export function useListNotes() {
 
 export function useCreateNote() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async ({
       title,
@@ -335,7 +334,7 @@ export function useCreateNote() {
 
 export function useUpdateNote() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async ({
       id,
@@ -357,7 +356,7 @@ export function useUpdateNote() {
 
 export function useDeleteNote() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (id: string) => {
       if (!actor) throw new Error("Actor not ready");
@@ -390,7 +389,7 @@ export interface AnnualStats {
 }
 
 export function useAnnualSummary(year: number) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
 
   return useQuery<{ monthRows: MonthRow[]; stats: AnnualStats }>({
     queryKey: ["annual-summary", year],
@@ -461,7 +460,7 @@ export function useAnnualSummary(year: number) {
 // ─── User Settings ────────────────────────────────────────────────────────────
 
 export function useUserSettings() {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<UserSettings>({
     queryKey: ["user-settings"],
     queryFn: async () => {
@@ -478,7 +477,7 @@ export function useUserSettings() {
 
 export function useUpdateUserSettings() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (settings: UserSettings) => {
       if (!actor) throw new Error("Actor not ready");
@@ -504,7 +503,7 @@ export interface SearchExpensesParams {
 }
 
 export function useSearchExpenses(params: SearchExpensesParams | null) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<Expense[]>({
     queryKey: [
       "search-expenses",
@@ -541,7 +540,7 @@ export function useGetExpensesInRange(
   endDate: string,
   enabled = true,
 ) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<Expense[]>({
     queryKey: ["expenses-in-range", startDate, endDate],
     queryFn: async () => {
@@ -558,7 +557,7 @@ export function useGetCategoryBreakdownForRange(
   endDate: string,
   enabled = true,
 ) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<CategoryBreakdownPoint[]>({
     queryKey: ["category-breakdown-range", startDate, endDate],
     queryFn: async () => {
@@ -576,7 +575,7 @@ export function useGetCategoryBreakdownForRange(
 // ─── Bill Payments ────────────────────────────────────────────────────────────
 
 export function useListBillPayments(year: number, month: number) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<BillPayment[]>({
     queryKey: ["bill-payments", year, month],
     queryFn: async () => {
@@ -590,7 +589,7 @@ export function useListBillPayments(year: number, month: number) {
 
 export function useCreateBillPayment() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (input: BillPaymentInput) => {
       if (!actor) throw new Error("Actor not ready");
@@ -610,7 +609,7 @@ export function useCreateBillPayment() {
 
 export function useUpdateBillPayment() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async ({
       id,
@@ -636,7 +635,7 @@ export function useUpdateBillPayment() {
 
 export function useDeleteBillPayment() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async ({ id }: { id: string; year: number; month: number }) => {
       if (!actor) throw new Error("Actor not ready");
@@ -653,7 +652,7 @@ export function useDeleteBillPayment() {
 // ─── List all budgets (used by bills page to fetch all templates) ─────────────
 
 export function useListBudgets(year: number, month: number) {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<Budget[]>({
     queryKey: ["budgets-list", year, month],
     queryFn: async () => {

@@ -1,4 +1,6 @@
-// Version: 3.0.0
+cd src/backend
+mops install
+mops build// Version: 3.0.0
 type BillPayment__777909272 =
   {
     dueDay : Nat;

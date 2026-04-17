@@ -1,6 +1,5 @@
-import { useActor } from "@caffeineai/core-infrastructure";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createActor } from "../backend";
+import { useActorOrMock } from "./useActorOrMock";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,7 +26,7 @@ export interface BudgetTemplateInput {
 // ─── Hooks ────────────────────────────────────────────────────────────────────
 
 export function useListBudgetTemplates() {
-  const { actor, isFetching } = useActor(createActor);
+  const { actor, isFetching } = useActorOrMock();
   return useQuery<BudgetTemplate[]>({
     queryKey: ["budget-templates"],
     queryFn: async () => {
@@ -41,7 +40,7 @@ export function useListBudgetTemplates() {
 
 export function useCreateBudgetTemplate() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (input: BudgetTemplateInput) => {
       if (!actor) throw new Error("Actor not ready");
@@ -58,7 +57,7 @@ export function useCreateBudgetTemplate() {
 
 export function useUpdateBudgetTemplate() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
       if (!actor) throw new Error("Actor not ready");
@@ -78,7 +77,7 @@ export function useUpdateBudgetTemplate() {
 
 export function useDeleteBudgetTemplate() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async (id: string) => {
       if (!actor) throw new Error("Actor not ready");
@@ -92,7 +91,7 @@ export function useDeleteBudgetTemplate() {
 
 export function useApplyBudgetTemplate() {
   const queryClient = useQueryClient();
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
   return useMutation({
     mutationFn: async ({
       templateId,

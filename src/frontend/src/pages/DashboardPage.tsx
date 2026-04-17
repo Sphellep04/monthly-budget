@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useActor } from "@caffeineai/core-infrastructure";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -10,7 +9,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useState } from "react";
-import { createActor } from "../backend";
+import { useActorOrMock } from "../hooks/useActorOrMock";
 import { AlertsPanel } from "../components/AlertsPanel";
 import { BudgetCard } from "../components/BudgetCard";
 import { MonthSelector } from "../components/MonthSelector";
@@ -33,7 +32,6 @@ function EmptyState() {
   return (
     <div
       className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle"
-      data-ocid="dashboard.empty_state"
     >
       {/* Icon */}
       <div className="relative mb-6">
@@ -56,7 +54,7 @@ function EmptyState() {
         goes.
       </p>
 
-      <Link to="/budgets" data-ocid="dashboard.create_budget_button">
+      <Link to="/budgets">
         <Button className="gap-2 font-body px-6 h-10 rounded-xl shadow-elevated button-hover transition-spring">
           <PlusCircle className="h-4 w-4" />
           Create your first budget
@@ -86,7 +84,7 @@ function ExportCsvButton({
   summary: ReturnType<typeof useMonthlySummary>["data"];
 }) {
   const [isExporting, setIsExporting] = useState(false);
-  const { actor } = useActor(createActor);
+  const { actor } = useActorOrMock();
 
   const handleExport = async () => {
     if (!summary || !actor) return;
@@ -165,7 +163,6 @@ function ExportCsvButton({
       className="gap-2 font-body h-9 px-3.5 rounded-xl border-border hover:border-primary/40 hover:bg-primary/5 transition-smooth shadow-subtle"
       onClick={handleExport}
       disabled={!summary || !actor || isExporting}
-      data-ocid="dashboard.export_csv_button"
     >
       {isExporting ? (
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -175,6 +172,13 @@ function ExportCsvButton({
       {isExporting ? "Exporting…" : "Export CSV"}
     </Button>
   );
+}
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
 }
 
 export function DashboardPage() {
@@ -192,16 +196,18 @@ export function DashboardPage() {
   return (
     <div
       className="p-5 md:p-7 space-y-7 max-w-7xl mx-auto page-enter"
-      data-ocid="dashboard.page"
     >
       {/* ── Page hero header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-1">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1.5">
+            {getGreeting()}
+          </p>
+          <div className="flex items-baseline gap-2 mb-1">
             <h1 className="font-display text-3xl font-bold text-foreground tracking-tight leading-none">
-              {getMonthName(month)} Budget
+              {getMonthName(month)}
             </h1>
-            <span className="font-mono text-lg text-muted-foreground font-medium tabular-nums leading-none mt-0.5">
+            <span className="font-mono text-xl text-muted-foreground/60 font-medium tabular-nums leading-none">
               {year}
             </span>
           </div>
@@ -224,7 +230,6 @@ export function DashboardPage() {
             <Button
               size="sm"
               className="gap-2 font-body h-9 px-4 rounded-xl shadow-elevated button-hover transition-spring"
-              data-ocid="dashboard.add_budget_button"
             >
               <PlusCircle className="h-4 w-4" />
               New Budget
@@ -259,7 +264,6 @@ export function DashboardPage() {
             <Link
               to="/budgets"
               className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 font-medium font-body transition-colors duration-200 group"
-              data-ocid="dashboard.view_all_link"
             >
               Manage budgets
               <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />
@@ -272,7 +276,6 @@ export function DashboardPage() {
         ) : hasBudgets ? (
           <div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-            data-ocid="dashboard.budget_list"
           >
             {budgets.map((bs, i) => (
               <BudgetCard
