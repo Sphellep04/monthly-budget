@@ -62,8 +62,8 @@ pnpm install
 **Step 3 — Enable mock mode** *(first time only — creates `.env.local`)*
 
 ```powershell
-# PowerShell
-"VITE_USE_MOCK=true" | Out-File -FilePath .env.local -Encoding utf8
+# PowerShell — must use -Encoding utf8 (Vite cannot read UTF-16)
+"VITE_USE_MOCK=true" | Out-File -FilePath .env.local -Encoding utf8NoBOM
 ```
 
 ```bash
