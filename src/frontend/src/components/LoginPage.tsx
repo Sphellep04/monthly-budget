@@ -7,7 +7,6 @@ import {
   Loader2,
   RefreshCcw,
   Shield,
-  TrendingUp,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
@@ -152,22 +151,15 @@ export function LoginPage() {
         </div>
 
         {/* Top: Logo */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div
-            className="flex items-center justify-center w-10 h-10 rounded-xl border"
-            style={{
-              background: "oklch(0.67 0.16 250 / 0.2)",
-              borderColor: "oklch(0.67 0.16 250 / 0.35)",
-            }}
-          >
-            <TrendingUp size={20} style={{ color: "oklch(0.8 0.12 250)" }} />
+        <div className="relative z-10">
+          <div className="bg-white/95 rounded-xl px-3 py-2 inline-flex shadow-subtle">
+            <img
+              src="/BudgetWise-Logo.png"
+              alt="BudgetWise"
+              className="h-8 w-auto object-contain"
+              draggable={false}
+            />
           </div>
-          <span
-            className="font-display text-xl font-bold tracking-tight"
-            style={{ color: "oklch(0.95 0.005 250)" }}
-          >
-            BudgetWise
-          </span>
         </div>
 
         {/* Center: Headline + floating preview cards */}
@@ -317,15 +309,12 @@ export function LoginPage() {
             className="flex flex-col items-center lg:hidden"
             style={{ animationDelay: "0ms" }}
           >
-            <div className="relative mb-4">
-              <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-lg scale-125" />
-              <div className="relative flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/15 border border-primary/30 shadow-elevated">
-                <TrendingUp size={24} className="text-primary" strokeWidth={2} />
-              </div>
-            </div>
-            <h1 className="font-display text-3xl font-bold text-foreground tracking-tight mb-1">
-              BudgetWise
-            </h1>
+            <img
+              src="/BudgetWise-Logo.png"
+              alt="BudgetWise"
+              className="h-16 w-auto object-contain mb-2"
+              draggable={false}
+            />
             <p className="text-sm text-muted-foreground">
               Private. Decentralized. Yours.
             </p>

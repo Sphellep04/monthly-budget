@@ -13,7 +13,6 @@ import {
   Search,
   Settings,
   StickyNote,
-  TrendingUp,
   Wallet,
   X,
 } from "lucide-react";
@@ -128,22 +127,13 @@ function SidebarInner({
   return (
     <div className="flex flex-col h-full">
       {/* ── Brand ── */}
-      <div className="px-5 pt-6 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="relative flex-shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-glow-sm">
-              <TrendingUp size={18} strokeWidth={2.5} className="text-primary-foreground" />
-            </div>
-          </div>
-          <div>
-            <p className="font-display font-bold text-[1.05rem] text-sidebar-foreground tracking-tight leading-none">
-              BudgetWise
-            </p>
-            <p className="text-[10px] text-muted-foreground/50 font-mono mt-0.5 tracking-widest uppercase">
-              Finance
-            </p>
-          </div>
-        </div>
+      <div className="px-5 pt-5 pb-4">
+        <img
+          src="/BudgetWise-Logo.png"
+          alt="BudgetWise"
+          className="h-10 w-auto object-contain"
+          draggable={false}
+        />
       </div>
 
       {/* ── Nav ── */}
