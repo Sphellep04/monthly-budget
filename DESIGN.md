@@ -15,6 +15,7 @@ Elevated card depth with shadow hierarchy, polished focus rings and input states
 ## Color Palette
 
 | Token      | Light OKLCH | Dark OKLCH   | Role                        |
+
 | ---------- | ----------- | ------------ | --------------------------- |
 | background | 0.98 0 0    | 0.12 0 0     | Primary surface             |
 | foreground | 0.2 0 0     | 0.92 0 0     | Text & content              |

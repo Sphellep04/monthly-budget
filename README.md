@@ -39,30 +39,58 @@ A personal finance app for tracking monthly budgets and expenses. Built on the I
 
 - [Node.js](https://nodejs.org/) 18+
 - [pnpm](https://pnpm.io/) 8+
-- [DFX](https://internetcomputer.org/docs/current/developer-docs/getting-started/install/) (for deploying to ICP)
+- [DFX](https://internetcomputer.org/docs/current/developer-docs/getting-started/install/) (for deploying to ICP — not needed for local mock dev)
 
 ### Local development (mock backend)
 
-The frontend can run fully without a deployed canister using the built-in mock backend.
+The frontend runs fully without a deployed canister using the built-in mock backend.
+
+> **Important:** all `pnpm` commands must be run from inside `monthly-budget/src/frontend/`, not the repo root. Running them from the wrong directory will produce `ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND`.
+
+**Step 1 — Navigate to the frontend folder**
+
+```powershell
+cd "monthly-budget\src\frontend"
+```
+
+**Step 2 — Install dependencies** *(first time only)*
+
+```powershell
+pnpm install
+```
+
+**Step 3 — Enable mock mode** *(first time only — creates `.env.local`)*
+
+```powershell
+# PowerShell
+"VITE_USE_MOCK=true" | Out-File -FilePath .env.local -Encoding utf8
+```
 
 ```bash
-# 1. Install dependencies
-cd monthly-budget/src/frontend
-pnpm install
-
-# 2. Enable mock mode
+# bash / Git Bash
 echo "VITE_USE_MOCK=true" > .env.local
+```
 
-# 3. Start the dev server
+**Step 4 — Start the dev server**
+
+```powershell
 pnpm dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). The app will bypass authentication and use in-memory mock data.
+**Step 5 — Open in your browser**
+
+```
+http://localhost:5173
+```
+
+The app will skip the login screen and load with sample data automatically.
+
+---
 
 ### Full ICP deployment
 
 ```bash
-# From the project root
+# From the monthly-budget/ directory
 dfx start --background
 dfx deploy
 ```
@@ -84,7 +112,8 @@ monthly-budget/
 │   │   │   ├── pages/         # Route pages
 │   │   │   └── types/         # Shared types + helpers
 │   │   ├── public/
-│   │   │   ├── icons/         # PWA icons (replace with real logo)
+│   │   │   ├── icons/             # PWA icons (generated from BudgetWise-Logo.png)
+│   │   │   ├── BudgetWise-Logo.png  # Source logo — run gen-pwa-icons.mjs after updating
 │   │   │   └── apple-touch-icon.png
 │   │   └── vite.config.js
 │   ├── backend/           # Motoko canister
