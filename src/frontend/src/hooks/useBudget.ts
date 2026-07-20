@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useActorOrMock } from "./useActorOrMock";
 import type {
   BillPayment,
   BillPaymentInput,
@@ -16,6 +15,7 @@ import type {
   RecurringTemplateInput,
   UserSettings,
 } from "../types";
+import { useActorOrMock } from "./useActorOrMock";
 
 export function useMonthlySummary(year: number, month: number) {
   const { actor, isFetching } = useActorOrMock();

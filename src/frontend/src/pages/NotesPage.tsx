@@ -102,9 +102,7 @@ function NoteModal({
   const isPending = createNote.isPending || updateNote.isPending;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-background/70"
@@ -162,13 +160,7 @@ function NoteModal({
               className="rounded-lg"
               autoFocus
             />
-            {error && (
-              <p
-                className="text-xs text-destructive"
-              >
-                {error}
-              </p>
-            )}
+            {error && <p className="text-xs text-destructive">{error}</p>}
           </div>
           <div className="space-y-1.5">
             <Label
@@ -195,11 +187,7 @@ function NoteModal({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={isPending}
-            >
+            <Button type="submit" className="flex-1" disabled={isPending}>
               {isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
@@ -341,10 +329,7 @@ export function NotesPage() {
               mind.
             </p>
           </div>
-          <Button
-            onClick={openCreate}
-            className="gap-2 shrink-0 mt-1"
-          >
+          <Button onClick={openCreate} className="gap-2 shrink-0 mt-1">
             <Plus size={15} />
             New Note
           </Button>
@@ -382,10 +367,7 @@ export function NotesPage() {
               Create your first note — track financial goals, reminders, or
               monthly reflections.
             </p>
-            <Button
-              onClick={openCreate}
-              className="gap-2"
-            >
+            <Button onClick={openCreate} className="gap-2">
               <Plus size={15} />
               Create your first note
             </Button>
@@ -437,9 +419,7 @@ export function NotesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

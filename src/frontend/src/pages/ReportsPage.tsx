@@ -137,9 +137,7 @@ function ReportSkeleton() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div
-      className="flex flex-col items-center justify-center py-20 text-center"
-    >
+    <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
         <FileText className="w-8 h-8 text-muted-foreground" />
       </div>
@@ -304,9 +302,7 @@ export function ReportsPage() {
               />
             </div>
             {startDate && endDate && startDate > endDate && (
-              <p
-                className="text-xs text-destructive self-end pb-2"
-              >
+              <p className="text-xs text-destructive self-end pb-2">
                 End date must be after start date
               </p>
             )}
@@ -324,9 +320,7 @@ export function ReportsPage() {
       ) : (
         <div className="space-y-6 slide-up">
           {/* ── Summary stats ── */}
-          <div
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
-          >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard label="Total Spent" value={formatCents(stats.total)} />
             <StatCard
               label="Transactions"
@@ -343,9 +337,7 @@ export function ReportsPage() {
 
           {/* ── Category breakdown chart ── */}
           {chartData.length > 0 && (
-            <Card
-              className="shadow-subtle"
-            >
+            <Card className="shadow-subtle">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold">
                   Spending by Category
@@ -410,9 +402,7 @@ export function ReportsPage() {
           )}
 
           {/* ── Expense table ── */}
-          <Card
-            className="shadow-subtle"
-          >
+          <Card className="shadow-subtle">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold">
@@ -448,7 +438,7 @@ export function ReportsPage() {
                   <TableBody>
                     {[...expenses]
                       .sort((a, b) => b.date.localeCompare(a.date))
-                      .map((expense, idx) => (
+                      .map((expense, _idx) => (
                         <TableRow
                           key={expense.id.toString()}
                           className="border-b border-border/50 hover:bg-muted/30 transition-colors-fast"

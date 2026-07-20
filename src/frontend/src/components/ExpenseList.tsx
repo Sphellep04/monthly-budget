@@ -94,9 +94,7 @@ export function ExpenseList({
 
   if (expenses.length === 0) {
     return (
-      <div
-        className="flex flex-col items-center justify-center py-14 text-center gap-3 rounded-2xl border border-dashed border-border bg-muted/20"
-      >
+      <div className="flex flex-col items-center justify-center py-14 text-center gap-3 rounded-2xl border border-dashed border-border bg-muted/20">
         <div className="w-12 h-12 rounded-xl bg-card border border-border shadow-subtle flex items-center justify-center">
           <Receipt className="w-5 h-5 text-muted-foreground" />
         </div>
@@ -131,7 +129,7 @@ export function ExpenseList({
 
       {/* Rows */}
       <div className="rounded-2xl border border-border overflow-hidden shadow-subtle bg-card divide-y divide-border">
-        {expenses.map((expense, idx) => (
+        {expenses.map((expense, _idx) => (
           <div
             key={expense.id.toString()}
             className="group grid grid-cols-[1fr_auto_auto] gap-3 items-center px-4 py-3.5 hover:bg-muted/30 transition-colors-fast"
@@ -174,9 +172,7 @@ export function ExpenseList({
       </div>
 
       {/* Subtotal */}
-      <div
-        className="flex items-center justify-between px-4 pt-3 pb-1"
-      >
+      <div className="flex items-center justify-between px-4 pt-3 pb-1">
         <span className="text-xs font-medium text-muted-foreground">
           {expenses.length} expense{expenses.length !== 1 ? "s" : ""} total
         </span>

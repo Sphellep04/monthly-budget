@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const AUTH_KEY = "budgetwise-auth";
 
@@ -21,7 +21,7 @@ export function useAuth() {
     setIsInitializing(false);
   }, []);
 
-  const login = async () => {
+  const login = useCallback(async () => {
     setIsLoggingIn(true);
     setLoginStatus("logging-in");
 
@@ -32,15 +32,15 @@ export function useAuth() {
     setIsAuthenticated(true);
     setLoginStatus("authenticated");
     setIsLoggingIn(false);
-  };
+  }, []);
 
-  const clear = () => {
+  const clear = useCallback(() => {
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(AUTH_KEY);
     }
     setIsAuthenticated(false);
     setLoginStatus("logged-out");
-  };
+  }, []);
 
   return useMemo(
     () => ({
@@ -51,6 +51,6 @@ export function useAuth() {
       login,
       logout: clear,
     }),
-    [isAuthenticated, isInitializing, isLoggingIn, loginStatus],
+    [isAuthenticated, isInitializing, isLoggingIn, loginStatus, login, clear],
   );
 }

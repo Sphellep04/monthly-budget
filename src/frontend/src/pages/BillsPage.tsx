@@ -237,11 +237,7 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={isPending}
-            >
+            <Button type="submit" className="flex-1" disabled={isPending}>
               {isPending ? "Saving…" : "Confirm Payment"}
             </Button>
           </div>
@@ -255,20 +251,17 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
 
 interface BillCardProps {
   bill: BillItem;
-  index: number;
   onMarkPaid: (bill: BillItem) => void;
 }
 
-function BillCard({ bill, index, onMarkPaid }: BillCardProps) {
+function BillCard({ bill, onMarkPaid }: BillCardProps) {
   const { template, payment, status, budgetCategory } = bill;
   const cfg = STATUS_CONFIG[status];
   const icon = CATEGORY_ICONS[budgetCategory] ?? "📦";
   const isPaid = status === "paid";
 
   return (
-    <div
-      className="group relative bg-card border border-border rounded-2xl p-4 shadow-subtle hover:shadow-elevated transition-all duration-200 hover:-translate-y-0.5"
-    >
+    <div className="group relative bg-card border border-border rounded-2xl p-4 shadow-subtle hover:shadow-elevated transition-all duration-200 hover:-translate-y-0.5">
       <div className="flex items-start gap-3">
         {/* Icon */}
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0 mt-0.5">
@@ -425,9 +418,7 @@ export function BillsPage() {
   ];
 
   return (
-    <div
-      className="p-4 md:p-6 space-y-5 max-w-3xl mx-auto"
-    >
+    <div className="p-4 md:p-6 space-y-5 max-w-3xl mx-auto">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -483,9 +474,7 @@ export function BillsPage() {
 
       {/* Filter tabs */}
       {!isLoading && budgets.length > 0 && (
-        <div
-          className="flex gap-1 p-1 bg-muted/50 rounded-xl border border-border w-fit"
-        >
+        <div className="flex gap-1 p-1 bg-muted/50 rounded-xl border border-border w-fit">
           {filterTabs.map((tab) => (
             <button
               key={tab.key}
@@ -524,9 +513,7 @@ export function BillsPage() {
       ) : budgets.length === 0 ? (
         <EmptyStateNoTemplates />
       ) : filteredBills.length === 0 ? (
-        <div
-          className="flex flex-col items-center justify-center py-16 text-center rounded-2xl border border-dashed border-border bg-card/40"
-        >
+        <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl border border-dashed border-border bg-card/40">
           <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
             <Bell size={22} className="text-muted-foreground" />
           </div>
@@ -547,11 +534,10 @@ export function BillsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredBills.map((bill, i) => (
+          {filteredBills.map((bill) => (
             <BillCard
               key={bill.template.id.toString()}
               bill={bill}
-              index={i}
               onMarkPaid={(b) => setMarkPaidBill(b)}
             />
           ))}
@@ -611,9 +597,7 @@ function BudgetTemplateLoader({
 
 function EmptyStateNoTemplates() {
   return (
-    <div
-      className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle"
-    >
+    <div className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
       <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 shadow-elevated">
         <Bell size={26} className="text-primary" />
       </div>
@@ -650,9 +634,7 @@ function BillsSummary({ bills }: { bills: BillItem[] }) {
   const overdue = bills.filter((b) => b.status === "overdue").length;
 
   return (
-    <div
-      className="grid grid-cols-3 gap-3 pt-1"
-    >
+    <div className="grid grid-cols-3 gap-3 pt-1">
       <div className="bg-card border border-border rounded-2xl p-4 shadow-subtle text-center">
         <p className="text-xs text-muted-foreground mb-1">Still Due</p>
         <p className="font-bold text-base font-display tabular-nums text-foreground">

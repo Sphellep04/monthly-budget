@@ -44,9 +44,7 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
         : "";
 
   return (
-    <div
-      className="flex items-center gap-0.5 bg-card border border-border rounded-xl px-1 py-1 shadow-subtle"
-    >
+    <div className="flex items-center gap-0.5 bg-card border border-border rounded-xl px-1 py-1 shadow-subtle">
       <Button
         variant="ghost"
         size="icon"
@@ -57,9 +55,7 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
         <ChevronLeft size={15} className="text-muted-foreground" />
       </Button>
 
-      <div
-        className="flex items-center gap-2 px-3 min-w-[156px] justify-center overflow-hidden"
-      >
+      <div className="flex items-center gap-2 px-3 min-w-[156px] justify-center overflow-hidden">
         <div className={`flex items-center gap-2 ${labelAnim}`}>
           <div className="flex flex-col items-center leading-none">
             <span className="text-sm font-semibold text-foreground font-display tracking-tight">

@@ -9,11 +9,11 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useState } from "react";
-import { useActorOrMock } from "../hooks/useActorOrMock";
 import { AlertsPanel } from "../components/AlertsPanel";
 import { BudgetCard } from "../components/BudgetCard";
 import { MonthSelector } from "../components/MonthSelector";
 import { MonthlySummaryHeader } from "../components/MonthlySummaryHeader";
+import { useActorOrMock } from "../hooks/useActorOrMock";
 import { useMonthlySummary, useUserSettings } from "../hooks/useBudget";
 import type { Expense } from "../types";
 import { getMonthName } from "../types";
@@ -30,9 +30,7 @@ function BudgetGridSkeleton() {
 
 function EmptyState() {
   return (
-    <div
-      className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle"
-    >
+    <div className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
       {/* Icon */}
       <div className="relative mb-6">
         <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center shadow-elevated">
@@ -194,9 +192,7 @@ export function DashboardPage() {
   const hasBudgets = budgets.length > 0;
 
   return (
-    <div
-      className="p-5 md:p-7 space-y-7 max-w-7xl mx-auto page-enter"
-    >
+    <div className="p-5 md:p-7 space-y-7 max-w-7xl mx-auto page-enter">
       {/* ── Page hero header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-1">
         <div>
@@ -274,9 +270,7 @@ export function DashboardPage() {
         {isLoading ? (
           <BudgetGridSkeleton />
         ) : hasBudgets ? (
-          <div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {budgets.map((bs, i) => (
               <BudgetCard
                 key={bs.budget.id.toString()}

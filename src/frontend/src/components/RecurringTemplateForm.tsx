@@ -140,9 +140,7 @@ export function RecurringTemplateForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-md shadow-premium backdrop-blur-md"
-      >
+      <DialogContent className="sm:max-w-md shadow-premium backdrop-blur-md">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">

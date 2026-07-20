@@ -321,9 +321,7 @@ export function ExpenseForm({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent
-        className="sm:max-w-md bg-card border-border shadow-premium backdrop-blur-md"
-      >
+      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium backdrop-blur-md">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-bold text-foreground">
             Add Expense
@@ -386,9 +384,7 @@ export function ExpenseForm({
               )}
             </div>
             {amountError && (
-              <p
-                className="flex items-center gap-1.5 text-xs text-destructive mt-1"
-              >
+              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {amountError}
               </p>
@@ -435,9 +431,7 @@ export function ExpenseForm({
                 />
                 {/* Scan overlay while OCR is running */}
                 {scanState === "scanning" && (
-                  <div
-                    className="absolute inset-0 bg-background/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2"
-                  >
+                  <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2">
                     <div className="relative w-10 h-10">
                       <Loader2 className="w-10 h-10 animate-spin text-primary" />
                       <ScanLine className="w-5 h-5 text-primary absolute inset-0 m-auto" />
@@ -534,9 +528,7 @@ export function ExpenseForm({
             />
 
             {receiptError && (
-              <p
-                className="flex items-center gap-1.5 text-xs text-destructive mt-1"
-              >
+              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {receiptError}
               </p>
@@ -544,9 +536,7 @@ export function ExpenseForm({
 
             {/* Upload progress bar (file upload path) */}
             {isUploading && (
-              <div
-                className="mt-2 space-y-1"
-              >
+              <div className="mt-2 space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1.5">
                     <Loader2 className="w-3 h-3 animate-spin" />

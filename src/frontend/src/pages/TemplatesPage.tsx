@@ -100,9 +100,7 @@ function SaveBudgetDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-w-lg shadow-premium"
-      >
+      <DialogContent className="max-w-lg shadow-premium">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-1">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -234,9 +232,7 @@ function RenameDialog({
 
   return (
     <Dialog open={!!template} onOpenChange={() => onClose()}>
-      <DialogContent
-        className="max-w-sm shadow-premium"
-      >
+      <DialogContent className="max-w-sm shadow-premium">
         <DialogHeader>
           <DialogTitle className="font-display text-base font-bold">
             Rename Template
@@ -254,11 +250,7 @@ function RenameDialog({
             autoFocus
           />
           <div className="flex gap-2 justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onClose}
-            >
+            <Button variant="outline" size="sm" onClick={onClose}>
               Cancel
             </Button>
             <Button
@@ -315,9 +307,7 @@ function ApplyTemplateDialog({
 
   return (
     <Dialog open={!!template} onOpenChange={() => onClose()}>
-      <DialogContent
-        className="max-w-sm shadow-premium"
-      >
+      <DialogContent className="max-w-sm shadow-premium">
         <DialogHeader>
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-2">
             <Check size={18} />
@@ -336,11 +326,7 @@ function ApplyTemplateDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="flex gap-2 justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-          >
+          <Button variant="outline" size="sm" onClick={onClose}>
             Cancel
           </Button>
           <Button
@@ -368,13 +354,11 @@ function ApplyTemplateDialog({
 
 function TemplateCard({
   template,
-  index,
   onApply,
   onRename,
   onDelete,
 }: {
   template: BudgetTemplate;
-  index: number;
   onApply: (tpl: BudgetTemplate) => void;
   onRename: (tpl: BudgetTemplate) => void;
   onDelete: (tpl: BudgetTemplate) => void;
@@ -384,9 +368,7 @@ function TemplateCard({
   const totalCents = templateTotalCents(template);
 
   return (
-    <article
-      className="group flex flex-col bg-card border border-border/60 rounded-xl shadow-subtle hover:shadow-elevated transition-shadow duration-200 overflow-hidden"
-    >
+    <article className="group flex flex-col bg-card border border-border/60 rounded-xl shadow-subtle hover:shadow-elevated transition-shadow duration-200 overflow-hidden">
       {/* Header stripe */}
       <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3">
         <div className="min-w-0 flex-1">
@@ -514,9 +496,7 @@ export function TemplatesPage() {
               <BookTemplate size={18} />
             </div>
             <div>
-              <h1
-                className="font-display text-xl font-bold text-foreground tracking-tight"
-              >
+              <h1 className="font-display text-xl font-bold text-foreground tracking-tight">
                 Budget Templates
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -537,18 +517,14 @@ export function TemplatesPage() {
       {/* Content */}
       <div className="max-w-5xl mx-auto px-6 py-6">
         {isLoading ? (
-          <div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((k) => (
               <Skeleton key={k} className="h-64 rounded-xl" />
             ))}
           </div>
         ) : !templates || templates.length === 0 ? (
           /* Empty state */
-          <div
-            className="flex flex-col items-center justify-center py-16 px-6 text-center"
-          >
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5 shadow-subtle">
               <BookTemplate size={28} />
             </div>

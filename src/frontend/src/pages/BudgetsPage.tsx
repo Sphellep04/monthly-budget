@@ -80,9 +80,7 @@ export function BudgetsPage() {
   }
 
   return (
-    <div
-      className="max-w-3xl mx-auto px-4 py-8 space-y-8 page-enter"
-    >
+    <div className="max-w-3xl mx-auto px-4 py-8 space-y-8 page-enter">
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
@@ -107,9 +105,7 @@ export function BudgetsPage() {
       </div>
 
       {/* Month navigator */}
-      <div
-        className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border shadow-subtle"
-      >
+      <div className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border shadow-subtle">
         <Button
           variant="ghost"
           size="icon"

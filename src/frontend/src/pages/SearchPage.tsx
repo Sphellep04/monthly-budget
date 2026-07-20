@@ -180,9 +180,7 @@ export function SearchPage() {
 
       <div className="flex-1 px-4 md:px-6 py-6 max-w-5xl mx-auto w-full space-y-6">
         {/* Filter panel */}
-        <div
-          className="bg-card border border-border rounded-xl shadow-subtle p-5 space-y-4"
-        >
+        <div className="bg-card border border-border rounded-xl shadow-subtle p-5 space-y-4">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <Filter size={14} />
@@ -317,9 +315,7 @@ export function SearchPage() {
 
         {/* Summary stats */}
         {!isLoading && results.length > 0 && (
-          <div
-            className="grid grid-cols-2 gap-4"
-          >
+          <div className="grid grid-cols-2 gap-4">
             <div className="bg-card border border-border rounded-xl p-4 shadow-subtle">
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">
                 Results
@@ -346,9 +342,7 @@ export function SearchPage() {
         )}
 
         {/* Results */}
-        <div
-          className="bg-card border border-border rounded-xl shadow-subtle overflow-hidden"
-        >
+        <div className="bg-card border border-border rounded-xl shadow-subtle overflow-hidden">
           <div className="px-5 py-3.5 border-b border-border flex items-center justify-between">
             <span className="text-sm font-semibold text-foreground">
               {hasActiveFilters || submitted
@@ -369,9 +363,7 @@ export function SearchPage() {
               ))}
             </div>
           ) : results.length === 0 ? (
-            <div
-              className="flex flex-col items-center justify-center py-16 px-6 text-center"
-            >
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
               <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-4 text-2xl">
                 🔍
               </div>
@@ -418,7 +410,7 @@ export function SearchPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {results.map((expense, idx) => {
+                  {results.map((expense, _idx) => {
                     const budget = budgetMap[expense.budgetId.toString()];
                     const icon = budget
                       ? (CATEGORY_ICONS[budget.category] ?? "📦")

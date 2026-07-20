@@ -124,9 +124,7 @@ export function BudgetDetailPage() {
 
   if (summaryLoading) {
     return (
-      <div
-        className="p-4 md:p-8 space-y-5 max-w-2xl mx-auto"
-      >
+      <div className="p-4 md:p-8 space-y-5 max-w-2xl mx-auto">
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-52 rounded-2xl" />
         <Skeleton className="h-64 rounded-2xl" />
@@ -136,9 +134,7 @@ export function BudgetDetailPage() {
 
   if (!summary) {
     return (
-      <div
-        className="p-4 md:p-8 max-w-2xl mx-auto text-center py-20"
-      >
+      <div className="p-4 md:p-8 max-w-2xl mx-auto text-center py-20">
         <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
           <ReceiptText className="w-7 h-7 text-muted-foreground" />
         </div>
@@ -147,11 +143,7 @@ export function BudgetDetailPage() {
           This budget may have been deleted.
         </p>
         <Link to="/budgets">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-          >
+          <Button variant="outline" size="sm" className="gap-1.5">
             <ArrowLeft className="w-4 h-4" /> Back to Budgets
           </Button>
         </Link>
@@ -171,9 +163,7 @@ export function BudgetDetailPage() {
   const icon = CATEGORY_ICONS[summary.budget.category] ?? "📦";
 
   return (
-    <div
-      className="p-4 md:p-8 space-y-6 max-w-2xl mx-auto page-enter"
-    >
+    <div className="p-4 md:p-8 space-y-6 max-w-2xl mx-auto page-enter">
       {/* Back nav */}
       <Link
         to="/budgets"
@@ -184,9 +174,7 @@ export function BudgetDetailPage() {
       </Link>
 
       {/* Header card */}
-      <div
-        className="rounded-2xl border border-border bg-card shadow-elevated space-y-6 overflow-hidden"
-      >
+      <div className="rounded-2xl border border-border bg-card shadow-elevated space-y-6 overflow-hidden">
         {/* Top accent band */}
         <div
           className="h-1.5 w-full"

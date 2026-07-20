@@ -21,7 +21,7 @@ interface SettingsModalProps {
 
 const THEMES = [
   { value: "light", label: "Light", icon: Sun },
-  { value: "dark",  label: "Dark",  icon: Moon },
+  { value: "dark", label: "Dark", icon: Moon },
   { value: "system", label: "System", icon: Monitor },
 ] as const;
 
@@ -71,7 +71,6 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
         </DialogHeader>
 
         <div className="px-6 py-5 space-y-6">
-
           {/* ── Appearance ── */}
           <div className="space-y-3">
             <Label className="text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">
@@ -178,7 +177,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-amber-500/8 border border-amber-500/20">
                 <AlertTriangle className="h-3.5 w-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-600 dark:text-amber-400 font-body">
-                  At {threshold}%, you'll only be alerted very close to the limit.
+                  At {threshold}%, you'll only be alerted very close to the
+                  limit.
                 </p>
               </div>
             )}

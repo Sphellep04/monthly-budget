@@ -99,6 +99,26 @@ export interface UserSettings {
   alertThresholdPercent: number;
 }
 
+export interface BudgetTemplateCategory {
+  name: string;
+  limitCents: bigint;
+  color: string;
+  category: string;
+}
+
+export interface BudgetTemplate {
+  id: string;
+  owner: string;
+  name: string;
+  createdAt: bigint;
+  categories: BudgetTemplateCategory[];
+}
+
+export interface BudgetTemplateInput {
+  name: string;
+  categories: BudgetTemplateCategory[];
+}
+
 export interface BillPayment {
   id: string;
   owner: string;

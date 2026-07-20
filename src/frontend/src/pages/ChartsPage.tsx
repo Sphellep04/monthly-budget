@@ -84,9 +84,7 @@ function MonthSelector({
   const isLatest = year === now.getFullYear() && month === now.getMonth() + 1;
 
   return (
-    <div
-      className="flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-subtle"
-    >
+    <div className="flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-subtle">
       <button
         type="button"
         onClick={prev}
@@ -268,9 +266,7 @@ function SpendingTrendChart() {
 
   if (chartData.length === 0) {
     return (
-      <div
-        className="flex flex-col items-center justify-center py-16 text-center"
-      >
+      <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
           <TrendingUp className="w-7 h-7 text-primary" />
         </div>
@@ -463,9 +459,7 @@ function MonthlyPieChart({ year, month }: { year: number; month: number }) {
 
   if (chartData.length === 0) {
     return (
-      <div
-        className="flex flex-col items-center justify-center py-16 text-center"
-      >
+      <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
           <PieChartIcon className="w-7 h-7 text-primary" />
         </div>
@@ -572,9 +566,7 @@ function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
 
   if (chartData.length === 0) {
     return (
-      <div
-        className="flex flex-col items-center justify-center py-16 text-center"
-      >
+      <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4">
           <BarChart2 className="w-7 h-7 text-secondary" />
         </div>
@@ -672,9 +664,7 @@ function DailySpendingChart({ year, month }: { year: number; month: number }) {
 
   if (!hasData) {
     return (
-      <div
-        className="flex flex-col items-center justify-center py-16 text-center"
-      >
+      <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
           <CalendarDays className="w-7 h-7 text-primary" />
         </div>
@@ -875,9 +865,7 @@ export function ChartsPage() {
             ))}
           </div>
         ) : summaries.length === 0 ? (
-          <div
-            className="flex flex-col items-center justify-center py-20 px-6 text-center rounded-2xl border border-dashed border-border/70 bg-muted/20"
-          >
+          <div className="flex flex-col items-center justify-center py-20 px-6 text-center rounded-2xl border border-dashed border-border/70 bg-muted/20">
             <div className="w-16 h-16 rounded-2xl bg-muted/60 flex items-center justify-center mb-5 shadow-inner-subtle">
               <LineChartIcon className="w-8 h-8 text-muted-foreground opacity-50" />
             </div>

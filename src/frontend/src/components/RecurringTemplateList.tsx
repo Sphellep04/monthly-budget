@@ -41,9 +41,7 @@ export function RecurringTemplateList({
 
   if (templates.length === 0) {
     return (
-      <div
-        className="flex flex-col items-center justify-center py-10 px-6 text-center rounded-2xl border border-dashed border-border bg-muted/20"
-      >
+      <div className="flex flex-col items-center justify-center py-10 px-6 text-center rounded-2xl border border-dashed border-border bg-muted/20">
         <div className="w-10 h-10 rounded-xl bg-secondary/8 flex items-center justify-center mb-3">
           <CalendarClock className="w-5 h-5 text-secondary" />
         </div>
@@ -60,7 +58,7 @@ export function RecurringTemplateList({
   return (
     <>
       <div className="space-y-2">
-        {templates.map((t, i) => (
+        {templates.map((t, _i) => (
           <div
             key={t.id.toString()}
             className="group flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card hover:bg-muted/20 hover:border-secondary/20 hover:shadow-subtle transition-smooth"

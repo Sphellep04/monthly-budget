@@ -35,10 +35,9 @@ function BudgetRowSkeleton() {
 
 interface BudgetRowProps {
   budget: Budget;
-  index: number;
 }
 
-function BudgetRow({ budget, index }: BudgetRowProps) {
+function BudgetRow({ budget }: BudgetRowProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const deleteMutation = useDeleteBudget();
   const categoryIcon = CATEGORY_ICONS[budget.category] ?? "📦";
@@ -50,9 +49,7 @@ function BudgetRow({ budget, index }: BudgetRowProps) {
 
   return (
     <>
-      <div
-        className="group flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-hover hover:border-primary/20 hover:shadow-elevated"
-      >
+      <div className="group flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-hover hover:border-primary/20 hover:shadow-elevated">
         {/* Icon + color dot */}
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 shadow-subtle"
@@ -150,9 +147,7 @@ export function BudgetList({
 
   if (budgets.length === 0) {
     return (
-      <div
-        className="flex flex-col items-center justify-center py-20 px-6 rounded-2xl border border-dashed border-border bg-card/40 text-center"
-      >
+      <div className="flex flex-col items-center justify-center py-20 px-6 rounded-2xl border border-dashed border-border bg-card/40 text-center">
         <div className="w-16 h-16 rounded-2xl bg-primary/8 flex items-center justify-center mb-5 shadow-subtle">
           <PiggyBank className="w-8 h-8 text-primary" />
         </div>

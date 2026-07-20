@@ -27,18 +27,18 @@ interface NavItem {
 }
 
 const NAV_MAIN: NavItem[] = [
-  { label: "Dashboard",      href: "/",               icon: LayoutDashboard },
-  { label: "Budgets",        href: "/budgets",         icon: Wallet          },
-  { label: "Charts",         href: "/charts",          icon: BarChart2       },
-  { label: "Annual Summary", href: "/annual-summary",  icon: CalendarDays    },
-  { label: "Insights",       href: "/insights",        icon: Lightbulb       },
-  { label: "Bills",          href: "/bills",           icon: Bell            },
+  { label: "Dashboard", href: "/", icon: LayoutDashboard },
+  { label: "Budgets", href: "/budgets", icon: Wallet },
+  { label: "Charts", href: "/charts", icon: BarChart2 },
+  { label: "Annual Summary", href: "/annual-summary", icon: CalendarDays },
+  { label: "Insights", href: "/insights", icon: Lightbulb },
+  { label: "Bills", href: "/bills", icon: Bell },
 ];
 
 const NAV_TOOLS: NavItem[] = [
   { label: "Templates", href: "/templates", icon: BookTemplate },
-  { label: "Search",    href: "/search",    icon: Search       },
-  { label: "Notes",     href: "/notes",     icon: StickyNote   },
+  { label: "Search", href: "/search", icon: Search },
+  { label: "Notes", href: "/notes", icon: StickyNote },
 ];
 
 function NavLink({
@@ -70,7 +70,9 @@ function NavLink({
         strokeWidth={isActive ? 2.5 : 2}
         className={cn(
           "flex-shrink-0 transition-all duration-150",
-          isActive ? "text-primary-foreground" : "text-muted-foreground/60 group-hover:text-sidebar-accent-foreground",
+          isActive
+            ? "text-primary-foreground"
+            : "text-muted-foreground/60 group-hover:text-sidebar-accent-foreground",
         )}
       />
       <span className="truncate">{item.label}</span>
@@ -192,7 +194,12 @@ export function Sidebar() {
         onClick={() => setMobileOpen((o) => !o)}
         aria-label="Toggle sidebar"
       >
-        <span className={cn("transition-spring", mobileOpen ? "rotate-90" : "rotate-0")}>
+        <span
+          className={cn(
+            "transition-spring",
+            mobileOpen ? "rotate-90" : "rotate-0",
+          )}
+        >
           {mobileOpen ? <X size={16} /> : <Menu size={16} />}
         </span>
       </button>
@@ -201,9 +208,15 @@ export function Sidebar() {
       <div
         className={cn(
           "fixed inset-0 z-40 md:hidden transition-smooth",
-          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+          mobileOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none",
         )}
-        style={{ background: "oklch(0 0 0 / 0.45)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
+        style={{
+          background: "oklch(0 0 0 / 0.45)",
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+        }}
         role="button"
         tabIndex={0}
         aria-label="Close sidebar"
@@ -220,7 +233,10 @@ export function Sidebar() {
       >
         <SidebarInner
           onNavClick={() => setMobileOpen(false)}
-          onSettingsOpen={() => { setMobileOpen(false); setSettingsOpen(true); }}
+          onSettingsOpen={() => {
+            setMobileOpen(false);
+            setSettingsOpen(true);
+          }}
         />
       </aside>
 
@@ -229,7 +245,10 @@ export function Sidebar() {
         <SidebarInner onSettingsOpen={() => setSettingsOpen(true)} />
       </aside>
 
-      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </>
   );
 }

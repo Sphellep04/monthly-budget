@@ -20,7 +20,7 @@ const features = [
   {
     icon: Shield,
     label: "Private & Secure",
-    description: "Your data lives on-chain, not on servers",
+    description: "Your data stays in your browser storage",
     color: "text-primary",
     bg: "bg-primary/10",
     border: "border-primary/20",
@@ -346,7 +346,6 @@ export function LoginPage() {
                 </p>
               </div>
 
-              {/* Internet Identity logo area */}
               <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/50 border border-border/50 mb-5">
                 <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 border border-primary/25 flex-shrink-0">
                   <Shield size={16} className="text-primary" strokeWidth={2} />
@@ -408,32 +407,34 @@ export function LoginPage() {
 
           {/* Feature cards — shown on right panel on both mobile + desktop */}
           <div className="grid grid-cols-3 gap-2.5">
-            {features.map(({ icon: Icon, label, description, color, bg, border }) => (
-              <div
-                key={label}
-                className={cn(
-                  "group bg-card border rounded-xl px-2.5 py-3.5 flex flex-col items-center gap-2 text-center shadow-subtle card-hover",
-                  border,
-                )}
-              >
+            {features.map(
+              ({ icon: Icon, label, description, color, bg, border }) => (
                 <div
+                  key={label}
                   className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-lg transition-spring group-hover:scale-110",
-                    bg,
+                    "group bg-card border rounded-xl px-2.5 py-3.5 flex flex-col items-center gap-2 text-center shadow-subtle card-hover",
+                    border,
                   )}
                 >
-                  <Icon size={14} className={color} strokeWidth={2} />
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-lg transition-spring group-hover:scale-110",
+                      bg,
+                    )}
+                  >
+                    <Icon size={14} className={color} strokeWidth={2} />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-foreground leading-tight">
+                      {label}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/70 mt-0.5 leading-tight">
+                      {description}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-foreground leading-tight">
-                    {label}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/70 mt-0.5 leading-tight">
-                    {description}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
 
           {/* Footer */}

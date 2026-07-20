@@ -40,11 +40,9 @@ interface BudgetFormProps {
   isPending?: boolean;
 }
 
-function FieldError({ message, id }: { message: string; id: string }) {
+function FieldError({ message }: { message: string }) {
   return (
-    <p
-      className="flex items-center gap-1.5 text-xs text-destructive mt-1 slide-up"
-    >
+    <p className="flex items-center gap-1.5 text-xs text-destructive mt-1 slide-up">
       <AlertCircle className="w-3.5 h-3.5 shrink-0" />
       {message}
     </p>

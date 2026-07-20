@@ -1,6 +1,4 @@
-import { Principal } from "@icp-sdk/core/principal";
 import type {
-  backendInterface,
   BillPayment,
   BillPaymentInput,
   Budget,
@@ -18,10 +16,11 @@ import type {
   RecurringTemplate,
   RecurringTemplateInput,
   UserSettings,
-} from "../backend.d";
+} from "../types";
 
 const STORAGE_KEY = "budgetwise-browser-backend";
 const STORAGE_VERSION = 1;
+const LOCAL_USER_ID = "local-user";
 
 interface BackendState {
   budgets: Budget[];
@@ -41,7 +40,7 @@ function createEmptyState(): BackendState {
     notes: [],
     budgetTemplates: [],
     billPayments: [],
-    userSettings: { alertThresholdPercent: BigInt(80) },
+    userSettings: { alertThresholdPercent: 80 },
   };
 }
 
@@ -50,7 +49,7 @@ function nowTimestamp() {
 }
 
 function getOwner() {
-  return Principal.anonymous();
+  return LOCAL_USER_ID;
 }
 
 function readState(): BackendState {
@@ -77,13 +76,11 @@ function readState(): BackendState {
       notes: parsed.notes ?? [],
       budgetTemplates: parsed.budgetTemplates ?? [],
       billPayments: parsed.billPayments ?? [],
-      userSettings: parsed.userSettings ?? { alertThresholdPercent: BigInt(80) },
+      userSettings: parsed.userSettings ?? { alertThresholdPercent: 80 },
     };
 
-    if (!state.budgets.length && !state.expenses.length) {
-      seedDemoData(state);
-      persistState(state);
-    }
+    seedDemoData(state);
+    persistState(state);
 
     return state;
   } catch {
@@ -173,11 +170,7 @@ function seedDemoData(state: BackendState) {
   state.notes = [];
   state.billPayments = [];
   state.budgetTemplates = [];
-  state.userSettings = { alertThresholdPercent: BigInt(80) };
-}
-
-function cloneState(state: BackendState): BackendState {
-  return JSON.parse(JSON.stringify(state)) as BackendState;
+  state.userSettings = { alertThresholdPercent: 80 };
 }
 
 function toDateParts(value: string) {
@@ -189,7 +182,11 @@ function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
 }
 
-function buildMonthlySummary(state: BackendState, year: bigint, month: bigint): MonthlySummary {
+function buildMonthlySummary(
+  state: BackendState,
+  year: bigint,
+  month: bigint,
+): MonthlySummary {
   const budgets = state.budgets.filter(
     (budget) => budget.year === year && budget.month === month,
   );
@@ -236,22 +233,36 @@ function getExpenseById(state: BackendState, id: bigint) {
 }
 
 function getRecurringTemplateById(state: BackendState, id: bigint) {
-  return state.recurringTemplates.find((template) => template.id === id) ?? null;
+  return (
+    state.recurringTemplates.find((template) => template.id === id) ?? null
+  );
 }
 
 function getBillPaymentById(state: BackendState, id: string) {
-  return state.billPayments.find((billPayment) => billPayment.id === id) ?? null;
+  return (
+    state.billPayments.find((billPayment) => billPayment.id === id) ?? null
+  );
 }
 
 function getBudgetTemplateById(state: BackendState, id: string) {
   return state.budgetTemplates.find((template) => template.id === id) ?? null;
 }
 
-function getExpensesInRange(state: BackendState, startDate: string, endDate: string) {
-  return state.expenses.filter((expense) => expense.date >= startDate && expense.date <= endDate);
+function getExpensesInRange(
+  state: BackendState,
+  startDate: string,
+  endDate: string,
+) {
+  return state.expenses.filter(
+    (expense) => expense.date >= startDate && expense.date <= endDate,
+  );
 }
 
-function getCategoryBreakdownPoints(state: BackendState, year: bigint, month: bigint) {
+function getCategoryBreakdownPoints(
+  state: BackendState,
+  year: bigint,
+  month: bigint,
+) {
   const budgets = state.budgets.filter(
     (budget) => budget.year === year && budget.month === month,
   );
@@ -264,7 +275,11 @@ function getCategoryBreakdownPoints(state: BackendState, year: bigint, month: bi
   }));
 }
 
-function getCategoryBreakdownPointsForRange(state: BackendState, startDate: string, endDate: string) {
+function getCategoryBreakdownPointsForRange(
+  state: BackendState,
+  startDate: string,
+  endDate: string,
+) {
   const relevantExpenses = getExpensesInRange(state, startDate, endDate);
   const totals = new Map<bigint, number>();
 
@@ -284,8 +299,16 @@ function getCategoryBreakdownPointsForRange(state: BackendState, startDate: stri
   });
 }
 
-function createExpenseFromTemplate(state: BackendState, template: RecurringTemplate, year: number, month: number) {
-  const day = Math.min(Number(template.dayOfMonth), getDaysInMonth(year, month));
+function createExpenseFromTemplate(
+  state: BackendState,
+  template: RecurringTemplate,
+  year: number,
+  month: number,
+) {
+  const day = Math.min(
+    Number(template.dayOfMonth),
+    getDaysInMonth(year, month),
+  );
   const date = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   const existing = state.expenses.some(
     (expense) =>
@@ -313,7 +336,7 @@ function createExpenseFromTemplate(state: BackendState, template: RecurringTempl
   return expense;
 }
 
-export const browserStorageBackend: backendInterface = {
+export const browserStorageBackend = {
   applyBudgetTemplate: async (templateId, year, month) => {
     const state = readState();
     const template = getBudgetTemplateById(state, templateId);
@@ -356,7 +379,12 @@ export const browserStorageBackend: backendInterface = {
     const state = readState();
     const createdExpenses: Expense[] = [];
     for (const template of state.recurringTemplates) {
-      const expense = createExpenseFromTemplate(state, template, Number(year), Number(month));
+      const expense = createExpenseFromTemplate(
+        state,
+        template,
+        Number(year),
+        Number(month),
+      );
       if (expense) {
         createdExpenses.push(expense);
       }
@@ -432,7 +460,6 @@ export const browserStorageBackend: backendInterface = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       title,
       content,
-      userId: getOwner(),
       createdAt: nowTimestamp() * BigInt(1_000_000),
       updatedAt: nowTimestamp() * BigInt(1_000_000),
     };
@@ -476,7 +503,9 @@ export const browserStorageBackend: backendInterface = {
       return false;
     }
     state.budgets = state.budgets.filter((budget) => budget.id !== id);
-    state.expenses = state.expenses.filter((expense) => expense.budgetId !== id);
+    state.expenses = state.expenses.filter(
+      (expense) => expense.budgetId !== id,
+    );
     state.recurringTemplates = state.recurringTemplates.filter(
       (template) => template.budgetId !== id,
     );
@@ -490,7 +519,9 @@ export const browserStorageBackend: backendInterface = {
     if (!existing) {
       return false;
     }
-    state.budgetTemplates = state.budgetTemplates.filter((template) => template.id !== id);
+    state.budgetTemplates = state.budgetTemplates.filter(
+      (template) => template.id !== id,
+    );
     persistState(state);
     return true;
   },
@@ -523,8 +554,12 @@ export const browserStorageBackend: backendInterface = {
     if (!existing) {
       return false;
     }
-    state.recurringTemplates = state.recurringTemplates.filter((template) => template.id !== id);
-    state.expenses = state.expenses.filter((expense) => expense.recurringTemplateId !== id);
+    state.recurringTemplates = state.recurringTemplates.filter(
+      (template) => template.id !== id,
+    );
+    state.expenses = state.expenses.filter(
+      (expense) => expense.recurringTemplateId !== id,
+    );
     persistState(state);
     return true;
   },
@@ -564,7 +599,12 @@ export const browserStorageBackend: backendInterface = {
         month += 12;
         year -= 1;
       }
-      const monthBudget = state.budgets.find((item) => item.id === budget.id && item.year === BigInt(year) && item.month === BigInt(month));
+      const _monthBudget = state.budgets.find(
+        (item) =>
+          item.id === budget.id &&
+          item.year === BigInt(year) &&
+          item.month === BigInt(month),
+      );
       const spending = state.expenses
         .filter((expense) => expense.budgetId === budget.id)
         .filter((expense) => {
@@ -621,7 +661,11 @@ export const browserStorageBackend: backendInterface = {
         month += 12;
         year -= 1;
       }
-      const summary = buildMonthlySummary(readState(), BigInt(year), BigInt(month));
+      const summary = buildMonthlySummary(
+        readState(),
+        BigInt(year),
+        BigInt(month),
+      );
       points.push({
         year: BigInt(year),
         month: BigInt(month),
@@ -657,7 +701,9 @@ export const browserStorageBackend: backendInterface = {
   },
 
   listExpenses: async (budgetId) => {
-    return readState().expenses.filter((expense) => expense.budgetId === budgetId);
+    return readState().expenses.filter(
+      (expense) => expense.budgetId === budgetId,
+    );
   },
 
   listNotes: async () => {
@@ -670,13 +716,23 @@ export const browserStorageBackend: backendInterface = {
     );
   },
 
-  searchExpenses: async (startDate, endDate, queryText, categoryId, minAmountCents, maxAmountCents) => {
+  searchExpenses: async (
+    startDate,
+    endDate,
+    queryText,
+    categoryId,
+    minAmountCents,
+    maxAmountCents,
+  ) => {
     const state = readState();
     return state.expenses.filter((expense) => {
       if (expense.date < startDate || expense.date > endDate) {
         return false;
       }
-      if (queryText && !expense.notes?.toLowerCase().includes(queryText.toLowerCase())) {
+      if (
+        queryText &&
+        !expense.notes?.toLowerCase().includes(queryText.toLowerCase())
+      ) {
         return false;
       }
       if (categoryId != null && expense.budgetId !== categoryId) {
@@ -724,7 +780,9 @@ export const browserStorageBackend: backendInterface = {
 
   updateBudgetTemplate: async (id, input) => {
     const state = readState();
-    const index = state.budgetTemplates.findIndex((template) => template.id === id);
+    const index = state.budgetTemplates.findIndex(
+      (template) => template.id === id,
+    );
     if (index < 0) {
       return null;
     }
@@ -773,7 +831,9 @@ export const browserStorageBackend: backendInterface = {
 
   updateRecurringTemplate: async (id, input) => {
     const state = readState();
-    const index = state.recurringTemplates.findIndex((template) => template.id === id);
+    const index = state.recurringTemplates.findIndex(
+      (template) => template.id === id,
+    );
     if (index < 0) {
       return null;
     }
@@ -796,3 +856,5 @@ export const browserStorageBackend: backendInterface = {
     return settings;
   },
 };
+
+export type BrowserStorageBackend = typeof browserStorageBackend;

@@ -29,9 +29,7 @@ export function DeleteConfirmDialog({
 }: DeleteConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent
-        className="max-w-md shadow-premium backdrop-blur-md"
-      >
+      <AlertDialogContent className="max-w-md shadow-premium backdrop-blur-md">
         <AlertDialogHeader>
           {/* Warning icon */}
           <div className="w-12 h-12 rounded-2xl bg-destructive/10 flex items-center justify-center mb-2">
@@ -47,10 +45,7 @@ export function DeleteConfirmDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter className="gap-2.5 mt-2">
-          <AlertDialogCancel
-            disabled={isPending}
-            className="button-hover"
-          >
+          <AlertDialogCancel disabled={isPending} className="button-hover">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction

@@ -20,9 +20,7 @@ export function AlertsPanel({
 
   if (alerts.length === 0) {
     return (
-      <div
-        className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-emerald-500/8 border border-emerald-500/20"
-      >
+      <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-emerald-500/8 border border-emerald-500/20">
         <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center">
           <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
         </div>
@@ -39,9 +37,7 @@ export function AlertsPanel({
   }
 
   return (
-    <div
-      className="rounded-xl border border-border bg-card shadow-subtle overflow-hidden"
-    >
+    <div className="rounded-xl border border-border bg-card shadow-subtle overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-2.5 px-4 py-3 border-b border-border bg-muted/30">
         <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0" />
@@ -59,7 +55,7 @@ export function AlertsPanel({
       {/* Alert list */}
       <ScrollArea className="max-h-56">
         <div className="divide-y divide-border/60">
-          {alerts.map((s, i) => {
+          {alerts.map((s, _i) => {
             const status = getBudgetStatus(s, alertThreshold);
             const limit = Number(s.budget.limitCents);
             const spent = Number(s.totalSpentCents);

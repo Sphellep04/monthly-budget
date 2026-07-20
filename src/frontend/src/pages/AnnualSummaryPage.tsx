@@ -180,9 +180,7 @@ function AnnualBarChart({
 
   if (!hasData) {
     return (
-      <div
-        className="flex flex-col items-center justify-center py-16 text-center"
-      >
+      <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
           <BarChart3 className="w-7 h-7 text-primary" />
         </div>
@@ -494,9 +492,7 @@ export function AnnualSummaryPage() {
         </div>
 
         {/* Year Selector */}
-        <div
-          className="flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-subtle shrink-0 mt-1"
-        >
+        <div className="flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-subtle shrink-0 mt-1">
           <button
             type="button"
             onClick={prevYear}
@@ -521,9 +517,7 @@ export function AnnualSummaryPage() {
       </div>
 
       {/* ── Stat Cards 2×2 ── */}
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {isLoading ? (
           <>
             <StatCardSkeleton />

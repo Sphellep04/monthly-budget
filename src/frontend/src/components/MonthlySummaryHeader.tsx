@@ -15,11 +15,16 @@ function AnimatedBar({ pct, colorClass }: { pct: number; colorClass: string }) {
 
   useEffect(() => {
     timerRef.current = setTimeout(() => setMounted(true), 120);
-    return () => { if (timerRef.current !== null) clearTimeout(timerRef.current); };
+    return () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    };
   }, []);
 
   return (
-    <div className="h-2 bg-muted/60 rounded-full overflow-hidden" aria-hidden="true">
+    <div
+      className="h-2 bg-muted/60 rounded-full overflow-hidden"
+      aria-hidden="true"
+    >
       <div
         className={`h-full rounded-full transition-all ${colorClass}`}
         style={{
@@ -31,7 +36,10 @@ function AnimatedBar({ pct, colorClass }: { pct: number; colorClass: string }) {
   );
 }
 
-export function MonthlySummaryHeader({ summary, isLoading }: MonthlySummaryHeaderProps) {
+export function MonthlySummaryHeader({
+  summary,
+  isLoading,
+}: MonthlySummaryHeaderProps) {
   if (isLoading || !summary) {
     return <Skeleton className="h-[148px] rounded-2xl" />;
   }
@@ -39,10 +47,12 @@ export function MonthlySummaryHeader({ summary, isLoading }: MonthlySummaryHeade
   const totalBudget = Number(summary.totalBudgetCents);
   const totalSpent = Number(summary.totalSpentCents);
   const remaining = totalBudget - totalSpent;
-  const pct = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
+  const pct =
+    totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
 
   const isOverBudget = remaining < 0;
-  const isNearLimit = !isOverBudget && remaining / Math.max(totalBudget, 1) < 0.2;
+  const isNearLimit =
+    !isOverBudget && remaining / Math.max(totalBudget, 1) < 0.2;
 
   const barColorClass = isOverBudget
     ? "bg-destructive"
@@ -87,8 +97,16 @@ export function MonthlySummaryHeader({ summary, isLoading }: MonthlySummaryHeade
       value: formatCents(Math.abs(remaining)),
       sub: remainingSub,
       valueClass: remainingValueClass,
-      iconBg: isOverBudget ? "bg-destructive/10" : isNearLimit ? "bg-amber-500/10" : "bg-emerald-500/10",
-      iconColor: isOverBudget ? "text-destructive" : isNearLimit ? "text-amber-600 dark:text-amber-400" : "text-emerald-700 dark:text-emerald-400",
+      iconBg: isOverBudget
+        ? "bg-destructive/10"
+        : isNearLimit
+          ? "bg-amber-500/10"
+          : "bg-emerald-500/10",
+      iconColor: isOverBudget
+        ? "text-destructive"
+        : isNearLimit
+          ? "text-amber-600 dark:text-amber-400"
+          : "text-emerald-700 dark:text-emerald-400",
     },
   ];
 
@@ -96,24 +114,40 @@ export function MonthlySummaryHeader({ summary, isLoading }: MonthlySummaryHeade
     <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-subtle slide-up animate-stagger-1">
       {/* Stat columns */}
       <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/60">
-        {stats.map(({ icon: Icon, label, value, sub, valueClass, iconBg, iconColor }) => (
-          <div key={label} className="flex items-start gap-3 px-5 py-4">
-            <div className={`flex-shrink-0 w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center`}>
-              <Icon className={`h-4 w-4 ${iconColor}`} />
+        {stats.map(
+          ({
+            icon: Icon,
+            label,
+            value,
+            sub,
+            valueClass,
+            iconBg,
+            iconColor,
+          }) => (
+            <div key={label} className="flex items-start gap-3 px-5 py-4">
+              <div
+                className={`flex-shrink-0 w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center`}
+              >
+                <Icon className={`h-4 w-4 ${iconColor}`} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
+                  {label}
+                </p>
+                <p
+                  className={`font-mono text-2xl font-bold tabular-nums leading-none ${valueClass}`}
+                >
+                  {value}
+                </p>
+                {sub && (
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    {sub}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
-                {label}
-              </p>
-              <p className={`font-mono text-2xl font-bold tabular-nums leading-none ${valueClass}`}>
-                {value}
-              </p>
-              {sub && (
-                <p className="text-[11px] text-muted-foreground mt-1">{sub}</p>
-              )}
-            </div>
-          </div>
-        ))}
+          ),
+        )}
       </div>
 
       {/* Integrated progress strip */}
@@ -122,7 +156,9 @@ export function MonthlySummaryHeader({ summary, isLoading }: MonthlySummaryHeade
           <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em]">
             Monthly Progress
           </span>
-          <span className={`font-mono text-xs font-bold tabular-nums ${isOverBudget ? "text-destructive" : isNearLimit ? "text-amber-600 dark:text-amber-400" : "text-primary"}`}>
+          <span
+            className={`font-mono text-xs font-bold tabular-nums ${isOverBudget ? "text-destructive" : isNearLimit ? "text-amber-600 dark:text-amber-400" : "text-primary"}`}
+          >
             {pct.toFixed(1)}%
           </span>
         </div>

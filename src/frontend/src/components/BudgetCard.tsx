@@ -41,7 +41,9 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
 
   useEffect(() => {
     timer.current = setTimeout(() => setMounted(true), 80);
-    return () => { if (timer.current) clearTimeout(timer.current); };
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
   }, []);
 
   return (
@@ -59,7 +61,11 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
   );
 }
 
-export function BudgetCard({ summary, index, alertThreshold = 80 }: BudgetCardProps) {
+export function BudgetCard({
+  summary,
+  index,
+  alertThreshold = 80,
+}: BudgetCardProps) {
   const { budget, totalSpentCents, remainingCents } = summary;
   const status = getBudgetStatus(summary, alertThreshold);
   const limit = Number(budget.limitCents);
@@ -78,12 +84,13 @@ export function BudgetCard({ summary, index, alertThreshold = 80 }: BudgetCardPr
       className={cn("group block slide-up", staggerClass)}
     >
       <div className="relative bg-card border border-border/80 rounded-2xl overflow-hidden h-full flex flex-col transition-all duration-200 hover:border-border hover:shadow-elevated hover:-translate-y-0.5">
-
         {/* Top color accent */}
-        <div className="h-[3px] w-full flex-shrink-0" style={{ background: accentColor }} />
+        <div
+          className="h-[3px] w-full flex-shrink-0"
+          style={{ background: accentColor }}
+        />
 
         <div className="flex flex-col gap-4 p-5 flex-1">
-
           {/* Header: icon + name + status */}
           <div className="flex items-start gap-3">
             <div
@@ -97,11 +104,23 @@ export function BudgetCard({ summary, index, alertThreshold = 80 }: BudgetCardPr
               <h3 className="font-display font-semibold text-[0.875rem] text-foreground truncate leading-tight">
                 {budget.name}
               </h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{budget.category}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                {budget.category}
+              </p>
             </div>
             {/* Status pill */}
-            <div className={cn("flex items-center gap-1.5 flex-shrink-0 px-2 py-1 rounded-full bg-muted/60 text-[10px] font-semibold", cfg.labelClass)}>
-              <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", cfg.dot)} />
+            <div
+              className={cn(
+                "flex items-center gap-1.5 flex-shrink-0 px-2 py-1 rounded-full bg-muted/60 text-[10px] font-semibold",
+                cfg.labelClass,
+              )}
+            >
+              <span
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full flex-shrink-0",
+                  cfg.dot,
+                )}
+              />
               {cfg.label}
             </div>
           </div>
@@ -111,8 +130,15 @@ export function BudgetCard({ summary, index, alertThreshold = 80 }: BudgetCardPr
             <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] mb-1.5">
               {remaining >= 0 ? "Remaining" : "Over budget"}
             </p>
-            <p className={cn("font-mono text-[1.75rem] font-bold tabular-nums leading-none", cfg.remainingClass)}>
-              {formatCents(remaining < 0 ? BigInt(Math.abs(remaining)) : remainingCents)}
+            <p
+              className={cn(
+                "font-mono text-[1.75rem] font-bold tabular-nums leading-none",
+                cfg.remainingClass,
+              )}
+            >
+              {formatCents(
+                remaining < 0 ? BigInt(Math.abs(remaining)) : remainingCents,
+              )}
             </p>
           </div>
 
@@ -124,11 +150,25 @@ export function BudgetCard({ summary, index, alertThreshold = 80 }: BudgetCardPr
                 <span className="text-muted-foreground/40 mx-1">/</span>
                 {formatCents(budget.limitCents)}
               </span>
-              <span className={cn("font-mono font-semibold tabular-nums", cfg.labelClass)}>
+              <span
+                className={cn(
+                  "font-mono font-semibold tabular-nums",
+                  cfg.labelClass,
+                )}
+              >
                 {Math.min(pct, 999).toFixed(0)}%
               </span>
             </div>
-            <ProgressBar pct={pct} color={pct >= 100 ? "#ef4444" : pct >= alertThreshold ? "#f59e0b" : accentColor} />
+            <ProgressBar
+              pct={pct}
+              color={
+                pct >= 100
+                  ? "#ef4444"
+                  : pct >= alertThreshold
+                    ? "#f59e0b"
+                    : accentColor
+              }
+            />
           </div>
         </div>
 
@@ -136,7 +176,10 @@ export function BudgetCard({ summary, index, alertThreshold = 80 }: BudgetCardPr
         <div className="px-5 py-3 border-t border-border/40 bg-muted/20">
           <span className="flex items-center justify-end gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-primary transition-colors duration-150">
             View details
-            <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform duration-150" />
+            <ArrowRight
+              size={11}
+              className="group-hover:translate-x-0.5 transition-transform duration-150"
+            />
           </span>
         </div>
       </div>

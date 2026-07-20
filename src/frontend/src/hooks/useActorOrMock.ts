@@ -1,3 +1,4 @@
+import type { BrowserStorageBackend } from "../backends/browserStorageBackend";
 import { browserStorageBackend } from "../backends/browserStorageBackend";
 import { mockBackend } from "../mocks/backend";
 
@@ -12,5 +13,7 @@ function useRealActor() {
 }
 
 // IS_MOCK is a build-time constant, so the hook identity is stable across renders.
-export const useActorOrMock: () => { actor: typeof mockBackend; isFetching: boolean } =
-  IS_MOCK ? useMockActor : (useRealActor as never);
+export const useActorOrMock: () => {
+  actor: BrowserStorageBackend;
+  isFetching: boolean;
+} = IS_MOCK ? useMockActor : (useRealActor as never);

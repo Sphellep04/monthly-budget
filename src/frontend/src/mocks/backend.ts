@@ -1,11 +1,11 @@
-import { Principal } from "@icp-sdk/core/principal";
+import type { BrowserStorageBackend } from "../backends/browserStorageBackend";
 import type {
-  backendInterface,
   BillPayment,
   BillPaymentInput,
   Budget,
   BudgetSummary,
   BudgetTemplate,
+  BudgetTemplateCategory,
   BudgetTemplateInput,
   CategoryBreakdownPoint,
   CategoryTrendPoint,
@@ -15,9 +15,10 @@ import type {
   MonthlySummary,
   Note,
   RecurringTemplate,
-} from "../backend.d";
+  RecurringTemplateInput,
+} from "../types";
 
-const stubOwner = Principal.anonymous();
+const stubOwner = "local-user";
 
 const mockBudgets: Budget[] = [
   {
@@ -108,25 +109,25 @@ const mockExpenses: Expense[] = [
   { id: BigInt(2), budgetId: BigInt(1), owner: stubOwner, date: "2026-04-08", amountCents: BigInt(12300), notes: "Farmers market", createdAt: BigInt(Date.now()) },
 ];
 
-export const mockBackend: backendInterface = {
-  createBudget: async (input) => ({ ...input, id: BigInt(99), owner: stubOwner, createdAt: BigInt(Date.now()) }),
-  createExpense: async (input) => ({ ...input, id: BigInt(99), owner: stubOwner, createdAt: BigInt(Date.now()), notes: input.notes }),
-  deleteBudget: async () => true,
-  deleteExpense: async () => true,
-  getBudget: async (id) => mockBudgets.find(b => b.id === id) ?? null,
-  getExpense: async (id) => mockExpenses.find(e => e.id === id) ?? null,
+export const mockBackend = {
+  createBudget: async (input: Omit<Budget, "id" | "owner" | "createdAt">) => ({ ...input, id: BigInt(99), owner: stubOwner, createdAt: BigInt(Date.now()) } as Budget),
+  createExpense: async (input: Omit<Expense, "id" | "owner" | "createdAt">) => ({ ...input, id: BigInt(99), owner: stubOwner, createdAt: BigInt(Date.now()), notes: input.notes } as Expense),
+  deleteBudget: async (_id: bigint) => true,
+  deleteExpense: async (_id: bigint) => true,
+  getBudget: async (id: bigint) => mockBudgets.find(b => b.id === id) ?? null,
+  getExpense: async (id: bigint) => mockExpenses.find(e => e.id === id) ?? null,
   getMonthlySummary: async () => mockMonthlySummary,
-  listBudgets: async () => mockBudgets,
-  listExpenses: async () => mockExpenses,
-  updateBudget: async (id, input) => ({ ...input, id, owner: stubOwner, createdAt: BigInt(Date.now()) }),
-  updateExpense: async (id, input) => ({ ...input, id, owner: stubOwner, createdAt: BigInt(Date.now()), notes: input.notes }),
+  listBudgets: async (_year: bigint, _month: bigint) => mockBudgets,
+  listExpenses: async (_budgetId: bigint) => mockExpenses,
+  updateBudget: async (id: bigint, input: Omit<Budget, "id" | "owner" | "createdAt">) => ({ ...input, id, owner: stubOwner, createdAt: BigInt(Date.now()) } as Budget),
+  updateExpense: async (id: bigint, input: Omit<Expense, "id" | "owner" | "createdAt">) => ({ ...input, id, owner: stubOwner, createdAt: BigInt(Date.now()), notes: input.notes } as Expense),
   // New methods for recurring templates
-  applyRecurringTemplates: async () => [],
-  createRecurringTemplate: async (input) => ({ ...input, id: BigInt(99), owner: stubOwner, createdAt: BigInt(Date.now()) } as RecurringTemplate),
-  deleteRecurringTemplate: async () => true,
-  getRecurringTemplate: async () => null,
-  listRecurringTemplates: async () => [] as RecurringTemplate[],
-  updateRecurringTemplate: async (id, input) => ({ ...input, id, owner: stubOwner, createdAt: BigInt(Date.now()) } as RecurringTemplate),
+  applyRecurringTemplates: async (_year: bigint, _month: bigint) => [] as Expense[],
+  createRecurringTemplate: async (input: RecurringTemplateInput) => ({ ...input, id: BigInt(99), owner: stubOwner, createdAt: BigInt(Date.now()) } as RecurringTemplate),
+  deleteRecurringTemplate: async (_id: bigint) => true,
+  getRecurringTemplate: async (_id: bigint) => null,
+  listRecurringTemplates: async (_budgetId: bigint) => [] as RecurringTemplate[],
+  updateRecurringTemplate: async (id: bigint, input: RecurringTemplateInput) => ({ ...input, id, owner: stubOwner, createdAt: BigInt(Date.now()) } as RecurringTemplate),
   // Trend methods
   getMonthlyTrend: async (_months, currentYear, currentMonth) => {
     const points: MonthlyTrendPoint[] = [];
@@ -174,26 +175,24 @@ export const mockBackend: backendInterface = {
     return points;
   },
   // Notes methods
-  createNote: async (title, content) => ({
+  createNote: async (title: string, content: string) => ({
     id: crypto.randomUUID(),
     title,
     content,
-    userId: stubOwner,
     createdAt: BigInt(Date.now()) * BigInt(1_000_000),
     updatedAt: BigInt(Date.now()) * BigInt(1_000_000),
   } as Note),
-  deleteNote: async () => true,
+  deleteNote: async (_id: string) => true,
   listNotes: async () => [] as Note[],
-  updateNote: async (id, title, content) => ({
+  updateNote: async (id: string, title: string, content: string) => ({
     id,
     title,
     content,
-    userId: stubOwner,
     createdAt: BigInt(Date.now()) * BigInt(1_000_000),
     updatedAt: BigInt(Date.now()) * BigInt(1_000_000),
   } as Note),
   // User settings
-  getUserSettings: async () => ({ alertThresholdPercent: BigInt(80) }),
+  getUserSettings: async () => ({ alertThresholdPercent: 80 }),
   updateUserSettings: async (settings) => settings,
   // Range-based queries
   getExpensesInRange: async (_startDate, _endDate) => mockExpenses,
@@ -214,13 +213,13 @@ export const mockBackend: backendInterface = {
     owner: stubOwner,
   }),
   getBillPayment: async (_id: string): Promise<BillPayment | null> => null,
-  listBillPayments: async (): Promise<BillPayment[]> => [],
+  listBillPayments: async (_year: bigint, _month: bigint): Promise<BillPayment[]> => [],
   updateBillPayment: async (_id: string, input: BillPaymentInput): Promise<BillPayment | null> => ({
     ...input,
     id: _id,
     owner: stubOwner,
   }),
-  deleteBillPayment: async (): Promise<boolean> => true,
+  deleteBillPayment: async (_id: string): Promise<boolean> => true,
   // Budget Template methods
   createBudgetTemplate: async (input: BudgetTemplateInput): Promise<BudgetTemplate> => ({
     ...input,
@@ -236,6 +235,6 @@ export const mockBackend: backendInterface = {
     owner: stubOwner,
     createdAt: BigInt(Date.now()),
   }),
-  deleteBudgetTemplate: async (): Promise<boolean> => true,
-  applyBudgetTemplate: async (): Promise<Budget[]> => [],
+  deleteBudgetTemplate: async (_id: string): Promise<boolean> => true,
+  applyBudgetTemplate: async (_templateId: string, _year: bigint, _month: bigint): Promise<Budget[]> => [],
 };
