@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
@@ -103,7 +103,7 @@ export function LoginPage() {
       >
         {/* Background atmosphere */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
-          {/* Primary glow — upper right */}
+          {/* Primary glow - upper right */}
           <div
             className="absolute -top-32 -right-20 w-[580px] h-[580px] rounded-full"
             style={{
@@ -112,7 +112,7 @@ export function LoginPage() {
               filter: "blur(70px)",
             }}
           />
-          {/* Green glow — lower left */}
+          {/* Green glow - lower left */}
           <div
             className="absolute -bottom-24 -left-16 w-[460px] h-[460px] rounded-full"
             style={{
@@ -121,7 +121,7 @@ export function LoginPage() {
               filter: "blur(80px)",
             }}
           />
-          {/* Warm accent — center */}
+          {/* Warm accent - center */}
           <div
             className="absolute top-[45%] left-[38%] w-72 h-72 rounded-full"
             style={{
@@ -156,7 +156,7 @@ export function LoginPage() {
             <img
               src="/BudgetWise-Logo.png"
               alt="BudgetWise"
-              className="h-8 w-auto object-contain"
+              className="h-12 w-auto object-contain"
               draggable={false}
             />
           </div>
@@ -191,7 +191,7 @@ export function LoginPage() {
               className="text-[0.9375rem] leading-relaxed max-w-[340px]"
               style={{ color: "oklch(0.60 0.02 265)" }}
             >
-              Track budgets, spot trends, and stay on top of recurring bills —
+              Track budgets, spot trends, and stay on top of recurring bills -
               all with private local storage.
             </p>
           </div>
@@ -405,7 +405,7 @@ export function LoginPage() {
             </div>
           </div>
 
-          {/* Feature cards — shown on right panel on both mobile + desktop */}
+          {/* Feature cards - shown on right panel on both mobile + desktop */}
           <div className="grid grid-cols-3 gap-2.5">
             {features.map(
               ({ icon: Icon, label, description, color, bg, border }) => (
@@ -446,3 +446,5 @@ export function LoginPage() {
     </div>
   );
 }
+
+

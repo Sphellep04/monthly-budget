@@ -132,7 +132,7 @@ export function BudgetCard({
             </p>
             <p
               className={cn(
-                "font-mono text-[1.75rem] font-bold tabular-nums leading-none",
+                "font-display text-[1.75rem] font-bold tabular-nums leading-none",
                 cfg.remainingClass,
               )}
             >
@@ -145,14 +145,14 @@ export function BudgetCard({
           {/* Progress + stats */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="font-mono text-muted-foreground tabular-nums">
+              <span className="font-display text-muted-foreground tabular-nums">
                 {formatCents(totalSpentCents)}
                 <span className="text-muted-foreground/40 mx-1">/</span>
                 {formatCents(budget.limitCents)}
               </span>
               <span
                 className={cn(
-                  "font-mono font-semibold tabular-nums",
+                  "font-display font-semibold tabular-nums",
                   cfg.labelClass,
                 )}
               >

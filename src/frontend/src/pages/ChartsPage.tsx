@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+﻿import { Skeleton } from "@/components/ui/skeleton";
 import {
   BarChart2,
   CalendarDays,
@@ -783,7 +783,7 @@ export function ChartsPage() {
             Spending Charts
           </h1>
           <p className="text-sm text-muted-foreground mt-1.5 max-w-md leading-relaxed">
-            Track your financial patterns — monthly totals, per-budget
+            Track your financial patterns - monthly totals, per-budget
             breakdowns, daily trends, and more.
           </p>
         </div>
@@ -842,7 +842,7 @@ export function ChartsPage() {
           <SectionHeader
             icon={<BarChart2 className="w-4.5 h-4.5" />}
             title="Per-Budget Breakdown"
-            subtitle="Compare actual spend vs. limit for each budget — last 6 months"
+            subtitle="Compare actual spend vs. limit for each budget - last 6 months"
             iconBg="bg-secondary/10"
             iconColor="text-secondary"
           />
@@ -873,7 +873,7 @@ export function ChartsPage() {
               No budgets to visualize
             </p>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-              Create budget categories and start logging expenses — your
+              Create budget categories and start logging expenses - your
               spending charts will appear here.
             </p>
           </div>
@@ -924,7 +924,7 @@ export function ChartsPage() {
           <SectionHeader
             icon={<PieChartIcon className="w-4.5 h-4.5" />}
             title="Category Spending Breakdown"
-            subtitle={`How your spending is distributed across categories — ${getMonthName(selectedMonth)} ${selectedYear}`}
+            subtitle={`How your spending is distributed across categories - ${getMonthName(selectedMonth)} ${selectedYear}`}
             iconBg="bg-accent/20"
             iconColor="text-accent-foreground"
           />
@@ -943,7 +943,7 @@ export function ChartsPage() {
           <SectionHeader
             icon={<BarChart2 className="w-4.5 h-4.5" />}
             title="Budget vs Actual"
-            subtitle={`Side-by-side comparison of limits vs real spend — ${getMonthName(selectedMonth)} ${selectedYear}`}
+            subtitle={`Side-by-side comparison of limits vs real spend - ${getMonthName(selectedMonth)} ${selectedYear}`}
             iconBg="bg-secondary/10"
             iconColor="text-secondary"
           />
@@ -962,7 +962,7 @@ export function ChartsPage() {
           <SectionHeader
             icon={<CalendarDays className="w-4.5 h-4.5" />}
             title="Daily Spending"
-            subtitle={`Day-by-day spending pattern — ${getMonthName(selectedMonth)} ${selectedYear}`}
+            subtitle={`Day-by-day spending pattern - ${getMonthName(selectedMonth)} ${selectedYear}`}
             iconBg="bg-primary/10"
             iconColor="text-primary"
           />
@@ -982,3 +982,5 @@ export function ChartsPage() {
     </motion.div>
   );
 }
+
+

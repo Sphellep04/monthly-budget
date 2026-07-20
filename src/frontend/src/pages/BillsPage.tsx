@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -57,10 +57,10 @@ function getBillStatus(
   const todayMonth = today.getMonth() + 1;
   const todayDay = today.getDate();
 
-  // Past month — no payment = overdue
+  // Past month - no payment = overdue
   if (year < todayYear || (year === todayYear && month < todayMonth))
     return "overdue";
-  // Future month — upcoming
+  // Future month - upcoming
   if (year > todayYear || (year === todayYear && month > todayMonth))
     return "upcoming";
 
@@ -197,7 +197,7 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="font-display text-base">
-            Mark as Paid — {bill?.template.name}
+            Mark as Paid - {bill?.template.name}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-1">
@@ -336,7 +336,7 @@ function useAllRecurringTemplates(year: number, month: number) {
     year,
     month,
   );
-  // We need to call hooks for each budget — but hooks can't be conditional.
+  // We need to call hooks for each budget - but hooks can't be conditional.
   // Strategy: fetch budgets first, then fetch all templates in one combined hook.
   // Since we don't know how many budgets there are, we fetch in sequence via effect.
   // For simplicity: fetch up to 20 budgets' templates using a stable list.
@@ -658,3 +658,5 @@ function BillsSummary({ bills }: { bills: BillItem[] }) {
     </div>
   );
 }
+
+

@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -168,7 +168,7 @@ export function ReportsPage() {
   const { data: breakdown, isLoading: brkLoading } =
     useGetCategoryBreakdownForRange(startDate, endDate, hasRange);
 
-  // We need budget names for the expense list — use current month as reference
+  // We need budget names for the expense list - use current month as reference
   const now = new Date();
   const { data: monthlySummary } = useMonthlySummary(
     now.getFullYear(),
@@ -465,7 +465,7 @@ export function ReportsPage() {
                             <span className="line-clamp-1">
                               {expense.notes ?? (
                                 <span className="text-muted-foreground/50 italic">
-                                  —
+                                  -
                                 </span>
                               )}
                             </span>
@@ -483,7 +483,7 @@ export function ReportsPage() {
                               </a>
                             ) : (
                               <span className="text-muted-foreground/30 text-xs">
-                                —
+                                -
                               </span>
                             )}
                           </TableCell>
@@ -499,3 +499,5 @@ export function ReportsPage() {
     </div>
   );
 }
+
+

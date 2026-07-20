@@ -171,7 +171,7 @@ export const CATEGORY_ICONS: Record<string, string> = {
   Groceries: "🛒",
   Housing: "🏠",
   "Dining Out": "🍽️",
-  Transportation: "🚗",
+  Transportation: "�-",
   Shopping: "🛍️",
   Utilities: "💡",
   Entertainment: "🎬",

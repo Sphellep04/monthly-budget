@@ -133,7 +133,7 @@ function SidebarInner({
         <img
           src="/BudgetWise-Logo.png"
           alt="BudgetWise"
-          className="h-10 w-auto object-contain"
+          className="h-14 w-auto object-contain"
           draggable={false}
         />
       </div>

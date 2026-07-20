@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
@@ -359,14 +359,14 @@ function MonthTable({
                 {getMonthName(row.monthNum).slice(0, 3)} {year}
               </span>
               <span className="text-sm tabular-nums text-muted-foreground">
-                {isFuture ? "—" : formatCents(row.totalBudgetCents)}
+                {isFuture ? "-" : formatCents(row.totalBudgetCents)}
               </span>
               <span
                 className={`text-sm tabular-nums font-medium ${
                   row.isOverBudget ? "text-destructive" : "text-foreground"
                 }`}
               >
-                {isFuture ? "—" : formatCents(row.totalSpentCents)}
+                {isFuture ? "-" : formatCents(row.totalSpentCents)}
               </span>
               <span
                 className={`text-sm tabular-nums ${
@@ -375,7 +375,7 @@ function MonthTable({
                     : "text-muted-foreground"
                 }`}
               >
-                {isFuture ? "—" : formatCents(Math.abs(row.remainingCents))}
+                {isFuture ? "-" : formatCents(Math.abs(row.remainingCents))}
               </span>
               <div className="flex justify-end">
                 {isFuture ? (
@@ -516,7 +516,7 @@ export function AnnualSummaryPage() {
         </div>
       </div>
 
-      {/* ── Stat Cards 2×2 ── */}
+      {/* ── Stat Cards 2�-2 ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {isLoading ? (
           <>
@@ -549,7 +549,7 @@ export function AnnualSummaryPage() {
               icon={<TrendingDown size={18} />}
               label="Best Month"
               value={
-                stats.bestMonth ? getMonthName(stats.bestMonth.monthNum) : "—"
+                stats.bestMonth ? getMonthName(stats.bestMonth.monthNum) : "-"
               }
               sub={
                 stats.bestMonth
@@ -564,7 +564,7 @@ export function AnnualSummaryPage() {
               icon={<TrendingUp size={18} />}
               label="Worst Month"
               value={
-                stats.worstMonth ? getMonthName(stats.worstMonth.monthNum) : "—"
+                stats.worstMonth ? getMonthName(stats.worstMonth.monthNum) : "-"
               }
               sub={
                 stats.worstMonth
@@ -593,7 +593,7 @@ export function AnnualSummaryPage() {
             </div>
             <div>
               <h2 className="font-display text-base font-semibold text-foreground leading-tight">
-                Monthly Spending — {selectedYear}
+                Monthly Spending - {selectedYear}
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                 Total spend per month. Bars turn amber near limit, red when
@@ -714,7 +714,7 @@ export function AnnualSummaryPage() {
                   ? `${getMonthName(stats.highestOverspendMonth.monthNum)} (${formatCents(
                       Math.abs(stats.highestOverspendMonth.remainingCents),
                     )} over)`
-                  : "None — great job!"
+                  : "None - great job!"
               }
               highlight={!!stats.highestOverspendMonth}
             />
@@ -724,3 +724,5 @@ export function AnnualSummaryPage() {
     </motion.div>
   );
 }
+
+

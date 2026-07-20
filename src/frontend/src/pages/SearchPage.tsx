@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -80,7 +80,7 @@ export function SearchPage() {
     [monthSummary],
   );
 
-  // Build search params — only search once user has interacted or use default date range
+  // Build search params - only search once user has interacted or use default date range
   const searchParams = useMemo(() => {
     const minAmt =
       filters.minAmount !== ""
@@ -372,7 +372,7 @@ export function SearchPage() {
               </h3>
               <p className="text-sm text-muted-foreground max-w-xs">
                 {hasActiveFilters
-                  ? "Try adjusting your filters — change the date range, clear the keyword, or select a different category."
+                  ? "Try adjusting your filters - change the date range, clear the keyword, or select a different category."
                   : "No expenses were recorded in the last 30 days. Start adding expenses to your budgets!"}
               </p>
               {hasActiveFilters && (
@@ -476,7 +476,7 @@ export function SearchPage() {
                             </a>
                           ) : (
                             <span className="text-muted-foreground/30 text-xs">
-                              —
+                              -
                             </span>
                           )}
                         </TableCell>
@@ -492,3 +492,5 @@ export function SearchPage() {
     </div>
   );
 }
+
+

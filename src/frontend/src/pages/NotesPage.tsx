@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -364,7 +364,7 @@ export function NotesPage() {
               No notes yet
             </p>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed mb-6">
-              Create your first note — track financial goals, reminders, or
+              Create your first note - track financial goals, reminders, or
               monthly reflections.
             </p>
             <Button onClick={openCreate} className="gap-2">
@@ -432,3 +432,5 @@ export function NotesPage() {
     </>
   );
 }
+
+

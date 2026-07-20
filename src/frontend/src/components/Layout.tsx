@@ -1,11 +1,11 @@
-import { Outlet } from "@tanstack/react-router";
+﻿import { Outlet } from "@tanstack/react-router";
 import { Sidebar } from "./Sidebar";
 
 export function Layout() {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      {/* Main content — offset only on md+ where sidebar is visible */}
+      {/* Main content - offset only on md+ where sidebar is visible */}
       <div className="flex-1 flex flex-col min-w-0 md:ml-0">
         <main className="flex-1 overflow-auto animate-page-enter">
           <div className="page-enter">
@@ -21,3 +21,5 @@ export function Layout() {
     </div>
   );
 }
+
+

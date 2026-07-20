@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
@@ -156,7 +156,7 @@ export function BudgetList({
         </h3>
         <p className="text-muted-foreground text-sm text-center mb-7 max-w-xs leading-relaxed">
           Set up your first monthly budget to start tracking where your money
-          goes — and stay in control.
+          goes - and stay in control.
         </p>
         <Button
           onClick={onAddBudget}
@@ -177,3 +177,5 @@ export function BudgetList({
     </div>
   );
 }
+
+

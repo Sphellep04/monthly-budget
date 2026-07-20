@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertTriangle,
@@ -380,7 +380,7 @@ function computeMonthlyTrend(
     type: "trending-category",
     title: "4-Month Spending Trend",
     value: `${sign(change)}% over 4 months`,
-    subtext: `Your overall spending has been ${up ? "climbing" : "declining"} — from ${formatCents(Math.round(first2Avg))} to ${formatCents(Math.round(last2Avg))} avg/month`,
+    subtext: `Your overall spending has been ${up ? "climbing" : "declining"} - from ${formatCents(Math.round(first2Avg))} to ${formatCents(Math.round(last2Avg))} avg/month`,
     direction: up ? "up" : "down",
     color: up ? "warning" : "success",
   };
@@ -526,7 +526,7 @@ function EmptyInsights() {
         No insights yet
       </h3>
       <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-        Keep tracking your expenses — insights will appear as patterns emerge
+        Keep tracking your expenses - insights will appear as patterns emerge
         across your spending history.
       </p>
     </motion.div>
@@ -657,3 +657,5 @@ export function InsightsPage() {
     </div>
   );
 }
+
+

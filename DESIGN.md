@@ -1,12 +1,12 @@
-# Design Brief
+﻿# Design Brief
 
 ## Direction
 
-Premium Clarity Budget Tool — A refined, elevated financial companion that combines clarity with polished micro-interactions and premium visual depth. Precision-engineered interface for confident spending decisions.
+Premium Clarity Budget Tool - A refined, elevated financial companion that combines clarity with polished micro-interactions and premium visual depth. Precision-engineered interface for confident spending decisions.
 
 ## Tone
 
-Premium fintech aesthetic—restrained elegance, smooth transitions, intentional depth layering, and trust-building clarity. Functional beauty without overstatement. Every interaction feels considered and refined.
+Premium fintech aesthetic-restrained elegance, smooth transitions, intentional depth layering, and trust-building clarity. Functional beauty without overstatement. Every interaction feels considered and refined.
 
 ## Differentiation
 
@@ -29,9 +29,9 @@ Elevated card depth with shadow hierarchy, polished focus rings and input states
 
 ## Typography
 
-- Display: Bricolage Grotesque — page headings, month selector, category titles
-- Body: DM Sans — all body copy, labels, form inputs
-- Mono: Geist Mono — budget amounts, transaction values
+- Display: Bricolage Grotesque - page headings, month selector, category titles
+- Body: DM Sans - all body copy, labels, form inputs
+- Mono: Geist Mono - budget amounts, transaction values
 - Scale: h1 `text-3xl font-display font-600`, h2 `text-xl font-display font-500`, label `text-sm font-body font-500`, body `text-base font-body font-400`
 
 ## Elevation & Depth
@@ -50,7 +50,7 @@ Three-tier shadow hierarchy: `shadow-subtle` for form inputs/interactive element
 
 ## Spacing & Rhythm
 
-16px base unit grid—category cards spaced 1.5rem apart, section headings with 2rem top margin, form inputs with 0.75rem label gap. Micro-spacing: 4px between badge and amount, 8px button padding.
+16px base unit grid-category cards spaced 1.5rem apart, section headings with 2rem top margin, form inputs with 0.75rem label gap. Micro-spacing: 4px between badge and amount, 8px button padding.
 
 ## Component Patterns
 
@@ -66,7 +66,7 @@ Three-tier shadow hierarchy: `shadow-subtle` for form inputs/interactive element
 - **Entrance**: Category cards use `animate-fade-in` + staggered delay (100ms), progress bars `animate-slide-up` on mount
 - **Hover**: Cards gain `shadow-elevated`, buttons scale 98% on active, form inputs focus-ring appears
 - **Transitions**: All interactive elements use 0.3s cubic-bezier(0.4, 0, 0.2, 1) smooth curve, buttons use 0.2s spring for snappy feedback
-- **Decorative**: None—only functional interactions
+- **Decorative**: None-only functional interactions
 
 ## Constraints
 
@@ -79,3 +79,5 @@ Three-tier shadow hierarchy: `shadow-subtle` for form inputs/interactive element
 ## Signature Detail
 
 Refined shadow hierarchy and polished micro-interactions: card elevation on hover, spring transitions on buttons, focus rings with 2px offset, and staggered entrance animations. Premium feel through considered depth and smooth motion, not decoration. Progress bars remain primary status indicator with animated fills and contextual color states.
+
+

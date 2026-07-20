@@ -1,20 +1,20 @@
-# BudgetWise
+﻿# BudgetWise
 
-A personal finance app for tracking monthly budgets and expenses. Built on the Internet Computer Protocol (ICP) with a React + TypeScript frontend and a Motoko backend canister.
+A personal finance app for tracking monthly budgets and expenses. Built with a React + TypeScript frontend and a local browser storage backend for offline-friendly budgeting.
 
 ---
 
 ## Features
 
-- **Monthly budget tracking** — create budget categories with limits and track spending in real time
-- **Expense logging** — add, edit, and delete expenses per category
-- **Recurring templates** — set up recurring expenses (subscriptions, rent, etc.) that auto-apply each month
-- **Spending insights** — progress bars, status indicators (On Track / Near Limit / Over Budget), and alerts
-- **Annual summary** — year-over-year view of all categories
-- **Charts** — visualise spending trends over time
-- **CSV export** — download a full month's budget and expense breakdown
-- **Dark / light / system theme** — toggle in Settings
-- **PWA support** — install to your phone or desktop home screen for a native app feel
+- **Monthly budget tracking** - create budget categories with limits and track spending in real time
+- **Expense logging** - add, edit, and delete expenses per category
+- **Recurring templates** - set up recurring expenses (subscriptions, rent, etc.) that auto-apply each month
+- **Spending insights** - progress bars, status indicators (On Track / Near Limit / Over Budget), and alerts
+- **Annual summary** - year-over-year view of all categories
+- **Charts** - visualise spending trends over time
+- **CSV export** - download a full month's budget and expense breakdown
+- **Dark / light / system theme** - toggle in Settings
+- **PWA support** - install to your phone or desktop home screen for a native app feel
 
 ---
 
@@ -26,9 +26,9 @@ A personal finance app for tracking monthly budgets and expenses. Built on the I
 | Routing               | TanStack Router                                            |
 | State / data fetching | TanStack Query                                             |
 | Styling               | Tailwind CSS v3 (oklch color space), shadcn/ui             |
-| Fonts                 | Bricolage Grotesque (display), DM Sans (body), Geist Mono  |
-| Backend               | Motoko canister on ICP                                     |
-| Auth                  | Internet Identity                                          |
+| Fonts                 | Inter (display/body), JetBrains Mono                       |
+| Backend               | Browser local storage / mock backend                       |
+| Auth                  | Local browser-based auth                                   |
 | PWA                   | vite-plugin-pwa + Workbox                                  |
 
 ---
@@ -39,63 +39,38 @@ A personal finance app for tracking monthly budgets and expenses. Built on the I
 
 - [Node.js](https://nodejs.org/) 18+
 - [pnpm](https://pnpm.io/) 8+
-- [DFX](https://internetcomputer.org/docs/current/developer-docs/getting-started/install/) (for deploying to ICP — not needed for local mock dev)
 
-### Local development (mock backend)
+### Local development
 
-The frontend runs fully without a deployed canister using the built-in mock backend.
+The frontend runs fully in the browser using local storage and does not require a backend server.
 
 > **Important:** all `pnpm` commands must be run from inside `monthly-budget/src/frontend/`, not the repo root. Running them from the wrong directory will produce `ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND`.
 
-**Step 1 — Navigate to the frontend folder**
+**Step 1 - Navigate to the frontend folder**
 
 ```powershell
 cd "monthly-budget\src\frontend"
 ```
 
-**Step 2 — Install dependencies** *(first time only)*
+**Step 2 - Install dependencies** *(first time only)*
 
 ```powershell
 pnpm install
 ```
 
-**Step 3 — Enable mock mode** *(first time only — creates `.env.local`)*
-
-```powershell
-# PowerShell — must use -Encoding utf8 (Vite cannot read UTF-16)
-"VITE_USE_MOCK=true" | Out-File -FilePath .env.local -Encoding utf8NoBOM
-```
-
-```bash
-# bash / Git Bash
-echo "VITE_USE_MOCK=true" > .env.local
-```
-
-**Step 4 — Start the dev server**
+**Step 3 - Start the dev server**
 
 ```powershell
 pnpm dev
 ```
 
-**Step 5 — Open in your browser**
+**Step 4 - Open in your browser**
 
 ```
 http://localhost:5173
 ```
 
-The app will skip the login screen and load with sample data automatically.
-
----
-
-### Full ICP deployment
-
-```bash
-# From the monthly-budget/ directory
-dfx start --background
-dfx deploy
-```
-
-Then open the frontend canister URL printed by DFX.
+The app will load using local browser storage and local authentication.
 
 ---
 
@@ -108,15 +83,16 @@ monthly-budget/
 │   │   ├── src/
 │   │   │   ├── components/    # UI components (Sidebar, BudgetCard, …)
 │   │   │   ├── hooks/         # Data hooks (useBudget, useActorOrMock, …)
+│   │   │   ├── backends/      # Browser storage backend implementation
 │   │   │   ├── mocks/         # Mock backend for local dev
 │   │   │   ├── pages/         # Route pages
 │   │   │   └── types/         # Shared types + helpers
 │   │   ├── public/
 │   │   │   ├── icons/             # PWA icons (generated from BudgetWise-Logo.png)
-│   │   │   ├── BudgetWise-Logo.png  # Source logo — run gen-pwa-icons.mjs after updating
+│   │   │   ├── BudgetWise-Logo.png  # Source logo - run gen-pwa-icons.mjs after updating
 │   │   │   └── apple-touch-icon.png
 │   │   └── vite.config.js
-│   ├── backend/           # Motoko canister
+│   ├── backend/           # Legacy Motoko/ICP code (not required for local dev)
 │   └── declarations/      # Auto-generated Candid bindings
 └── dfx.json
 ```
@@ -125,7 +101,7 @@ monthly-budget/
 
 ## PWA / Mobile
 
-BudgetWise is configured as a Progressive Web App. After deploying:
+BudgetWise is configured as a Progressive Web App. After starting the frontend:
 
 1. Open the app in Chrome (Android) or Safari (iOS)
 2. Tap **Add to Home Screen**
@@ -152,12 +128,14 @@ The app respects your OS preference by default (light/dark/system). You can over
 
 | Variable              | Default                       | Purpose                                               |
 | --------------------- | ----------------------------- | ----------------------------------------------------- |
-| `VITE_USE_MOCK`       | `false`                       | Set to `true` to bypass ICP and use mock data locally |
-| `CANISTER_ID_BACKEND` | —                             | Set automatically by DFX on deploy                    |
-| `II_URL`              | identity.internetcomputer.org | Internet Identity URL                                 |
+| `VITE_USE_MOCK`       | `false`                       | Set to `true` to use the mock backend locally         |
+| `CANISTER_ID_BACKEND` | -                             | Legacy ICP setting, not required for local dev        |
+| `II_URL`              | identity.internetcomputer.org | Legacy Internet Identity URL for ICP builds           |
 
 ---
 
 ## License
 
-Private — all rights reserved.
+Private - all rights reserved.
+
+

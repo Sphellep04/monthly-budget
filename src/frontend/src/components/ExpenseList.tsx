@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLink, ImageIcon, Receipt, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -38,7 +38,7 @@ function openReceiptInTab(dataUrl: string) {
     // Revoke after a short delay to allow the tab to load
     setTimeout(() => URL.revokeObjectURL(blobUrl), 10_000);
     if (!win) {
-      toast.error("Popup blocked — please allow popups for this site.");
+      toast.error("Popup blocked - please allow popups for this site.");
     }
   } catch {
     toast.error("Could not open receipt.");
@@ -156,7 +156,7 @@ export function ExpenseList({
               {formatCents(expense.amountCents)}
             </span>
 
-            {/* Delete — icon only, appears on hover */}
+            {/* Delete - icon only, appears on hover */}
             <Button
               variant="ghost"
               size="icon"
@@ -183,3 +183,5 @@ export function ExpenseList({
     </div>
   );
 }
+
+

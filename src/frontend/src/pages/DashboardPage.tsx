@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
 import {
@@ -48,7 +48,7 @@ function EmptyState() {
       </h3>
       <p className="text-sm text-muted-foreground max-w-sm mb-8 font-body leading-relaxed">
         Take control of your spending by creating your first budget category. It
-        only takes a minute — you'll get instant insight into where your money
+        only takes a minute - you'll get instant insight into where your money
         goes.
       </p>
 
@@ -287,3 +287,5 @@ export function DashboardPage() {
     </div>
   );
 }
+
+

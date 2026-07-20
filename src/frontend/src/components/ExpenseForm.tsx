@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -187,7 +187,7 @@ export function ExpenseForm({
     applyReceiptFile(file, objectUrl);
   }
 
-  /** Handle the camera capture input change — runs OCR automatically */
+  /** Handle the camera capture input change - runs OCR automatically */
   const handleCameraCapture = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -231,7 +231,7 @@ export function ExpenseForm({
           setAmountStr(amount);
           setAmountError("");
           setScanState("done");
-          toast.success(`Receipt scanned — amount detected: N$${amount}`, {
+          toast.success(`Receipt scanned - amount detected: N$${amount}`, {
             description: "You can adjust the amount before saving.",
             duration: 5000,
           });
@@ -284,7 +284,7 @@ export function ExpenseForm({
           receiptUrl = receiptDataUrl;
           setUploadProgress(100);
         } else {
-          // File upload — convert now
+          // File upload - convert now
           const tick = setInterval(() => {
             setUploadProgress((p) => Math.min(p + 15, 85));
           }, 120);
@@ -517,7 +517,7 @@ export function ExpenseForm({
               className="hidden"
               onChange={handleFileChange}
             />
-            {/* Camera capture input — capture="environment" opens rear camera on mobile */}
+            {/* Camera capture input - capture="environment" opens rear camera on mobile */}
             <input
               ref={cameraInputRef}
               type="file"
@@ -591,3 +591,5 @@ export function ExpenseForm({
     </Dialog>
   );
 }
+
+

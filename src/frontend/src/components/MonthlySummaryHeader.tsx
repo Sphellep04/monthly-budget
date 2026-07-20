@@ -72,6 +72,10 @@ export function MonthlySummaryHeader({
       ? "Approaching limit"
       : "You're doing great";
 
+  const savings = Math.max(remaining, 0);
+  const savingsValueClass = savings > 0 ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground";
+  const savingsSub = savings > 0 ? "Saved this month" : "No savings yet";
+
   const stats = [
     {
       icon: Wallet,
@@ -90,6 +94,15 @@ export function MonthlySummaryHeader({
       valueClass: "text-foreground",
       iconBg: "bg-secondary/10",
       iconColor: "text-secondary",
+    },
+    {
+      icon: PiggyBank,
+      label: "Savings",
+      value: formatCents(BigInt(savings)),
+      sub: savingsSub,
+      valueClass: savingsValueClass,
+      iconBg: "bg-emerald-500/10",
+      iconColor: "text-emerald-700 dark:text-emerald-400",
     },
     {
       icon: isOverBudget ? TrendingDown : PiggyBank,
@@ -113,7 +126,7 @@ export function MonthlySummaryHeader({
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-subtle slide-up animate-stagger-1">
       {/* Stat columns */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/60">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border/60">
         {stats.map(
           ({
             icon: Icon,
@@ -135,7 +148,7 @@ export function MonthlySummaryHeader({
                   {label}
                 </p>
                 <p
-                  className={`font-mono text-2xl font-bold tabular-nums leading-none ${valueClass}`}
+                  className={`font-display text-[1.75rem] font-bold tabular-nums leading-none ${valueClass}`}
                 >
                   {value}
                 </p>

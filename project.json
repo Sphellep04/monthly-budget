@@ -1,5 +1,5 @@
-{
-  "overview": "A responsive personal finance tracker with receipt scanning, budget categories, expense logging, recurring templates, analytics charts, annual summary, budget alerts, dark/light mode, and notes — all in Namibian dollars (N$).",
+﻿{
+  "overview": "A responsive personal finance tracker with receipt scanning, budget categories, expense logging, recurring templates, analytics charts, annual summary, budget alerts, dark/light mode, and notes - all in Namibian dollars (N$).",
   "features": [
     "Receipt scanning with camera to auto-fill expense amounts via OCR",
     "Budget categories with monthly spending limits and color-coded progress bars",
@@ -26,3 +26,4 @@
   ],
   "last_updated": "2026-04-16T08:37:00.508Z"
 }
+
