@@ -1,5 +1,4 @@
-import { useActor } from "@caffeineai/core-infrastructure";
-import { createActor } from "../backend";
+import { browserStorageBackend } from "../backends/browserStorageBackend";
 import { mockBackend } from "../mocks/backend";
 
 const IS_MOCK = import.meta.env.VITE_USE_MOCK === "true";
@@ -9,7 +8,7 @@ function useMockActor() {
 }
 
 function useRealActor() {
-  return useActor(createActor);
+  return { actor: browserStorageBackend, isFetching: false };
 }
 
 // IS_MOCK is a build-time constant, so the hook identity is stable across renders.

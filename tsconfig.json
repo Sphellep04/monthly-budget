@@ -2,11 +2,13 @@
   "compilerOptions": {
     "strict": true,
     "target": "ES2020",
+    "module": "ESNext",
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "moduleResolution": "node10",
-    "ignoreDeprecations": "5.0",
+    "moduleResolution": "bundler",
+    "ignoreDeprecations": "6.0",
     "allowJs": true,
-    "outDir": "HACK_BECAUSE_OF_ALLOW_JS"
+    "rootDir": "./src/frontend",
+    "noEmit": true
   }
 }

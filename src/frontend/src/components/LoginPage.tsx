@@ -12,8 +12,8 @@ import { useAuth } from "../hooks/useAuth";
 
 const trustPoints = [
   "No password or email required",
-  "Cryptographically signed with your identity",
-  "Data stored decentralized on-chain",
+  "Your data stays in your browser storage",
+  "Works locally without any hosted backend",
 ];
 
 const features = [
@@ -192,7 +192,7 @@ export function LoginPage() {
               style={{ color: "oklch(0.60 0.02 265)" }}
             >
               Track budgets, spot trends, and stay on top of recurring bills —
-              all with on-chain privacy.
+              all with private local storage.
             </p>
           </div>
 
@@ -316,7 +316,7 @@ export function LoginPage() {
               draggable={false}
             />
             <p className="text-sm text-muted-foreground">
-              Private. Decentralized. Yours.
+              Private. Local-first. Yours.
             </p>
           </div>
 
@@ -342,7 +342,7 @@ export function LoginPage() {
                   Sign in to continue
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Use Internet Identity — no password needed.
+                  Continue with a simple local sign-in.
                 </p>
               </div>
 
@@ -353,10 +353,10 @@ export function LoginPage() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-foreground">
-                    Internet Identity
+                    Local Sign-In
                   </p>
                   <p className="text-[11px] text-muted-foreground leading-tight">
-                    Secure, passwordless authentication
+                    Secure, lightweight browser authentication
                   </p>
                 </div>
               </div>
@@ -380,7 +380,7 @@ export function LoginPage() {
                   </>
                 ) : (
                   <>
-                    <span>Continue with Internet Identity</span>
+                    <span>Continue with Local Sign-In</span>
                     <ArrowRight
                       size={16}
                       className="flex-shrink-0 transition-spring group-hover:translate-x-0.5"
