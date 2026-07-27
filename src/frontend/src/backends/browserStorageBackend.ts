@@ -61,13 +61,12 @@ function readState(): BackendState {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       const state = createEmptyState();
-      seedDemoData(state);
       persistState(state);
       return state;
     }
 
     const parsed = JSON.parse(raw) as Partial<BackendState>;
-    const state = {
+    return {
       ...createEmptyState(),
       ...parsed,
       budgets: parsed.budgets ?? [],
@@ -78,16 +77,8 @@ function readState(): BackendState {
       billPayments: parsed.billPayments ?? [],
       userSettings: parsed.userSettings ?? { alertThresholdPercent: 80 },
     };
-
-    seedDemoData(state);
-    persistState(state);
-
-    return state;
   } catch {
-    const state = createEmptyState();
-    seedDemoData(state);
-    persistState(state);
-    return state;
+    return createEmptyState();
   }
 }
 
@@ -100,77 +91,6 @@ function persistState(state: BackendState) {
     STORAGE_KEY,
     JSON.stringify({ ...state, version: STORAGE_VERSION }),
   );
-}
-
-function seedDemoData(state: BackendState) {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-
-  const baseBudgets: Budget[] = [
-    {
-      id: BigInt(1),
-      owner: getOwner(),
-      name: "Groceries",
-      limitCents: BigInt(80000),
-      color: "#22c55e",
-      category: "Groceries",
-      year: BigInt(year),
-      month: BigInt(month),
-      createdAt: nowTimestamp(),
-    },
-    {
-      id: BigInt(2),
-      owner: getOwner(),
-      name: "Housing",
-      limitCents: BigInt(180000),
-      color: "#3b82f6",
-      category: "Housing",
-      year: BigInt(year),
-      month: BigInt(month),
-      createdAt: nowTimestamp(),
-    },
-    {
-      id: BigInt(3),
-      owner: getOwner(),
-      name: "Dining Out",
-      limitCents: BigInt(45000),
-      color: "#f97316",
-      category: "Dining Out",
-      year: BigInt(year),
-      month: BigInt(month),
-      createdAt: nowTimestamp(),
-    },
-  ];
-
-  const baseExpenses: Expense[] = [
-    {
-      id: BigInt(10),
-      owner: getOwner(),
-      budgetId: BigInt(1),
-      date: `${year}-${String(month).padStart(2, "0")}-06`,
-      amountCents: BigInt(14500),
-      notes: "Weekly grocery run",
-      createdAt: nowTimestamp(),
-    },
-    {
-      id: BigInt(11),
-      owner: getOwner(),
-      budgetId: BigInt(2),
-      date: `${year}-${String(month).padStart(2, "0")}-08`,
-      amountCents: BigInt(32000),
-      notes: "Rent payment",
-      createdAt: nowTimestamp(),
-    },
-  ];
-
-  state.budgets = baseBudgets;
-  state.expenses = baseExpenses;
-  state.recurringTemplates = [];
-  state.notes = [];
-  state.billPayments = [];
-  state.budgetTemplates = [];
-  state.userSettings = { alertThresholdPercent: 80 };
 }
 
 function toDateParts(value: string) {

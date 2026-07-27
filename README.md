@@ -27,7 +27,7 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 | State / data fetching | TanStack Query                                             |
 | Styling               | Tailwind CSS v3 (oklch color space), shadcn/ui             |
 | Fonts                 | Inter (display/body), JetBrains Mono                       |
-| Backend               | Browser local storage / mock backend                       |
+| Backend               | Browser local storage (interim, DB planned)                |
 | Auth                  | Local browser-based auth                                   |
 | PWA                   | vite-plugin-pwa + Workbox                                  |
 
@@ -78,23 +78,19 @@ The app will load using local browser storage and local authentication.
 
 ```text
 monthly-budget/
-├── src/
-│   ├── frontend/          # React app (Vite)
-│   │   ├── src/
-│   │   │   ├── components/    # UI components (Sidebar, BudgetCard, …)
-│   │   │   ├── hooks/         # Data hooks (useBudget, useActorOrMock, …)
-│   │   │   ├── backends/      # Browser storage backend implementation
-│   │   │   ├── mocks/         # Mock backend for local dev
-│   │   │   ├── pages/         # Route pages
-│   │   │   └── types/         # Shared types + helpers
-│   │   ├── public/
-│   │   │   ├── icons/             # PWA icons (generated from BudgetWise-Logo.png)
-│   │   │   ├── BudgetWise-Logo.png  # Source logo - run gen-pwa-icons.mjs after updating
-│   │   │   └── apple-touch-icon.png
-│   │   └── vite.config.js
-│   ├── backend/           # Legacy Motoko/ICP code (not required for local dev)
-│   └── declarations/      # Auto-generated Candid bindings
-└── dfx.json
+└── src/
+    └── frontend/          # React app (Vite)
+        ├── src/
+        │   ├── components/    # UI components (Sidebar, BudgetCard, …)
+        │   ├── hooks/         # Data hooks (useBudget, useActorOrMock, …)
+        │   ├── backends/      # Browser storage backend implementation
+        │   ├── pages/         # Route pages
+        │   └── types/         # Shared types + helpers
+        ├── public/
+        │   ├── icons/             # PWA icons (generated from BudgetWise-Logo.png)
+        │   ├── BudgetWise-Logo.png  # Source logo - run gen-pwa-icons.mjs after updating
+        │   └── apple-touch-icon.png
+        └── vite.config.js
 ```
 
 ---
@@ -121,16 +117,6 @@ This will overwrite `public/icons/*.png` and `public/apple-touch-icon.png`.
 ## Theme
 
 The app respects your OS preference by default (light/dark/system). You can override it any time via **Settings → Appearance**.
-
----
-
-## Environment Variables
-
-| Variable              | Default                       | Purpose                                               |
-| --------------------- | ----------------------------- | ----------------------------------------------------- |
-| `VITE_USE_MOCK`       | `false`                       | Set to `true` to use the mock backend locally         |
-| `CANISTER_ID_BACKEND` | -                             | Legacy ICP setting, not required for local dev        |
-| `II_URL`              | identity.internetcomputer.org | Legacy Internet Identity URL for ICP builds           |
 
 ---
 
