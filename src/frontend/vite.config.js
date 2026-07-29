@@ -14,6 +14,7 @@ export default defineConfig({
     postcss: "./postcss.config.js",
   },
   optimizeDeps: {
+    exclude: ["next-themes"],
     esbuildOptions: {
       define: {
         global: "globalThis",
