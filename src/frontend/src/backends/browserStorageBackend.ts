@@ -52,6 +52,26 @@ function getOwner() {
   return LOCAL_USER_ID;
 }
 
+/** JSON.stringify throws on bigint, so tag it as a round-trippable object. */
+function bigIntReplacer(_key: string, value: unknown) {
+  if (typeof value === "bigint") {
+    return { __bigint__: value.toString() };
+  }
+  return value;
+}
+
+function bigIntReviver(_key: string, value: unknown) {
+  if (
+    value &&
+    typeof value === "object" &&
+    "__bigint__" in value &&
+    typeof (value as { __bigint__: unknown }).__bigint__ === "string"
+  ) {
+    return BigInt((value as { __bigint__: string }).__bigint__);
+  }
+  return value;
+}
+
 function readState(): BackendState {
   if (typeof window === "undefined") {
     return createEmptyState();
@@ -65,7 +85,7 @@ function readState(): BackendState {
       return state;
     }
 
-    const parsed = JSON.parse(raw) as Partial<BackendState>;
+    const parsed = JSON.parse(raw, bigIntReviver) as Partial<BackendState>;
     return {
       ...createEmptyState(),
       ...parsed,
@@ -89,7 +109,7 @@ function persistState(state: BackendState) {
 
   window.localStorage.setItem(
     STORAGE_KEY,
-    JSON.stringify({ ...state, version: STORAGE_VERSION }),
+    JSON.stringify({ ...state, version: STORAGE_VERSION }, bigIntReplacer),
   );
 }
 
