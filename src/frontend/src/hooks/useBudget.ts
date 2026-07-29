@@ -8,11 +8,16 @@ import type {
   CategoryTrendPoint,
   DailySpendingPoint,
   Expense,
+  Income,
+  IncomeInput,
   MonthlySummary,
   MonthlyTrendPoint,
   Note,
   RecurringTemplate,
   RecurringTemplateInput,
+  SavingsGoal,
+  SavingsGoalInput,
+  UpcomingBill,
   UserSettings,
 } from "../types";
 import { useActorOrMock } from "./useActorOrMock";
@@ -491,6 +496,197 @@ export function useUpdateUserSettings() {
   });
 }
 
+// ─── Income ───────────────────────────────────────────────────────────────────
+
+export function useIncome(year: number, month: number) {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<Income[]>({
+    queryKey: ["income", year, month],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listIncome(BigInt(year), BigInt(month));
+      return result as unknown as Income[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateIncome() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (input: IncomeInput) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.createIncome(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["income"] });
+      queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+    },
+  });
+}
+
+export function useUpdateIncome() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async ({ id, input }: { id: bigint; input: IncomeInput }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.updateIncome(id, input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["income"] });
+      queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+    },
+  });
+}
+
+export function useDeleteIncome() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.deleteIncome(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["income"] });
+      queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+    },
+  });
+}
+
+// ─── Savings Goals ────────────────────────────────────────────────────────────
+
+export function useSavingsGoals() {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<SavingsGoal[]>({
+    queryKey: ["savings-goals"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listSavingsGoals();
+      return result as unknown as SavingsGoal[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateSavingsGoal() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (input: SavingsGoalInput) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.createSavingsGoal(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
+    },
+  });
+}
+
+export function useUpdateSavingsGoal() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      input,
+    }: { id: string; input: SavingsGoalInput }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.updateSavingsGoal(id, input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
+    },
+  });
+}
+
+export function useDeleteSavingsGoal() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.deleteSavingsGoal(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
+    },
+  });
+}
+
+export function useContributeSavingsGoal() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      amountCents,
+    }: { id: string; amountCents: bigint }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.contributeSavingsGoal(id, amountCents);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
+    },
+  });
+}
+
+export function useAllBudgets() {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<Budget[]>({
+    queryKey: ["all-budgets"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listAllBudgets();
+      return result as unknown as Budget[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ─── Receipt Gallery ──────────────────────────────────────────────────────────
+
+export function useReceiptGallery() {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<Expense[]>({
+    queryKey: ["receipt-gallery"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listExpensesWithReceipts();
+      return result as unknown as Expense[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ─── Backup / Restore ─────────────────────────────────────────────────────────
+
+export function useExportData() {
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.exportAllData();
+    },
+  });
+}
+
+export function useImportData() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (json: string) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.importAllData(json);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
+}
+
 // ─── Search ───────────────────────────────────────────────────────────────────
 
 export interface SearchExpensesParams {
@@ -649,6 +845,19 @@ export function useDeleteBillPayment() {
   });
 }
 
+export function useUpcomingBills(withinDays: number) {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<UpcomingBill[]>({
+    queryKey: ["upcoming-bills", withinDays],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.getUpcomingBills(BigInt(withinDays));
+      return result as unknown as UpcomingBill[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 // ─── List all budgets (used by bills page to fetch all templates) ─────────────
 
 export function useListBudgets(year: number, month: number) {
@@ -679,4 +888,9 @@ export type {
   UserSettings,
   BillPayment,
   BillPaymentInput,
+  Income,
+  IncomeInput,
+  SavingsGoal,
+  SavingsGoalInput,
+  UpcomingBill,
 };

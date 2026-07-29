@@ -90,6 +90,7 @@ export interface MonthlySummary {
   month: bigint;
   totalBudgetCents: bigint;
   totalSpentCents: bigint;
+  totalIncomeCents: bigint;
   budgets: BudgetSummary[];
 }
 
@@ -143,6 +144,51 @@ export interface BillPaymentInput {
 
 export type BillStatus = "paid" | "due-soon" | "overdue" | "upcoming";
 
+export interface UpcomingBill {
+  id: string;
+  name: string;
+  amountCents: bigint;
+  dueDay: bigint;
+  budgetName: string;
+  daysUntilDue: number;
+}
+
+export interface Income {
+  id: bigint;
+  owner: UserId;
+  source: string;
+  amountCents: bigint;
+  date: string;
+  notes?: string;
+  createdAt: Timestamp;
+}
+
+export interface IncomeInput {
+  source: string;
+  amountCents: bigint;
+  date: string;
+  notes?: string;
+}
+
+export interface SavingsGoal {
+  id: string;
+  owner: UserId;
+  name: string;
+  targetCents: bigint;
+  savedCents: bigint;
+  targetDate?: string;
+  color: string;
+  createdAt: Timestamp;
+  completedAt?: Timestamp;
+}
+
+export interface SavingsGoalInput {
+  name: string;
+  targetCents: bigint;
+  targetDate?: string;
+  color: string;
+}
+
 export function getBudgetStatus(
   summary: BudgetSummary,
   threshold = 80,
@@ -171,7 +217,7 @@ export const CATEGORY_ICONS: Record<string, string> = {
   Groceries: "🛒",
   Housing: "🏠",
   "Dining Out": "🍽️",
-  Transportation: "�-",
+  Transportation: "�-",
   Shopping: "🛍️",
   Utilities: "💡",
   Entertainment: "🎬",

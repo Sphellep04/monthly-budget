@@ -10,11 +10,15 @@ import type {
   CategoryTrendPoint,
   DailySpendingPoint,
   Expense,
+  Income,
+  IncomeInput,
   MonthlySummary,
   MonthlyTrendPoint,
   Note,
   RecurringTemplate,
   RecurringTemplateInput,
+  SavingsGoal,
+  SavingsGoalInput,
   UserSettings,
 } from "../types";
 
@@ -29,6 +33,8 @@ interface BackendState {
   notes: Note[];
   budgetTemplates: BudgetTemplate[];
   billPayments: BillPayment[];
+  income: Income[];
+  savingsGoals: SavingsGoal[];
   userSettings: UserSettings;
 }
 
@@ -40,6 +46,8 @@ function createEmptyState(): BackendState {
     notes: [],
     budgetTemplates: [],
     billPayments: [],
+    income: [],
+    savingsGoals: [],
     userSettings: { alertThresholdPercent: 80 },
   };
 }
@@ -95,6 +103,8 @@ function readState(): BackendState {
       notes: parsed.notes ?? [],
       budgetTemplates: parsed.budgetTemplates ?? [],
       billPayments: parsed.billPayments ?? [],
+      income: parsed.income ?? [],
+      savingsGoals: parsed.savingsGoals ?? [],
       userSettings: parsed.userSettings ?? { alertThresholdPercent: 80 },
     };
   } catch {
@@ -155,11 +165,19 @@ function buildMonthlySummary(
     0,
   );
 
+  const totalIncomeCents = state.income
+    .filter((entry) => {
+      const date = toDateParts(entry.date);
+      return BigInt(date.year) === year && BigInt(date.month) === month;
+    })
+    .reduce((sum, entry) => sum + Number(entry.amountCents), 0);
+
   return {
     month,
     year,
     totalBudgetCents: BigInt(totalBudgetCents),
     totalSpentCents: BigInt(totalSpentCents),
+    totalIncomeCents: BigInt(totalIncomeCents),
     budgets: budgetSummaries,
   };
 }
@@ -186,6 +204,14 @@ function getBillPaymentById(state: BackendState, id: string) {
 
 function getBudgetTemplateById(state: BackendState, id: string) {
   return state.budgetTemplates.find((template) => template.id === id) ?? null;
+}
+
+function getSavingsGoalById(state: BackendState, id: string) {
+  return state.savingsGoals.find((goal) => goal.id === id) ?? null;
+}
+
+function getIncomeById(state: BackendState, id: bigint) {
+  return state.income.find((entry) => entry.id === id) ?? null;
 }
 
 function getExpensesInRange(
@@ -333,6 +359,26 @@ export const browserStorageBackend = {
     return createdExpenses;
   },
 
+  contributeSavingsGoal: async (id, amountCents) => {
+    const state = readState();
+    const index = state.savingsGoals.findIndex((goal) => goal.id === id);
+    if (index < 0) {
+      return null;
+    }
+    const goal = state.savingsGoals[index];
+    const savedCents = goal.savedCents + amountCents;
+    state.savingsGoals[index] = {
+      ...goal,
+      savedCents,
+      completedAt:
+        savedCents >= goal.targetCents
+          ? (goal.completedAt ?? nowTimestamp())
+          : undefined,
+    };
+    persistState(state);
+    return state.savingsGoals[index];
+  },
+
   createBillPayment: async (input) => {
     const state = readState();
     const billPayment: BillPayment = {
@@ -394,6 +440,22 @@ export const browserStorageBackend = {
     return expense;
   },
 
+  createIncome: async (input) => {
+    const state = readState();
+    const income: Income = {
+      id: BigInt(Date.now()) + BigInt(Math.floor(Math.random() * 10000)),
+      owner: getOwner(),
+      source: input.source,
+      amountCents: input.amountCents,
+      date: input.date,
+      notes: input.notes,
+      createdAt: nowTimestamp(),
+    };
+    state.income.push(income);
+    persistState(state);
+    return income;
+  },
+
   createNote: async (title, content) => {
     const state = readState();
     const note: Note = {
@@ -423,6 +485,23 @@ export const browserStorageBackend = {
     state.recurringTemplates.push(template);
     persistState(state);
     return template;
+  },
+
+  createSavingsGoal: async (input) => {
+    const state = readState();
+    const goal: SavingsGoal = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      owner: getOwner(),
+      name: input.name,
+      targetCents: input.targetCents,
+      savedCents: BigInt(0),
+      targetDate: input.targetDate,
+      color: input.color,
+      createdAt: nowTimestamp(),
+    };
+    state.savingsGoals.push(goal);
+    persistState(state);
+    return goal;
   },
 
   deleteBillPayment: async (id) => {
@@ -477,6 +556,17 @@ export const browserStorageBackend = {
     return true;
   },
 
+  deleteIncome: async (id) => {
+    const state = readState();
+    const existing = getIncomeById(state, id);
+    if (!existing) {
+      return false;
+    }
+    state.income = state.income.filter((entry) => entry.id !== id);
+    persistState(state);
+    return true;
+  },
+
   deleteNote: async (id) => {
     const state = readState();
     const existing = state.notes.find((note) => note.id === id);
@@ -502,6 +592,26 @@ export const browserStorageBackend = {
     );
     persistState(state);
     return true;
+  },
+
+  deleteSavingsGoal: async (id) => {
+    const state = readState();
+    const existing = getSavingsGoalById(state, id);
+    if (!existing) {
+      return false;
+    }
+    state.savingsGoals = state.savingsGoals.filter((goal) => goal.id !== id);
+    persistState(state);
+    return true;
+  },
+
+  exportAllData: async () => {
+    const state = readState();
+    return JSON.stringify(
+      { ...state, version: STORAGE_VERSION },
+      bigIntReplacer,
+      2,
+    );
   },
 
   getBillPayment: async (id) => {
@@ -588,6 +698,54 @@ export const browserStorageBackend = {
     return getExpensesInRange(readState(), startDate, endDate);
   },
 
+  getIncome: async (id) => {
+    return getIncomeById(readState(), id) ?? null;
+  },
+
+  getUpcomingBills: async (withinDays) => {
+    const state = readState();
+    const now = new Date();
+    const year = BigInt(now.getFullYear());
+    const month = BigInt(now.getMonth() + 1);
+    const today = now.getDate();
+    const within = Number(withinDays);
+
+    const results: {
+      id: string;
+      name: string;
+      amountCents: bigint;
+      dueDay: bigint;
+      budgetName: string;
+      daysUntilDue: number;
+    }[] = [];
+
+    for (const template of state.recurringTemplates) {
+      const payment = state.billPayments.find(
+        (p) =>
+          p.recurringTemplateId === template.id.toString() &&
+          p.year === year &&
+          p.month === month,
+      );
+      if (payment?.paidDate != null) continue;
+
+      const dueDay = Number(template.dayOfMonth);
+      const daysUntilDue = dueDay - today;
+      if (daysUntilDue > within) continue;
+
+      const budget = state.budgets.find((b) => b.id === template.budgetId);
+      results.push({
+        id: template.id.toString(),
+        name: template.name,
+        amountCents: template.amountCents,
+        dueDay: template.dayOfMonth,
+        budgetName: budget?.name ?? "Unknown",
+        daysUntilDue,
+      });
+    }
+
+    return results;
+  },
+
   getMonthlySummary: async (year, month) => {
     return buildMonthlySummary(readState(), year, month);
   },
@@ -619,8 +777,31 @@ export const browserStorageBackend = {
     return getRecurringTemplateById(readState(), id) ?? null;
   },
 
+  getSavingsGoal: async (id) => {
+    return getSavingsGoalById(readState(), id) ?? null;
+  },
+
   getUserSettings: async () => {
     return readState().userSettings;
+  },
+
+  importAllData: async (json) => {
+    const parsed = JSON.parse(json, bigIntReviver) as Partial<BackendState>;
+    const state: BackendState = {
+      ...createEmptyState(),
+      ...parsed,
+      budgets: parsed.budgets ?? [],
+      expenses: parsed.expenses ?? [],
+      recurringTemplates: parsed.recurringTemplates ?? [],
+      notes: parsed.notes ?? [],
+      budgetTemplates: parsed.budgetTemplates ?? [],
+      billPayments: parsed.billPayments ?? [],
+      income: parsed.income ?? [],
+      savingsGoals: parsed.savingsGoals ?? [],
+      userSettings: parsed.userSettings ?? { alertThresholdPercent: 80 },
+    };
+    persistState(state);
+    return true;
   },
 
   listBillPayments: async (year, month) => {
@@ -632,6 +813,10 @@ export const browserStorageBackend = {
 
   listBudgetTemplates: async () => {
     return readState().budgetTemplates;
+  },
+
+  listAllBudgets: async () => {
+    return readState().budgets;
   },
 
   listBudgets: async (year, month) => {
@@ -646,6 +831,19 @@ export const browserStorageBackend = {
     );
   },
 
+  listExpensesWithReceipts: async () => {
+    return readState()
+      .expenses.filter((expense) => !!expense.receiptUrl)
+      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  },
+
+  listIncome: async (year, month) => {
+    return readState().income.filter((entry) => {
+      const date = toDateParts(entry.date);
+      return BigInt(date.year) === year && BigInt(date.month) === month;
+    });
+  },
+
   listNotes: async () => {
     return readState().notes;
   },
@@ -654,6 +852,10 @@ export const browserStorageBackend = {
     return readState().recurringTemplates.filter(
       (template) => template.budgetId === budgetId,
     );
+  },
+
+  listSavingsGoals: async () => {
+    return readState().savingsGoals;
   },
 
   searchExpenses: async (
@@ -753,6 +955,23 @@ export const browserStorageBackend = {
     return state.expenses[index];
   },
 
+  updateIncome: async (id, input) => {
+    const state = readState();
+    const index = state.income.findIndex((entry) => entry.id === id);
+    if (index < 0) {
+      return null;
+    }
+    state.income[index] = {
+      ...state.income[index],
+      source: input.source,
+      amountCents: input.amountCents,
+      date: input.date,
+      notes: input.notes,
+    };
+    persistState(state);
+    return state.income[index];
+  },
+
   updateNote: async (id, title, content) => {
     const state = readState();
     const index = state.notes.findIndex((note) => note.id === id);
@@ -787,6 +1006,23 @@ export const browserStorageBackend = {
     };
     persistState(state);
     return state.recurringTemplates[index];
+  },
+
+  updateSavingsGoal: async (id, input) => {
+    const state = readState();
+    const index = state.savingsGoals.findIndex((goal) => goal.id === id);
+    if (index < 0) {
+      return null;
+    }
+    state.savingsGoals[index] = {
+      ...state.savingsGoals[index],
+      name: input.name,
+      targetCents: input.targetCents,
+      targetDate: input.targetDate,
+      color: input.color,
+    };
+    persistState(state);
+    return state.savingsGoals[index];
   },
 
   updateUserSettings: async (settings) => {
