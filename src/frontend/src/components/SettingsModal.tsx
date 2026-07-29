@@ -8,11 +8,30 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Bell, Monitor, Moon, Sun } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  Download,
+  Monitor,
+  Moon,
+  Sun,
+  Upload,
+} from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useUpdateUserSettings, useUserSettings } from "../hooks/useBudget";
+import {
+  getNotificationPermission,
+  getNotificationsEnabled,
+  requestNotificationPermission,
+  setNotificationsEnabled,
+} from "../hooks/useBillReminders";
+import {
+  useExportData,
+  useImportData,
+  useUpdateUserSettings,
+  useUserSettings,
+} from "../hooks/useBudget";
 
 interface SettingsModalProps {
   open: boolean;
@@ -29,14 +48,82 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const { data: settings } = useUserSettings();
   const updateSettings = useUpdateUserSettings();
   const { theme, setTheme } = useTheme();
+  const exportData = useExportData();
+  const importData = useImportData();
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const [threshold, setThreshold] = useState(80);
+  const [notificationsEnabled, setNotificationsEnabledState] = useState(false);
 
   useEffect(() => {
     if (settings?.alertThresholdPercent !== undefined) {
       setThreshold(settings.alertThresholdPercent);
     }
   }, [settings?.alertThresholdPercent]);
+
+  useEffect(() => {
+    if (open) {
+      setNotificationsEnabledState(getNotificationsEnabled());
+    }
+  }, [open]);
+
+  async function handleToggleNotifications(next: boolean) {
+    if (next) {
+      const permission = await requestNotificationPermission();
+      setNotificationsEnabled(true);
+      setNotificationsEnabledState(true);
+      if (permission === "granted") {
+        toast.success("Bill reminders enabled");
+      } else {
+        toast.info("Bill reminders enabled", {
+          description:
+            "Browser notifications are blocked, so reminders will show as in-app alerts instead.",
+        });
+      }
+    } else {
+      setNotificationsEnabled(false);
+      setNotificationsEnabledState(false);
+    }
+  }
+
+  async function handleExport() {
+    try {
+      const json = await exportData.mutateAsync();
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `budgetwise-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Data exported");
+    } catch {
+      toast.error("Failed to export data");
+    }
+  }
+
+  function handleImportClick() {
+    importInputRef.current?.click();
+  }
+
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    const confirmed = window.confirm(
+      "Importing will replace all current data in this browser with the contents of the backup file. Continue?",
+    );
+    if (!confirmed) return;
+
+    try {
+      const text = await file.text();
+      await importData.mutateAsync(text);
+      toast.success("Data imported successfully");
+    } catch {
+      toast.error("Failed to import data. Make sure it's a valid BudgetWise backup file.");
+    }
+  }
 
   const handleSave = async () => {
     await updateSettings.mutateAsync({ alertThresholdPercent: threshold });
@@ -182,6 +269,90 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-border/60" />
+
+          {/* ── Bill Reminders ── */}
+          <div className="space-y-3">
+            <Label className="text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">
+              Bill Reminders
+            </Label>
+            <div className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-muted/40 border border-border/60">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  Notify me about bills due soon
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {getNotificationPermission() === "denied"
+                    ? "Browser notifications blocked - will show as in-app alerts"
+                    : "Checks for unpaid bills due within 3 days"}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={notificationsEnabled}
+                onClick={() => handleToggleNotifications(!notificationsEnabled)}
+                className={cn(
+                  "relative flex-shrink-0 w-10 h-6 rounded-full transition-colors duration-150",
+                  notificationsEnabled ? "bg-primary" : "bg-muted-foreground/25",
+                )}
+              >
+                <span
+                  className={cn(
+                    "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-150",
+                    notificationsEnabled && "translate-x-4",
+                  )}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-border/60" />
+
+          {/* ── Backup & Restore ── */}
+          <div className="space-y-3">
+            <Label className="text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">
+              Backup & Restore
+            </Label>
+            <p className="text-sm text-muted-foreground font-body leading-relaxed">
+              Your data lives only in this browser. Export a backup file
+              regularly so you don't lose it.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5 h-9 rounded-xl text-xs"
+                onClick={handleExport}
+                disabled={exportData.isPending}
+              >
+                <Download size={13} />
+                Export Data
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5 h-9 rounded-xl text-xs"
+                onClick={handleImportClick}
+                disabled={importData.isPending}
+              >
+                <Upload size={13} />
+                Import Data
+              </Button>
+            </div>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json"
+              className="hidden"
+              onChange={handleImportFile}
+            />
           </div>
         </div>
 

@@ -10,6 +10,7 @@ import {
 import { Suspense, lazy } from "react";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
+import { useBillReminders } from "./hooks/useBillReminders";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { useApplyRecurringTemplates } from "./hooks/useBudget";
 
@@ -89,6 +90,12 @@ function RecurringTemplateApplier() {
   return null;
 }
 
+/** Silently checks for bills due soon and surfaces a reminder */
+function BillReminderNotifier() {
+  useBillReminders();
+  return null;
+}
+
 function AuthGuard() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -110,6 +117,7 @@ function AuthGuard() {
   return (
     <>
       <RecurringTemplateApplier />
+      <BillReminderNotifier />
       <Outlet />
     </>
   );
