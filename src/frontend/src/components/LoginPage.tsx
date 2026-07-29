@@ -5,10 +5,13 @@ import {
   BarChart3,
   CheckCircle2,
   Loader2,
+  PlayCircle,
   RefreshCcw,
   Shield,
 } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { HowItWorksCarousel } from "./HowItWorksCarousel";
 
 const trustPoints = [
   "No password or email required",
@@ -90,6 +93,7 @@ const previewCards = [
 
 export function LoginPage() {
   const { login, isLoading } = useAuth();
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex overflow-hidden">
@@ -388,6 +392,16 @@ export function LoginPage() {
                 )}
               </Button>
 
+              {/* How it works trigger */}
+              <button
+                type="button"
+                onClick={() => setHowItWorksOpen(true)}
+                className="w-full mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                <PlayCircle size={13} />
+                See how it works
+              </button>
+
               {/* Trust points */}
               <div className="mt-5 space-y-2.5 pt-5 border-t border-border/50">
                 {trustPoints.map((point) => (
@@ -443,6 +457,11 @@ export function LoginPage() {
           </p>
         </div>
       </div>
+
+      <HowItWorksCarousel
+        open={howItWorksOpen}
+        onOpenChange={setHowItWorksOpen}
+      />
     </div>
   );
 }
