@@ -7,8 +7,15 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 ## Features
 
 - **Monthly budget tracking** - create budget categories with limits and track spending in real time
-- **Expense logging** - add, edit, and delete expenses per category
+- **Expense logging** - add, edit, and delete expenses per category, with photo receipts
+- **Receipt scanning (OCR)** - snap a photo of a receipt and the amount is auto-filled via on-device OCR
+- **Receipt gallery** - browse every scanned/attached receipt in one place
+- **Income tracking** - log salary and other income sources per month
+- **Savings goals** - set named targets (e.g. "New Laptop") and track contributions toward them
+- **Net savings** - real income-minus-expenses figure on the Dashboard, alongside budget utilization
 - **Recurring templates** - set up recurring expenses (subscriptions, rent, etc.) that auto-apply each month
+- **Bill reminders** - optional browser notifications for bills due within 3 days
+- **Backup & restore** - export/import all your data as a JSON file (everything lives in this browser only)
 - **Spending insights** - progress bars, status indicators (On Track / Near Limit / Over Budget), and alerts
 - **Annual summary** - year-over-year view of all categories
 - **Charts** - visualise spending trends over time
