@@ -44,12 +44,12 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 
 The frontend runs fully in the browser using local storage and does not require a backend server.
 
-> **Important:** all `pnpm` commands must be run from inside `monthly-budget/src/frontend/`, not the repo root. Running them from the wrong directory will produce `ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND`.
+> **Important:** open/run everything from `monthly-budget/` — that's the repo root (it's the folder containing `package.json` and `.git`). If your editor or terminal is instead pointed at its parent folder, commands will fail with errors like `ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND` or `npm error enoent` because there's no project there.
 
-**Step 1 - Navigate to the frontend folder**
+**Step 1 - Navigate to the project folder**
 
 ```powershell
-cd "monthly-budget\src\frontend"
+cd monthly-budget
 ```
 
 **Step 2 - Install dependencies** *(first time only)*
