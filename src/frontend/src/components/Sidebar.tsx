@@ -6,14 +6,17 @@ import {
   Bell,
   BookTemplate,
   CalendarDays,
+  Images,
   LayoutDashboard,
   Lightbulb,
   LogOut,
   Menu,
+  PiggyBank,
   Search,
   Settings,
   StickyNote,
   Wallet,
+  WalletCards,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -29,6 +32,8 @@ interface NavItem {
 const NAV_MAIN: NavItem[] = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Budgets", href: "/budgets", icon: Wallet },
+  { label: "Income", href: "/income", icon: WalletCards },
+  { label: "Savings Goals", href: "/savings-goals", icon: PiggyBank },
   { label: "Charts", href: "/charts", icon: BarChart2 },
   { label: "Annual Summary", href: "/annual-summary", icon: CalendarDays },
   { label: "Insights", href: "/insights", icon: Lightbulb },
@@ -39,6 +44,7 @@ const NAV_TOOLS: NavItem[] = [
   { label: "Templates", href: "/templates", icon: BookTemplate },
   { label: "Search", href: "/search", icon: Search },
   { label: "Notes", href: "/notes", icon: StickyNote },
+  { label: "Receipts", href: "/receipts", icon: Images },
 ];
 
 function NavLink({

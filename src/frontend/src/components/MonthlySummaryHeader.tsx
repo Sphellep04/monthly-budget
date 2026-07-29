@@ -72,9 +72,19 @@ export function MonthlySummaryHeader({
       ? "Approaching limit"
       : "You're doing great";
 
-  const savings = Math.max(remaining, 0);
-  const savingsValueClass = savings > 0 ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground";
-  const savingsSub = savings > 0 ? "Saved this month" : "No savings yet";
+  const totalIncome = Number(summary.totalIncomeCents);
+  const netSavings = totalIncome - totalSpent;
+  const hasIncome = totalIncome > 0;
+  const savingsValueClass = !hasIncome
+    ? "text-muted-foreground"
+    : netSavings >= 0
+      ? "text-emerald-700 dark:text-emerald-400"
+      : "text-destructive";
+  const savingsSub = !hasIncome
+    ? "Log income to track this"
+    : netSavings >= 0
+      ? "Income minus expenses"
+      : "Spending more than you earn";
 
   const stats = [
     {
@@ -97,8 +107,8 @@ export function MonthlySummaryHeader({
     },
     {
       icon: PiggyBank,
-      label: "Savings",
-      value: formatCents(BigInt(savings)),
+      label: "Net Savings",
+      value: formatCents(Math.abs(netSavings)),
       sub: savingsSub,
       valueClass: savingsValueClass,
       iconBg: "bg-emerald-500/10",
