@@ -10,7 +10,7 @@ import {
 import { Suspense, lazy } from "react";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
-import { useAuth } from "./hooks/useAuth";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { useApplyRecurringTemplates } from "./hooks/useBudget";
 
 const DashboardPage = lazy(() =>
@@ -78,19 +78,8 @@ function RecurringTemplateApplier() {
   return null;
 }
 
-const IS_MOCK = import.meta.env.VITE_USE_MOCK === "true";
-
 function AuthGuard() {
   const { isAuthenticated, isLoading } = useAuth();
-
-  if (IS_MOCK) {
-    return (
-      <>
-        <RecurringTemplateApplier />
-        <Outlet />
-      </>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -273,5 +262,9 @@ declare module "@tanstack/react-router" {
 }
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
