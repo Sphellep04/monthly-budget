@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
-import { ExternalLink, Images, StickyNote } from "lucide-react";
 import { useState } from "react";
 import { useAllBudgets, useReceiptGallery } from "../hooks/useBudget";
 import type { Expense } from "../types";
@@ -97,8 +96,7 @@ function ReceiptDetailDialog({
               </div>
               {expense.notes && (
                 <div className="col-span-2">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
-                    <StickyNote size={11} />
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
                     Notes
                   </p>
                   <p className="text-sm text-foreground">{expense.notes}</p>
@@ -108,9 +106,8 @@ function ReceiptDetailDialog({
             <Link
               to="/budgets/$id"
               params={{ id: expense.budgetId.toString() }}
-              className="flex items-center justify-center gap-2 h-10 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-muted/60 transition-colors"
+              className="flex items-center justify-center h-10 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-muted/60 transition-colors"
             >
-              <ExternalLink size={14} />
               Go to Budget
             </Link>
           </div>
@@ -149,15 +146,12 @@ export function ReceiptsPage() {
         </div>
       ) : receipts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 shadow-elevated">
-            <Images size={26} className="text-primary" />
-          </div>
           <h3 className="font-display font-bold text-lg text-foreground mb-2 tracking-tight">
             No receipts yet
           </h3>
           <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-            Attach a receipt photo (or scan one with the camera) when adding
-            an expense, and it'll show up here.
+            Attach a receipt photo (or scan one with the camera) when adding an
+            expense, and it'll show up here.
           </p>
         </div>
       ) : (

@@ -11,14 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Filter, Receipt, Search, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import {
   useGetExpensesInRange,
   useMonthlySummary,
   useSearchExpenses,
 } from "../hooks/useBudget";
-import { CATEGORY_ICONS, formatCents } from "../types";
+import { formatCents } from "../types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -163,18 +162,13 @@ export function SearchPage() {
     <div className="flex flex-col min-h-screen bg-background">
       {/* Page header */}
       <div className="bg-card border-b border-border px-6 py-5 shadow-subtle">
-        <div className="max-w-5xl mx-auto flex items-center gap-3">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/15 text-primary">
-            <Search size={18} strokeWidth={2.2} />
-          </div>
-          <div>
-            <h1 className="font-display font-bold text-xl text-foreground leading-tight">
-              Search Expenses
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Filter by name, category, date range, or amount
-            </p>
-          </div>
+        <div className="max-w-5xl mx-auto">
+          <h1 className="font-display font-bold text-xl text-foreground leading-tight">
+            Search Expenses
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Filter by name, category, date range, or amount
+          </p>
         </div>
       </div>
 
@@ -182,18 +176,14 @@ export function SearchPage() {
         {/* Filter panel */}
         <div className="bg-card border border-border rounded-xl shadow-subtle p-5 space-y-4">
           <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Filter size={14} />
-              Filters
-            </div>
+            <div className="text-sm font-semibold text-foreground">Filters</div>
             {hasActiveFilters && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive gap-1"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
               >
-                <X size={12} />
                 Clear all
               </Button>
             )}
@@ -207,19 +197,13 @@ export function SearchPage() {
             >
               Keyword
             </Label>
-            <div className="relative">
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60"
-              />
-              <Input
-                id="search-query"
-                placeholder="Search by notes or description…"
-                value={filters.query}
-                onChange={(e) => set("query", e.target.value)}
-                className="pl-8 h-9 text-sm bg-background border-input"
-              />
-            </div>
+            <Input
+              id="search-query"
+              placeholder="Search by notes or description…"
+              value={filters.query}
+              onChange={(e) => set("query", e.target.value)}
+              className="h-9 text-sm bg-background border-input"
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -240,7 +224,7 @@ export function SearchPage() {
                 <option value="">All categories</option>
                 {allBudgets.map((b) => (
                   <option key={b.id.toString()} value={b.id.toString()}>
-                    {CATEGORY_ICONS[b.category] ?? "📦"} {b.name}
+                    {b.name}
                   </option>
                 ))}
               </select>
@@ -364,9 +348,6 @@ export function SearchPage() {
             </div>
           ) : results.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-4 text-2xl">
-                🔍
-              </div>
               <h3 className="font-semibold text-base text-foreground mb-1">
                 No expenses found
               </h3>
@@ -380,9 +361,8 @@ export function SearchPage() {
                   variant="outline"
                   size="sm"
                   onClick={clearFilters}
-                  className="mt-4 gap-2"
+                  className="mt-4"
                 >
-                  <X size={13} />
                   Clear filters
                 </Button>
               )}
@@ -412,9 +392,6 @@ export function SearchPage() {
                 <TableBody>
                   {results.map((expense, _idx) => {
                     const budget = budgetMap[expense.budgetId.toString()];
-                    const icon = budget
-                      ? (CATEGORY_ICONS[budget.category] ?? "📦")
-                      : "📦";
                     return (
                       <TableRow
                         key={expense.id.toString()}
@@ -424,20 +401,15 @@ export function SearchPage() {
                           {formatDate(expense.date)}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-base leading-none flex-shrink-0">
-                              {icon}
-                            </span>
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">
-                                {budget?.name ?? "Unknown"}
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {budget?.name ?? "Unknown"}
+                            </p>
+                            {budget && (
+                              <p className="text-xs text-muted-foreground/70 truncate">
+                                {budget.category}
                               </p>
-                              {budget && (
-                                <p className="text-xs text-muted-foreground/70 truncate">
-                                  {budget.category}
-                                </p>
-                              )}
-                            </div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="max-w-xs">
@@ -468,9 +440,8 @@ export function SearchPage() {
                             >
                               <Badge
                                 variant="secondary"
-                                className="text-[10px] gap-1 px-1.5 py-0.5 cursor-pointer hover:bg-primary/10 transition-colors"
+                                className="text-[10px] px-1.5 py-0.5 cursor-pointer hover:bg-primary/10 transition-colors"
                               >
-                                <Receipt size={9} />
                                 View
                               </Badge>
                             </a>
@@ -492,5 +463,3 @@ export function SearchPage() {
     </div>
   );
 }
-
-

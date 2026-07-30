@@ -8,19 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertCircle,
-  CalendarDays,
-  Camera,
-  ImagePlus,
-  Loader2,
-  NotepadText,
-  Receipt,
-  ScanLine,
-  StickyNote,
-  X,
-} from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAddExpense } from "../hooks/useBudget";
@@ -41,14 +30,12 @@ function todayISO() {
 function FieldLabel({
   children,
   htmlFor,
-  icon,
-}: { children: React.ReactNode; htmlFor?: string; icon?: React.ReactNode }) {
+}: { children: React.ReactNode; htmlFor?: string }) {
   return (
     <Label
       htmlFor={htmlFor}
-      className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1.5"
+      className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
     >
-      {icon}
       {children}
     </Label>
   );
@@ -334,12 +321,7 @@ export function ExpenseForm({
         <form onSubmit={handleSubmit} className="space-y-5 pt-1">
           {/* Date */}
           <div>
-            <FieldLabel
-              htmlFor="expense-date"
-              icon={<CalendarDays className="w-3 h-3" />}
-            >
-              Date
-            </FieldLabel>
+            <FieldLabel htmlFor="expense-date">Date</FieldLabel>
             <Input
               id="expense-date"
               type="date"
@@ -352,12 +334,7 @@ export function ExpenseForm({
 
           {/* Amount */}
           <div>
-            <FieldLabel
-              htmlFor="expense-amount"
-              icon={<NotepadText className="w-3 h-3" />}
-            >
-              Amount
-            </FieldLabel>
+            <FieldLabel htmlFor="expense-amount">Amount</FieldLabel>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm select-none pointer-events-none">
                 N$
@@ -374,29 +351,15 @@ export function ExpenseForm({
                 className={`pl-9 input-focus h-10 font-mono text-sm ${amountError ? "border-destructive focus:border-destructive" : ""}`}
                 aria-invalid={!!amountError}
               />
-              {scanState === "done" && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <ScanLine
-                    className="w-3.5 h-3.5 text-primary"
-                    aria-label="Amount filled from scan"
-                  />
-                </span>
-              )}
             </div>
             {amountError && (
-              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                {amountError}
-              </p>
+              <p className="text-xs text-destructive mt-1">{amountError}</p>
             )}
           </div>
 
           {/* Notes */}
           <div>
-            <FieldLabel
-              htmlFor="expense-notes"
-              icon={<StickyNote className="w-3 h-3" />}
-            >
+            <FieldLabel htmlFor="expense-notes">
               Notes{" "}
               <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
                 (optional)
@@ -414,7 +377,7 @@ export function ExpenseForm({
 
           {/* Receipt */}
           <div>
-            <FieldLabel icon={<Receipt className="w-3 h-3" />}>
+            <FieldLabel>
               Receipt{" "}
               <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
                 (optional)
@@ -432,10 +395,7 @@ export function ExpenseForm({
                 {/* Scan overlay while OCR is running */}
                 {scanState === "scanning" && (
                   <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2">
-                    <div className="relative w-10 h-10">
-                      <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                      <ScanLine className="w-5 h-5 text-primary absolute inset-0 m-auto" />
-                    </div>
+                    <Spinner className="w-8 h-8 text-primary" />
                     <p className="text-xs font-medium text-foreground">
                       Scanning receipt…
                     </p>
@@ -448,10 +408,10 @@ export function ExpenseForm({
                   type="button"
                   onClick={removeReceipt}
                   disabled={scanState === "scanning"}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-card/90 border border-border shadow-subtle flex items-center justify-center hover:bg-destructive/10 hover:border-destructive/40 transition-colors disabled:opacity-40"
+                  className="absolute top-2 right-2 h-6 px-2 rounded-full bg-card/90 border border-border shadow-subtle flex items-center justify-center text-[10px] font-medium text-foreground hover:bg-destructive/10 hover:border-destructive/40 transition-colors disabled:opacity-40"
                   aria-label="Remove receipt"
                 >
-                  <X className="w-3 h-3 text-foreground" />
+                  Remove
                 </button>
                 {receiptFile && scanState !== "scanning" && (
                   <div className="px-3 py-1.5 bg-muted/40 border-t border-border flex items-center gap-2">
@@ -459,8 +419,7 @@ export function ExpenseForm({
                       {receiptFile.name}
                     </p>
                     {scanState === "done" && (
-                      <span className="flex items-center gap-1 text-[10px] text-primary font-medium shrink-0">
-                        <ScanLine className="w-3 h-3" />
+                      <span className="text-[10px] text-primary font-medium shrink-0">
                         Scanned
                       </span>
                     )}
@@ -474,12 +433,9 @@ export function ExpenseForm({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full rounded-xl border border-dashed border-border bg-muted/20 hover:bg-muted/40 hover:border-primary/40 transition-colors px-4 py-4 flex flex-col items-center gap-2 group"
+                  className="w-full rounded-xl border border-dashed border-border bg-muted/20 hover:bg-muted/40 hover:border-primary/40 transition-colors px-4 py-4 flex flex-col items-center gap-1.5 group"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-card border border-border shadow-subtle flex items-center justify-center group-hover:border-primary/30 transition-colors">
-                    <ImagePlus className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                     Click to attach a receipt photo
                   </span>
                   <span className="text-[10px] text-muted-foreground/60">
@@ -491,12 +447,9 @@ export function ExpenseForm({
                 <button
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="w-full rounded-xl border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors px-4 py-3 flex items-center justify-center gap-2.5 group"
+                  className="w-full rounded-xl border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors px-4 py-3 flex items-center justify-center group"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Camera className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  <div className="text-left">
+                  <div className="text-center">
                     <p className="text-xs font-semibold text-primary leading-tight">
                       Scan Receipt
                     </p>
@@ -504,7 +457,6 @@ export function ExpenseForm({
                       Use camera to auto-fill amount
                     </p>
                   </div>
-                  <ScanLine className="w-3.5 h-3.5 text-primary/60 ml-auto shrink-0" />
                 </button>
               </div>
             )}
@@ -528,10 +480,7 @@ export function ExpenseForm({
             />
 
             {receiptError && (
-              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                {receiptError}
-              </p>
+              <p className="text-xs text-destructive mt-1">{receiptError}</p>
             )}
 
             {/* Upload progress bar (file upload path) */}
@@ -539,7 +488,7 @@ export function ExpenseForm({
               <div className="mt-2 space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <Spinner className="w-3 h-3" />
                     Processing receipt…
                   </span>
                   <span className="text-[11px] font-mono text-muted-foreground">
@@ -574,7 +523,7 @@ export function ExpenseForm({
             >
               {isBusy ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Spinner className="w-4 h-4 mr-2" />
                   {isUploading
                     ? "Uploading…"
                     : scanState === "scanning"
@@ -591,5 +540,3 @@ export function ExpenseForm({
     </Dialog>
   );
 }
-
-

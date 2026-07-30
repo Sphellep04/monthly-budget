@@ -1,14 +1,4 @@
 ﻿import { Skeleton } from "@/components/ui/skeleton";
-import {
-  BarChart2,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  LineChart as LineChartIcon,
-  PieChartIcon,
-  Sparkles,
-  TrendingUp,
-} from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import {
@@ -88,10 +78,10 @@ function MonthSelector({
       <button
         type="button"
         onClick={prev}
-        className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors"
+        className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-muted transition-colors text-xs text-muted-foreground"
         aria-label="Previous month"
       >
-        <ChevronLeft size={15} className="text-muted-foreground" />
+        Prev
       </button>
       <span className="min-w-[110px] text-center text-[0.8125rem] font-semibold text-foreground px-1 select-none">
         {getMonthName(month)} {year}
@@ -100,10 +90,10 @@ function MonthSelector({
         type="button"
         onClick={next}
         disabled={isLatest}
-        className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-xs text-muted-foreground"
         aria-label="Next month"
       >
-        <ChevronRight size={15} className="text-muted-foreground" />
+        Next
       </button>
     </div>
   );
@@ -196,33 +186,20 @@ function CustomLineDot(props: { cx?: number; cy?: number }) {
 
 /* ─── Section Header ─── */
 function SectionHeader({
-  icon,
   title,
   subtitle,
-  iconBg = "bg-primary/10",
-  iconColor = "text-primary",
 }: {
-  icon: React.ReactNode;
   title: string;
   subtitle: string;
-  iconBg?: string;
-  iconColor?: string;
 }) {
   return (
-    <div className="flex items-start gap-3">
-      <div
-        className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center shrink-0 mt-0.5`}
-      >
-        <span className={iconColor}>{icon}</span>
-      </div>
-      <div>
-        <h2 className="font-display text-base font-semibold text-foreground leading-tight">
-          {title}
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-          {subtitle}
-        </p>
-      </div>
+    <div>
+      <h2 className="font-display text-base font-semibold text-foreground leading-tight">
+        {title}
+      </h2>
+      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+        {subtitle}
+      </p>
     </div>
   );
 }
@@ -266,10 +243,7 @@ function SpendingTrendChart() {
 
   if (chartData.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-          <TrendingUp className="w-7 h-7 text-primary" />
-        </div>
+      <div className="flex flex-col items-center justify-center py-12 text-center">
         <p className="font-display text-sm font-semibold text-foreground mb-1">
           No trend data yet
         </p>
@@ -378,7 +352,6 @@ function CategoryBreakdownChart({
   if (chartData.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[160px] text-center">
-        <BarChart2 className="w-6 h-6 text-muted-foreground mb-2 opacity-50" />
         <p className="text-xs text-muted-foreground">No history yet</p>
       </div>
     );
@@ -459,10 +432,7 @@ function MonthlyPieChart({ year, month }: { year: number; month: number }) {
 
   if (chartData.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-          <PieChartIcon className="w-7 h-7 text-primary" />
-        </div>
+      <div className="flex flex-col items-center justify-center py-12 text-center">
         <p className="font-display text-sm font-semibold text-foreground mb-1">
           No spending this month
         </p>
@@ -566,10 +536,7 @@ function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
 
   if (chartData.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4">
-          <BarChart2 className="w-7 h-7 text-secondary" />
-        </div>
+      <div className="flex flex-col items-center justify-center py-12 text-center">
         <p className="font-display text-sm font-semibold text-foreground mb-1">
           No budgets this month
         </p>
@@ -664,10 +631,7 @@ function DailySpendingChart({ year, month }: { year: number; month: number }) {
 
   if (!hasData) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-          <CalendarDays className="w-7 h-7 text-primary" />
-        </div>
+      <div className="flex flex-col items-center justify-center py-12 text-center">
         <p className="font-display text-sm font-semibold text-foreground mb-1">
           No daily data yet
         </p>
@@ -773,12 +737,9 @@ export function ChartsPage() {
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-4 h-4 text-primary opacity-70" />
-            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-              Analytics
-            </span>
-          </div>
+          <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
+            Analytics
+          </p>
           <h1 className="font-display text-3xl font-bold text-foreground leading-tight">
             Spending Charts
           </h1>
@@ -808,7 +769,6 @@ export function ChartsPage() {
       >
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
           <SectionHeader
-            icon={<TrendingUp className="w-4.5 h-4.5" />}
             title="Total Spending Trend"
             subtitle="Your cumulative monthly spend over the past 12 months"
           />
@@ -840,11 +800,8 @@ export function ChartsPage() {
       >
         <div className="flex items-start justify-between gap-4">
           <SectionHeader
-            icon={<BarChart2 className="w-4.5 h-4.5" />}
             title="Per-Budget Breakdown"
             subtitle="Compare actual spend vs. limit for each budget - last 6 months"
-            iconBg="bg-secondary/10"
-            iconColor="text-secondary"
           />
           <div className="flex items-center gap-3 shrink-0 mt-0.5">
             <div className="flex items-center gap-1.5">
@@ -865,10 +822,7 @@ export function ChartsPage() {
             ))}
           </div>
         ) : summaries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-6 text-center rounded-2xl border border-dashed border-border/70 bg-muted/20">
-            <div className="w-16 h-16 rounded-2xl bg-muted/60 flex items-center justify-center mb-5 shadow-inner-subtle">
-              <LineChartIcon className="w-8 h-8 text-muted-foreground opacity-50" />
-            </div>
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center rounded-2xl border border-dashed border-border/70 bg-muted/20">
             <p className="font-display text-base font-semibold text-foreground mb-2">
               No budgets to visualize
             </p>
@@ -922,11 +876,8 @@ export function ChartsPage() {
       >
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
           <SectionHeader
-            icon={<PieChartIcon className="w-4.5 h-4.5" />}
             title="Category Spending Breakdown"
             subtitle={`How your spending is distributed across categories - ${getMonthName(selectedMonth)} ${selectedYear}`}
-            iconBg="bg-accent/20"
-            iconColor="text-accent-foreground"
           />
         </div>
         <MonthlyPieChart year={selectedYear} month={selectedMonth} />
@@ -941,11 +892,8 @@ export function ChartsPage() {
       >
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
           <SectionHeader
-            icon={<BarChart2 className="w-4.5 h-4.5" />}
             title="Budget vs Actual"
             subtitle={`Side-by-side comparison of limits vs real spend - ${getMonthName(selectedMonth)} ${selectedYear}`}
-            iconBg="bg-secondary/10"
-            iconColor="text-secondary"
           />
         </div>
         <BudgetVsActualChart year={selectedYear} month={selectedMonth} />
@@ -960,11 +908,8 @@ export function ChartsPage() {
       >
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
           <SectionHeader
-            icon={<CalendarDays className="w-4.5 h-4.5" />}
             title="Daily Spending"
             subtitle={`Day-by-day spending pattern - ${getMonthName(selectedMonth)} ${selectedYear}`}
-            iconBg="bg-primary/10"
-            iconColor="text-primary"
           />
         </div>
         <DailySpendingChart year={selectedYear} month={selectedMonth} />
@@ -982,5 +927,3 @@ export function ChartsPage() {
     </motion.div>
   );
 }
-
-

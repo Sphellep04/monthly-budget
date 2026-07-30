@@ -1,6 +1,5 @@
 ﻿import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, ImageIcon, Receipt, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useDeleteExpense } from "../hooks/useBudget";
 import { formatCents } from "../types";
@@ -52,11 +51,9 @@ function ReceiptBadge({ url }: { url: string }) {
       type="button"
       onClick={() => openReceiptInTab(url)}
       title="View receipt"
-      className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/8 border border-primary/20 text-primary hover:bg-primary/15 transition-colors text-[10px] font-medium shrink-0"
+      className="flex items-center px-2 py-0.5 rounded-md bg-primary/8 border border-primary/20 text-primary hover:bg-primary/15 transition-colors text-[10px] font-medium shrink-0"
     >
-      <ImageIcon className="w-3 h-3" />
-      <span>Receipt</span>
-      <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+      Receipt
     </button>
   );
 }
@@ -94,10 +91,7 @@ export function ExpenseList({
 
   if (expenses.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-14 text-center gap-3 rounded-2xl border border-dashed border-border bg-muted/20">
-        <div className="w-12 h-12 rounded-xl bg-card border border-border shadow-subtle flex items-center justify-center">
-          <Receipt className="w-5 h-5 text-muted-foreground" />
-        </div>
+      <div className="flex flex-col items-center justify-center py-11 text-center gap-3 rounded-2xl border border-dashed border-border bg-muted/20">
         <div>
           <p className="text-foreground font-semibold text-sm mb-0.5">
             No expenses yet
@@ -156,16 +150,16 @@ export function ExpenseList({
               {formatCents(expense.amountCents)}
             </span>
 
-            {/* Delete - icon only, appears on hover */}
+            {/* Delete - text label, appears on hover */}
             <Button
               variant="ghost"
-              size="icon"
-              className="w-7 h-7 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg"
+              size="sm"
+              className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg"
               onClick={() => handleDelete(expense.id)}
               disabled={deleteExpense.isPending}
               aria-label="Delete expense"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              Delete
             </Button>
           </div>
         ))}
@@ -183,5 +177,3 @@ export function ExpenseList({
     </div>
   );
 }
-
-

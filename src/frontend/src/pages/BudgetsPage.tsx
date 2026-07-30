@@ -7,13 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  ChevronLeft,
-  ChevronRight,
-  LayoutGrid,
-  Plus,
-  Wallet,
-} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { BudgetForm, type BudgetFormValues } from "../components/BudgetForm";
@@ -84,8 +77,7 @@ export function BudgetsPage() {
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1.5 flex items-center gap-1.5">
-            <Wallet className="w-3.5 h-3.5" />
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1.5">
             Monthly Tracker
           </p>
           <h1 className="font-display text-4xl font-bold text-foreground tracking-tight leading-none">
@@ -97,9 +89,8 @@ export function BudgetsPage() {
         </div>
         <Button
           onClick={() => setDialogOpen(true)}
-          className="gap-2 self-start sm:self-auto button-hover shadow-elevated"
+          className="self-start sm:self-auto button-hover shadow-elevated"
         >
-          <Plus className="w-4 h-4" />
           New Budget
         </Button>
       </div>
@@ -108,12 +99,12 @@ export function BudgetsPage() {
       <div className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border shadow-subtle">
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={prev}
           aria-label="Previous month"
-          className="h-9 w-9 rounded-xl hover:bg-muted transition-colors-fast"
+          className="h-9 px-3 rounded-xl hover:bg-muted transition-colors-fast text-xs"
         >
-          <ChevronLeft className="w-4 h-4" />
+          Prev
         </Button>
 
         <div className="text-center">
@@ -132,13 +123,13 @@ export function BudgetsPage() {
 
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={next}
           disabled={isCurrent}
           aria-label="Next month"
-          className="h-9 w-9 rounded-xl hover:bg-muted transition-colors-fast disabled:opacity-30"
+          className="h-9 px-3 rounded-xl hover:bg-muted transition-colors-fast disabled:opacity-30 text-xs"
         >
-          <ChevronRight className="w-4 h-4" />
+          Next
         </Button>
       </div>
 
@@ -147,24 +138,18 @@ export function BudgetsPage() {
         <div className="grid grid-cols-2 gap-4 slide-up">
           <div className="rounded-2xl bg-card border border-border px-5 py-4 shadow-subtle relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-            <div className="flex items-center gap-2 mb-2">
-              <LayoutGrid className="w-3.5 h-3.5 text-primary" />
-              <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold">
-                Total Budgets
-              </p>
-            </div>
+            <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mb-2">
+              Total Budgets
+            </p>
             <p className="font-display text-3xl font-bold text-foreground tabular-nums">
               {budgets.length}
             </p>
           </div>
           <div className="rounded-2xl bg-card border border-border px-5 py-4 shadow-subtle relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
-            <div className="flex items-center gap-2 mb-2">
-              <Wallet className="w-3.5 h-3.5 text-secondary" />
-              <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold">
-                Combined Limit
-              </p>
-            </div>
+            <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mb-2">
+              Combined Limit
+            </p>
             <p className="font-display text-3xl font-bold text-foreground tabular-nums">
               {formatCents(totalLimit)}
             </p>

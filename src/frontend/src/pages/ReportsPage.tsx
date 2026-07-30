@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, FileText, Receipt } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   Bar,
@@ -138,9 +137,6 @@ function ReportSkeleton() {
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
-        <FileText className="w-8 h-8 text-muted-foreground" />
-      </div>
       <p className="text-lg font-display font-semibold text-foreground mb-1">
         No data to display
       </p>
@@ -254,9 +250,8 @@ export function ReportsPage() {
             variant="outline"
             size="sm"
             onClick={handleExport}
-            className="gap-2 shrink-0"
+            className="shrink-0"
           >
-            <Download className="w-4 h-4" />
             Export CSV
           </Button>
         )}
@@ -477,9 +472,9 @@ export function ReportsPage() {
                                 target="_blank"
                                 rel="noreferrer"
                                 title="View receipt"
-                                className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors-fast"
+                                className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors-fast text-xs font-medium"
                               >
-                                <Receipt className="w-3.5 h-3.5" />
+                                View
                               </a>
                             ) : (
                               <span className="text-muted-foreground/30 text-xs">
@@ -499,5 +494,3 @@ export function ReportsPage() {
     </div>
   );
 }
-
-

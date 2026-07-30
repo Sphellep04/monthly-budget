@@ -8,9 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, Check, Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
-import { CATEGORY_ICONS } from "../types";
+import { CATEGORIES } from "../types";
 
 const PRESET_COLORS = [
   "#22c55e",
@@ -24,8 +24,6 @@ const PRESET_COLORS = [
   "#14b8a6",
   "#64748b",
 ];
-
-const CATEGORIES = Object.keys(CATEGORY_ICONS);
 
 export interface BudgetFormValues {
   name: string;
@@ -41,12 +39,7 @@ interface BudgetFormProps {
 }
 
 function FieldError({ message }: { message: string }) {
-  return (
-    <p className="flex items-center gap-1.5 text-xs text-destructive mt-1 slide-up">
-      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-      {message}
-    </p>
-  );
+  return <p className="text-xs text-destructive mt-1 slide-up">{message}</p>;
 }
 
 function FieldLabel({
@@ -114,9 +107,7 @@ export function BudgetForm({
           aria-invalid={!!errors.name}
           className={`input-focus h-10 ${errors.name ? "border-destructive focus:border-destructive focus:ring-destructive/15" : ""}`}
         />
-        {errors.name && (
-          <FieldError message={errors.name} id="budget_form.name_field_error" />
-        )}
+        {errors.name && <FieldError message={errors.name} />}
       </div>
 
       {/* Monthly Limit */}
@@ -141,12 +132,7 @@ export function BudgetForm({
             aria-invalid={!!errors.limit}
           />
         </div>
-        {errors.limit && (
-          <FieldError
-            message={errors.limit}
-            id="budget_form.limit_field_error"
-          />
-        )}
+        {errors.limit && <FieldError message={errors.limit} />}
       </div>
 
       {/* Category */}
@@ -166,20 +152,12 @@ export function BudgetForm({
           <SelectContent className="shadow-premium">
             {CATEGORIES.map((cat) => (
               <SelectItem key={cat} value={cat}>
-                <span className="flex items-center gap-2.5">
-                  <span>{CATEGORY_ICONS[cat]}</span>
-                  <span>{cat}</span>
-                </span>
+                {cat}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {errors.category && (
-          <FieldError
-            message={errors.category}
-            id="budget_form.category_field_error"
-          />
-        )}
+        {errors.category && <FieldError message={errors.category} />}
       </div>
 
       {/* Color */}
@@ -196,21 +174,14 @@ export function BudgetForm({
               aria-pressed={color === c}
               onClick={() => setColor(c)}
               disabled={isPending}
-              className={`w-8 h-8 rounded-full transition-spring focus-visible-ring relative flex items-center justify-center ${
+              className={`w-8 h-8 rounded-full transition-spring focus-visible-ring ${
                 color === c
                   ? "ring-2 ring-offset-2 ring-foreground/60 scale-110"
                   : "hover:scale-110 hover:ring-2 hover:ring-offset-1 hover:ring-foreground/30"
               }`}
               style={{ backgroundColor: c }}
               aria-label={`Color ${c}`}
-            >
-              {color === c && (
-                <Check
-                  className="w-4 h-4 text-white drop-shadow"
-                  strokeWidth={3}
-                />
-              )}
-            </button>
+            />
           ))}
         </div>
         <div className="flex items-center gap-2 mt-2 px-1">
@@ -242,7 +213,7 @@ export function BudgetForm({
         >
           {isPending ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Spinner className="w-4 h-4 mr-2" />
               Saving…
             </>
           ) : (

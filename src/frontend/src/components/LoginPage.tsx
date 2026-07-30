@@ -1,14 +1,6 @@
 ﻿import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import {
-  ArrowRight,
-  BarChart3,
-  CheckCircle2,
-  Loader2,
-  PlayCircle,
-  RefreshCcw,
-  Shield,
-} from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { HowItWorksCarousel } from "./HowItWorksCarousel";
@@ -21,28 +13,16 @@ const trustPoints = [
 
 const features = [
   {
-    icon: Shield,
     label: "Private & Secure",
     description: "Your data stays in your browser storage",
-    color: "text-primary",
-    bg: "bg-primary/10",
-    border: "border-primary/20",
   },
   {
-    icon: BarChart3,
     label: "Visual Insights",
     description: "Charts and trends at a glance",
-    color: "text-chart-1",
-    bg: "bg-[oklch(0.72_0.19_141/0.1)]",
-    border: "border-[oklch(0.72_0.19_141/0.2)]",
   },
   {
-    icon: RefreshCcw,
     label: "Recurring Bills",
     description: "Auto-fill monthly templates",
-    color: "text-accent",
-    bg: "bg-accent/10",
-    border: "border-accent/20",
   },
 ];
 
@@ -268,17 +248,16 @@ export function LoginPage() {
 
         {/* Bottom: Feature pills */}
         <div className="relative z-10 flex flex-wrap gap-2.5">
-          {features.map(({ icon: Icon, label }) => (
+          {features.map(({ label }) => (
             <div
               key={label}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-medium"
+              className="px-3.5 py-2 rounded-full text-xs font-medium"
               style={{
                 background: "oklch(1 0 0 / 0.05)",
                 border: "1px solid oklch(1 0 0 / 0.09)",
                 color: "oklch(0.58 0.02 265)",
               }}
             >
-              <Icon size={11} style={{ color: "oklch(0.52 0.04 265)" }} />
               {label}
             </div>
           ))}
@@ -350,18 +329,13 @@ export function LoginPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/50 border border-border/50 mb-5">
-                <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 border border-primary/25 flex-shrink-0">
-                  <Shield size={16} className="text-primary" strokeWidth={2} />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-foreground">
-                    Local Sign-In
-                  </p>
-                  <p className="text-[11px] text-muted-foreground leading-tight">
-                    Secure, lightweight browser authentication
-                  </p>
-                </div>
+              <div className="p-3.5 rounded-xl bg-muted/50 border border-border/50 mb-5">
+                <p className="text-xs font-semibold text-foreground">
+                  Local Sign-In
+                </p>
+                <p className="text-[11px] text-muted-foreground leading-tight">
+                  Secure, lightweight browser authentication
+                </p>
               </div>
 
               {/* CTA */}
@@ -378,17 +352,11 @@ export function LoginPage() {
                 <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-smooth bg-gradient-to-r from-transparent via-primary-foreground/10 to-transparent -skew-x-12 translate-x-[-120%] group-hover:translate-x-[120%] duration-700" />
                 {isLoading ? (
                   <>
-                    <Loader2 size={17} className="animate-spin flex-shrink-0" />
+                    <Spinner className="w-4 h-4 flex-shrink-0" />
                     <span>Connecting…</span>
                   </>
                 ) : (
-                  <>
-                    <span>Continue with Local Sign-In</span>
-                    <ArrowRight
-                      size={16}
-                      className="flex-shrink-0 transition-spring group-hover:translate-x-0.5"
-                    />
-                  </>
+                  <span>Continue with Local Sign-In</span>
                 )}
               </Button>
 
@@ -396,59 +364,40 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => setHowItWorksOpen(true)}
-                className="w-full mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="w-full mt-3 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
               >
-                <PlayCircle size={13} />
                 See how it works
               </button>
 
               {/* Trust points */}
-              <div className="mt-5 space-y-2.5 pt-5 border-t border-border/50">
+              <ul className="mt-5 space-y-2 pt-5 border-t border-border/50 list-disc list-inside marker:text-chart-1">
                 {trustPoints.map((point) => (
-                  <div key={point} className="flex items-start gap-2.5">
-                    <CheckCircle2
-                      size={13}
-                      className="text-chart-1 flex-shrink-0 mt-0.5"
-                    />
-                    <span className="text-xs text-muted-foreground leading-relaxed">
-                      {point}
-                    </span>
-                  </div>
+                  <li
+                    key={point}
+                    className="text-xs text-muted-foreground leading-relaxed"
+                  >
+                    {point}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
 
           {/* Feature cards - shown on right panel on both mobile + desktop */}
           <div className="grid grid-cols-3 gap-2.5">
-            {features.map(
-              ({ icon: Icon, label, description, color, bg, border }) => (
-                <div
-                  key={label}
-                  className={cn(
-                    "group bg-card border rounded-xl px-2.5 py-3.5 flex flex-col items-center gap-2 text-center shadow-subtle card-hover",
-                    border,
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-lg transition-spring group-hover:scale-110",
-                      bg,
-                    )}
-                  >
-                    <Icon size={14} className={color} strokeWidth={2} />
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-semibold text-foreground leading-tight">
-                      {label}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground/70 mt-0.5 leading-tight">
-                      {description}
-                    </p>
-                  </div>
-                </div>
-              ),
-            )}
+            {features.map(({ label, description }) => (
+              <div
+                key={label}
+                className="bg-card border border-border/60 rounded-xl px-2.5 py-3.5 flex flex-col items-center text-center shadow-subtle card-hover"
+              >
+                <p className="text-[11px] font-semibold text-foreground leading-tight">
+                  {label}
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 mt-0.5 leading-tight">
+                  {description}
+                </p>
+              </div>
+            ))}
           </div>
 
           {/* Footer */}
@@ -465,5 +414,3 @@ export function LoginPage() {
     </div>
   );
 }
-
-

@@ -8,15 +8,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import {
-  AlertTriangle,
-  Bell,
-  Download,
-  Monitor,
-  Moon,
-  Sun,
-  Upload,
-} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -39,9 +30,9 @@ interface SettingsModalProps {
 }
 
 const THEMES = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Monitor },
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+  { value: "system", label: "System" },
 ] as const;
 
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
@@ -121,7 +112,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       await importData.mutateAsync(text);
       toast.success("Data imported successfully");
     } catch {
-      toast.error("Failed to import data. Make sure it's a valid BudgetWise backup file.");
+      toast.error(
+        "Failed to import data. Make sure it's a valid BudgetWise backup file.",
+      );
     }
   }
 
@@ -147,14 +140,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       <DialogContent className="max-w-sm rounded-2xl bg-card border border-border shadow-premium p-0 overflow-hidden">
         {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border bg-muted/20">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Bell className="h-4 w-4 text-primary" />
-            </div>
-            <DialogTitle className="font-display text-base font-semibold text-foreground leading-tight">
-              Settings
-            </DialogTitle>
-          </div>
+          <DialogTitle className="font-display text-base font-semibold text-foreground leading-tight">
+            Settings
+          </DialogTitle>
         </DialogHeader>
 
         <div className="px-6 py-5 space-y-6">
@@ -164,7 +152,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               Appearance
             </Label>
             <div className="grid grid-cols-3 gap-2">
-              {THEMES.map(({ value, label, icon: Icon }) => {
+              {THEMES.map(({ value, label }) => {
                 const active = theme === value;
                 return (
                   <button
@@ -172,13 +160,12 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     type="button"
                     onClick={() => setTheme(value)}
                     className={cn(
-                      "flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl border text-[11px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+                      "px-3 py-2.5 rounded-xl border text-[11px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
                       active
                         ? "bg-primary text-primary-foreground border-primary shadow-elevated"
                         : "bg-muted/40 text-muted-foreground border-border/60 hover:bg-muted/70 hover:text-foreground",
                     )}
                   >
-                    <Icon size={16} strokeWidth={active ? 2.5 : 2} />
                     {label}
                   </button>
                 );
@@ -261,8 +248,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
 
             {threshold >= 90 && (
-              <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-amber-500/8 border border-amber-500/20">
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
+              <div className="px-3 py-2.5 rounded-lg bg-amber-500/8 border border-amber-500/20">
                 <p className="text-xs text-amber-600 dark:text-amber-400 font-body">
                   At {threshold}%, you'll only be alerted very close to the
                   limit.
@@ -297,7 +283,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 onClick={() => handleToggleNotifications(!notificationsEnabled)}
                 className={cn(
                   "relative flex-shrink-0 w-10 h-6 rounded-full transition-colors duration-150",
-                  notificationsEnabled ? "bg-primary" : "bg-muted-foreground/25",
+                  notificationsEnabled
+                    ? "bg-primary"
+                    : "bg-muted-foreground/25",
                 )}
               >
                 <span
@@ -327,22 +315,20 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="gap-1.5 h-9 rounded-xl text-xs"
+                className="h-9 rounded-xl text-xs"
                 onClick={handleExport}
                 disabled={exportData.isPending}
               >
-                <Download size={13} />
                 Export Data
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="gap-1.5 h-9 rounded-xl text-xs"
+                className="h-9 rounded-xl text-xs"
                 onClick={handleImportClick}
                 disabled={importData.isPending}
               >
-                <Upload size={13} />
                 Import Data
               </Button>
             </div>

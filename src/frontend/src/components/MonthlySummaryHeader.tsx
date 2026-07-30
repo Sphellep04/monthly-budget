@@ -1,5 +1,4 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { PiggyBank, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { formatCents } from "../types";
 import type { MonthlySummary } from "../types";
@@ -88,48 +87,28 @@ export function MonthlySummaryHeader({
 
   const stats = [
     {
-      icon: Wallet,
       label: "Total Budget",
       value: formatCents(summary.totalBudgetCents),
       sub: `${summary.budgets.length} categor${summary.budgets.length === 1 ? "y" : "ies"}`,
       valueClass: "text-foreground",
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
     },
     {
-      icon: TrendingUp,
       label: "Total Spent",
       value: formatCents(summary.totalSpentCents),
       sub: `${pct.toFixed(1)}% of budget`,
       valueClass: "text-foreground",
-      iconBg: "bg-secondary/10",
-      iconColor: "text-secondary",
     },
     {
-      icon: PiggyBank,
       label: "Net Savings",
       value: formatCents(Math.abs(netSavings)),
       sub: savingsSub,
       valueClass: savingsValueClass,
-      iconBg: "bg-emerald-500/10",
-      iconColor: "text-emerald-700 dark:text-emerald-400",
     },
     {
-      icon: isOverBudget ? TrendingDown : PiggyBank,
       label: isOverBudget ? "Over Budget" : "Remaining",
       value: formatCents(Math.abs(remaining)),
       sub: remainingSub,
       valueClass: remainingValueClass,
-      iconBg: isOverBudget
-        ? "bg-destructive/10"
-        : isNearLimit
-          ? "bg-amber-500/10"
-          : "bg-emerald-500/10",
-      iconColor: isOverBudget
-        ? "text-destructive"
-        : isNearLimit
-          ? "text-amber-600 dark:text-amber-400"
-          : "text-emerald-700 dark:text-emerald-400",
     },
   ];
 
@@ -137,40 +116,21 @@ export function MonthlySummaryHeader({
     <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-subtle slide-up animate-stagger-1">
       {/* Stat columns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border/60">
-        {stats.map(
-          ({
-            icon: Icon,
-            label,
-            value,
-            sub,
-            valueClass,
-            iconBg,
-            iconColor,
-          }) => (
-            <div key={label} className="flex items-start gap-3 px-5 py-4">
-              <div
-                className={`flex-shrink-0 w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center`}
-              >
-                <Icon className={`h-4 w-4 ${iconColor}`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
-                  {label}
-                </p>
-                <p
-                  className={`font-display text-[1.75rem] font-bold tabular-nums leading-none ${valueClass}`}
-                >
-                  {value}
-                </p>
-                {sub && (
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    {sub}
-                  </p>
-                )}
-              </div>
-            </div>
-          ),
-        )}
+        {stats.map(({ label, value, sub, valueClass }) => (
+          <div key={label} className="px-5 py-4">
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
+              {label}
+            </p>
+            <p
+              className={`font-display text-[1.75rem] font-bold tabular-nums leading-none ${valueClass}`}
+            >
+              {value}
+            </p>
+            {sub && (
+              <p className="text-[11px] text-muted-foreground mt-1">{sub}</p>
+            )}
+          </div>
+        ))}
       </div>
 
       {/* Integrated progress strip */}

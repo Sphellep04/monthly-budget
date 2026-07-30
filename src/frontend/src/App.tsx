@@ -10,8 +10,8 @@ import {
 import { Suspense, lazy } from "react";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
-import { useBillReminders } from "./hooks/useBillReminders";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { useBillReminders } from "./hooks/useBillReminders";
 import { useApplyRecurringTemplates } from "./hooks/useBudget";
 
 const DashboardPage = lazy(() =>

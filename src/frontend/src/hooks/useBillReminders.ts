@@ -14,7 +14,9 @@ export function setNotificationsEnabled(enabled: boolean) {
   window.localStorage.setItem(NOTIFICATIONS_KEY, String(enabled));
 }
 
-export function getNotificationPermission(): NotificationPermission | "unsupported" {
+export function getNotificationPermission():
+  | NotificationPermission
+  | "unsupported" {
   if (typeof window === "undefined" || !("Notification" in window)) {
     return "unsupported";
   }

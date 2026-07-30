@@ -10,14 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
-import {
-  AlertCircle,
-  Bell,
-  CheckCircle2,
-  Clock,
-  Download,
-  ExternalLink,
-} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MonthSelector } from "../components/MonthSelector";
@@ -29,7 +21,7 @@ import {
   useUpdateBillPayment,
 } from "../hooks/useBudget";
 import type { BillPayment, BillStatus, RecurringTemplate } from "../types";
-import { CATEGORY_ICONS, formatCents, getMonthName } from "../types";
+import { formatCents, getMonthName } from "../types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,33 +62,27 @@ function getBillStatus(
   return "upcoming";
 }
 
-const STATUS_CONFIG: Record<
-  BillStatus,
-  { label: string; badgeClass: string; icon: React.ReactNode }
-> = {
-  paid: {
-    label: "Paid",
-    badgeClass:
-      "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
-    icon: <CheckCircle2 size={13} />,
-  },
-  "due-soon": {
-    label: "Due Soon",
-    badgeClass:
-      "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25",
-    icon: <Clock size={13} />,
-  },
-  overdue: {
-    label: "Overdue",
-    badgeClass: "bg-destructive/15 text-destructive border-destructive/25",
-    icon: <AlertCircle size={13} />,
-  },
-  upcoming: {
-    label: "Upcoming",
-    badgeClass: "bg-primary/10 text-primary border-primary/20",
-    icon: <Bell size={13} />,
-  },
-};
+const STATUS_CONFIG: Record<BillStatus, { label: string; badgeClass: string }> =
+  {
+    paid: {
+      label: "Paid",
+      badgeClass:
+        "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
+    },
+    "due-soon": {
+      label: "Due Soon",
+      badgeClass:
+        "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25",
+    },
+    overdue: {
+      label: "Overdue",
+      badgeClass: "bg-destructive/15 text-destructive border-destructive/25",
+    },
+    upcoming: {
+      label: "Upcoming",
+      badgeClass: "bg-primary/10 text-primary border-primary/20",
+    },
+  };
 
 // ─── CSV Export ───────────────────────────────────────────────────────────────
 
@@ -255,19 +241,13 @@ interface BillCardProps {
 }
 
 function BillCard({ bill, onMarkPaid }: BillCardProps) {
-  const { template, payment, status, budgetCategory } = bill;
+  const { template, payment, status } = bill;
   const cfg = STATUS_CONFIG[status];
-  const icon = CATEGORY_ICONS[budgetCategory] ?? "📦";
   const isPaid = status === "paid";
 
   return (
     <div className="group relative bg-card border border-border rounded-2xl p-4 shadow-subtle hover:shadow-elevated transition-all duration-200 hover:-translate-y-0.5">
       <div className="flex items-start gap-3">
-        {/* Icon */}
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0 mt-0.5">
-          {icon}
-        </div>
-
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-0.5">
@@ -276,9 +256,8 @@ function BillCard({ bill, onMarkPaid }: BillCardProps) {
             </span>
             <Badge
               variant="outline"
-              className={`text-[10px] font-semibold gap-0.5 py-0 px-1.5 h-5 ${cfg.badgeClass}`}
+              className={`text-[10px] font-semibold py-0 px-1.5 h-5 ${cfg.badgeClass}`}
             >
-              {cfg.icon}
               {cfg.label}
             </Badge>
           </div>
@@ -442,10 +421,9 @@ export function BillsPage() {
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5 h-9 rounded-xl text-xs"
+              className="h-9 rounded-xl text-xs"
               onClick={() => exportBillsCSV(bills, year, month)}
             >
-              <Download size={13} />
               Export CSV
             </Button>
           )}
@@ -513,10 +491,7 @@ export function BillsPage() {
       ) : budgets.length === 0 ? (
         <EmptyStateNoTemplates />
       ) : filteredBills.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl border border-dashed border-border bg-card/40">
-          <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
-            <Bell size={22} className="text-muted-foreground" />
-          </div>
+        <div className="flex flex-col items-center justify-center py-12 text-center rounded-2xl border border-dashed border-border bg-card/40">
           <p className="text-sm font-semibold text-foreground mb-1">
             No bills match this filter
           </p>
@@ -597,10 +572,7 @@ function BudgetTemplateLoader({
 
 function EmptyStateNoTemplates() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
-      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 shadow-elevated">
-        <Bell size={26} className="text-primary" />
-      </div>
+    <div className="flex flex-col items-center justify-center py-16 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
       <h3 className="font-display font-bold text-lg text-foreground mb-2 tracking-tight">
         No recurring templates yet
       </h3>
@@ -609,8 +581,7 @@ function EmptyStateNoTemplates() {
         recurring template in a budget to start tracking bills here.
       </p>
       <Link to="/budgets">
-        <Button className="gap-2 rounded-xl h-10 shadow-elevated">
-          <ExternalLink size={15} />
+        <Button className="rounded-xl h-10 shadow-elevated">
           Go to Budgets
         </Button>
       </Link>
@@ -658,5 +629,3 @@ function BillsSummary({ bills }: { bills: BillItem[] }) {
     </div>
   );
 }
-
-

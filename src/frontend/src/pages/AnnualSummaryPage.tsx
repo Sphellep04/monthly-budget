@@ -1,16 +1,6 @@
 ﻿import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import {
-  Award,
-  BarChart3,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  TrendingDown,
-  TrendingUp,
-  Wallet,
-} from "lucide-react";
 import { motion } from "motion/react";
 import {
   Bar,
@@ -103,24 +93,13 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 /* ─── Stat Card ─── */
 interface StatCardProps {
-  icon: React.ReactNode;
   label: string;
   value: string;
   sub?: string;
-  iconBg: string;
-  iconColor: string;
   delay?: number;
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  sub,
-  iconBg,
-  iconColor,
-  delay = 0,
-}: StatCardProps) {
+function StatCard({ label, value, sub, delay = 0 }: StatCardProps) {
   return (
     <motion.div
       className="rounded-2xl border border-border bg-card p-5 shadow-elevated space-y-3"
@@ -128,11 +107,6 @@ function StatCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay, ease: [0.4, 0, 0.2, 1] }}
     >
-      <div
-        className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center`}
-      >
-        <span className={iconColor}>{icon}</span>
-      </div>
       <div>
         <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
           {label}
@@ -180,10 +154,7 @@ function AnnualBarChart({
 
   if (!hasData) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-          <BarChart3 className="w-7 h-7 text-primary" />
-        </div>
+      <div className="flex flex-col items-center justify-center py-12 text-center">
         <p className="font-display text-sm font-semibold text-foreground mb-1">
           No spending data
         </p>
@@ -476,12 +447,9 @@ export function AnnualSummaryPage() {
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <CalendarDays className="w-4 h-4 text-primary opacity-70" />
-            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-              Year in Review
-            </span>
-          </div>
+          <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
+            Year in Review
+          </p>
           <h1 className="font-display text-3xl font-bold text-foreground leading-tight">
             Annual Summary
           </h1>
@@ -496,10 +464,10 @@ export function AnnualSummaryPage() {
           <button
             type="button"
             onClick={prevYear}
-            className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors"
+            className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-muted transition-colors text-xs text-muted-foreground"
             aria-label="Previous year"
           >
-            <ChevronLeft size={15} className="text-muted-foreground" />
+            Prev
           </button>
           <span className="min-w-[60px] text-center text-[0.8125rem] font-semibold text-foreground px-1 select-none">
             {selectedYear}
@@ -508,15 +476,15 @@ export function AnnualSummaryPage() {
             type="button"
             onClick={nextYear}
             disabled={selectedYear >= currentYear}
-            className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-xs text-muted-foreground"
             aria-label="Next year"
           >
-            <ChevronRight size={15} className="text-muted-foreground" />
+            Next
           </button>
         </div>
       </div>
 
-      {/* ── Stat Cards 2�-2 ── */}
+      {/* ── Stat Cards 2x2 ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {isLoading ? (
           <>
@@ -528,25 +496,18 @@ export function AnnualSummaryPage() {
         ) : (
           <>
             <StatCard
-              icon={<Wallet size={18} />}
               label="Total Spent"
               value={formatCents(stats.totalYearSpentCents)}
               sub={`Across all ${selectedYear} expenses`}
-              iconBg="bg-primary/10"
-              iconColor="text-primary"
               delay={0.08}
             />
             <StatCard
-              icon={<BarChart3 size={18} />}
               label="Avg Monthly Spend"
               value={formatCents(stats.avgMonthlySpentCents)}
               sub="Average across active months"
-              iconBg="bg-secondary/10"
-              iconColor="text-secondary"
               delay={0.12}
             />
             <StatCard
-              icon={<TrendingDown size={18} />}
               label="Best Month"
               value={
                 stats.bestMonth ? getMonthName(stats.bestMonth.monthNum) : "-"
@@ -556,12 +517,9 @@ export function AnnualSummaryPage() {
                   ? formatCents(stats.bestMonth.totalSpentCents)
                   : "No data yet"
               }
-              iconBg="bg-emerald-500/10"
-              iconColor="text-emerald-600 dark:text-emerald-400"
               delay={0.16}
             />
             <StatCard
-              icon={<TrendingUp size={18} />}
               label="Worst Month"
               value={
                 stats.worstMonth ? getMonthName(stats.worstMonth.monthNum) : "-"
@@ -571,8 +529,6 @@ export function AnnualSummaryPage() {
                   ? formatCents(stats.worstMonth.totalSpentCents)
                   : "No data yet"
               }
-              iconBg="bg-destructive/10"
-              iconColor="text-destructive"
               delay={0.2}
             />
           </>
@@ -587,19 +543,13 @@ export function AnnualSummaryPage() {
         transition={{ duration: 0.4, delay: 0.24, ease: [0.4, 0, 0.2, 1] }}
       >
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-              <BarChart3 className="w-4.5 h-4.5 text-primary" />
-            </div>
-            <div>
-              <h2 className="font-display text-base font-semibold text-foreground leading-tight">
-                Monthly Spending - {selectedYear}
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                Total spend per month. Bars turn amber near limit, red when
-                over.
-              </p>
-            </div>
+          <div>
+            <h2 className="font-display text-base font-semibold text-foreground leading-tight">
+              Monthly Spending - {selectedYear}
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+              Total spend per month. Bars turn amber near limit, red when over.
+            </p>
           </div>
           <div className="flex items-center gap-3 shrink-0 mt-0.5 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
@@ -632,19 +582,13 @@ export function AnnualSummaryPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
       >
-        <div className="flex items-start gap-3 pb-4 border-b border-border">
-          <div className="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0 mt-0.5">
-            <CalendarDays className="w-4.5 h-4.5 text-secondary" />
-          </div>
-          <div className="min-w-0">
-            <h2 className="font-display text-base font-semibold text-foreground leading-tight">
-              Month-by-Month Breakdown
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              Click any month to view its detailed charts and category
-              breakdown.
-            </p>
-          </div>
+        <div className="pb-4 border-b border-border">
+          <h2 className="font-display text-base font-semibold text-foreground leading-tight">
+            Month-by-Month Breakdown
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            Click any month to view its detailed charts and category breakdown.
+          </p>
         </div>
         <MonthTable
           rows={monthRows}
@@ -660,18 +604,13 @@ export function AnnualSummaryPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.36, ease: [0.4, 0, 0.2, 1] }}
       >
-        <div className="flex items-start gap-3 pb-4 border-b border-border mb-2">
-          <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
-            <Award className="w-4.5 h-4.5 text-accent-foreground" />
-          </div>
-          <div>
-            <h2 className="font-display text-base font-semibold text-foreground leading-tight">
-              Yearly Totals
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              Aggregated financial stats across the entire year.
-            </p>
-          </div>
+        <div className="pb-4 border-b border-border mb-2">
+          <h2 className="font-display text-base font-semibold text-foreground leading-tight">
+            Yearly Totals
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            Aggregated financial stats across the entire year.
+          </p>
         </div>
 
         {isLoading ? (
@@ -724,5 +663,3 @@ export function AnnualSummaryPage() {
     </motion.div>
   );
 }
-
-

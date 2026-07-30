@@ -2,14 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useParams } from "@tanstack/react-router";
-import {
-  AlertTriangle,
-  ArrowLeft,
-  ChevronRight,
-  Plus,
-  ReceiptText,
-  RefreshCw,
-} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ExpenseForm } from "../components/ExpenseForm";
 import { ExpenseList } from "../components/ExpenseList";
@@ -20,7 +12,7 @@ import {
   useExpenses,
   useRecurringTemplates,
 } from "../hooks/useBudget";
-import { CATEGORY_ICONS, formatCents, getBudgetStatus } from "../types";
+import { formatCents, getBudgetStatus } from "../types";
 
 function AnimatedProgressBar({
   spentCents,
@@ -134,17 +126,14 @@ export function BudgetDetailPage() {
 
   if (!summary) {
     return (
-      <div className="p-4 md:p-8 max-w-2xl mx-auto text-center py-20">
-        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-          <ReceiptText className="w-7 h-7 text-muted-foreground" />
-        </div>
+      <div className="p-4 md:p-8 max-w-2xl mx-auto text-center py-16">
         <p className="text-foreground font-medium mb-1">Budget not found</p>
         <p className="text-muted-foreground text-sm mb-6">
           This budget may have been deleted.
         </p>
         <Link to="/budgets">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <ArrowLeft className="w-4 h-4" /> Back to Budgets
+          <Button variant="outline" size="sm">
+            Back to Budgets
           </Button>
         </Link>
       </div>
@@ -160,17 +149,15 @@ export function BudgetDetailPage() {
       ? Math.round((Number(spentCents) / Number(limitCents)) * 100)
       : 0;
   const isOverBudget = status === "over-budget";
-  const icon = CATEGORY_ICONS[summary.budget.category] ?? "📦";
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-2xl mx-auto page-enter">
       {/* Back nav */}
       <Link
         to="/budgets"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors-fast group"
+        className="text-sm text-muted-foreground hover:text-foreground transition-colors-fast"
       >
-        <ChevronRight className="w-3.5 h-3.5 rotate-180 group-hover:-translate-x-0.5 transition-transform duration-150" />
-        <span>All Budgets</span>
+        All Budgets
       </Link>
 
       {/* Header card */}
@@ -186,21 +173,13 @@ export function BudgetDetailPage() {
         <div className="px-6 pb-6 space-y-5">
           {/* Title row */}
           <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-subtle shrink-0"
-                style={{ backgroundColor: `${summary.budget.color}20` }}
-              >
-                {icon}
-              </div>
-              <div className="min-w-0">
-                <h1 className="font-display text-2xl font-bold text-foreground truncate leading-tight">
-                  {summary.budget.name}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {summary.budget.category}
-                </p>
-              </div>
+            <div className="min-w-0">
+              <h1 className="font-display text-2xl font-bold text-foreground truncate leading-tight">
+                {summary.budget.name}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {summary.budget.category}
+              </p>
             </div>
             <Badge
               variant="outline"
@@ -265,7 +244,6 @@ export function BudgetDetailPage() {
           className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/8 px-4 py-3 shadow-subtle"
           role="alert"
         >
-          <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-semibold text-destructive">
               Over budget
@@ -285,9 +263,6 @@ export function BudgetDetailPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-              <ReceiptText className="w-3.5 h-3.5 text-primary" />
-            </div>
             <h2 className="font-display text-base font-bold text-foreground">
               Expenses
             </h2>
@@ -295,10 +270,9 @@ export function BudgetDetailPage() {
           </div>
           <Button
             size="sm"
-            className="gap-1.5 button-hover shadow-subtle"
+            className="button-hover shadow-subtle"
             onClick={() => setExpenseFormOpen(true)}
           >
-            <Plus className="w-3.5 h-3.5" />
             Add
           </Button>
         </div>
@@ -313,9 +287,6 @@ export function BudgetDetailPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center">
-              <RefreshCw className="w-3.5 h-3.5 text-secondary" />
-            </div>
             <h2 className="font-display text-base font-bold text-foreground">
               Recurring
             </h2>
@@ -329,13 +300,12 @@ export function BudgetDetailPage() {
           <Button
             size="sm"
             variant="outline"
-            className="gap-1.5 button-hover"
+            className="button-hover"
             onClick={() => {
               setEditingTemplate(null);
               setRecurringFormOpen(true);
             }}
           >
-            <Plus className="w-3.5 h-3.5" />
             Add
           </Button>
         </div>

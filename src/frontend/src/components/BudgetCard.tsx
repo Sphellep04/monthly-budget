@@ -1,8 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { CATEGORY_ICONS, formatCents, getBudgetStatus } from "../types";
+import { formatCents, getBudgetStatus } from "../types";
 import type { BudgetSummary } from "../types";
 
 interface BudgetCardProps {
@@ -72,7 +71,6 @@ export function BudgetCard({
   const spent = Number(totalSpentCents);
   const remaining = Number(remainingCents);
   const pct = limit > 0 ? (spent / limit) * 100 : 0;
-  const icon = CATEGORY_ICONS[budget.category] ?? CATEGORY_ICONS.Other;
   const cfg = STATUS_CONFIG[status];
   const accentColor = budget.color ?? "#6366f1";
   const staggerClass = `animate-stagger-${Math.min(index + 1, 6)}`;
@@ -91,15 +89,8 @@ export function BudgetCard({
         />
 
         <div className="flex flex-col gap-4 p-5 flex-1">
-          {/* Header: icon + name + status */}
+          {/* Header: name + status */}
           <div className="flex items-start gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-              style={{ background: `${accentColor}18` }}
-              aria-hidden
-            >
-              {icon}
-            </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-display font-semibold text-[0.875rem] text-foreground truncate leading-tight">
                 {budget.name}
@@ -174,12 +165,8 @@ export function BudgetCard({
 
         {/* Footer CTA */}
         <div className="px-5 py-3 border-t border-border/40 bg-muted/20">
-          <span className="flex items-center justify-end gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-primary transition-colors duration-150">
+          <span className="flex items-center justify-end text-[11px] font-medium text-muted-foreground group-hover:text-primary transition-colors duration-150">
             View details
-            <ArrowRight
-              size={11}
-              className="group-hover:translate-x-0.5 transition-transform duration-150"
-            />
           </span>
         </div>
       </div>

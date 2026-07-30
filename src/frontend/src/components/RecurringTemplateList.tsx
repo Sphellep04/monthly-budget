@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarClock, Pencil, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useDeleteRecurringTemplate } from "../hooks/useBudget";
 import type { RecurringTemplate } from "../types";
@@ -41,10 +40,7 @@ export function RecurringTemplateList({
 
   if (templates.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 px-6 text-center rounded-2xl border border-dashed border-border bg-muted/20">
-        <div className="w-10 h-10 rounded-xl bg-secondary/8 flex items-center justify-center mb-3">
-          <CalendarClock className="w-5 h-5 text-secondary" />
-        </div>
+      <div className="flex flex-col items-center justify-center py-8 px-6 text-center rounded-2xl border border-dashed border-border bg-muted/20">
         <p className="text-sm font-medium text-foreground mb-1">
           No recurring expenses
         </p>
@@ -58,17 +54,12 @@ export function RecurringTemplateList({
   return (
     <>
       <div className="space-y-2">
-        {templates.map((t, _i) => (
+        {templates.map((t) => (
           <div
             key={t.id.toString()}
             className="group flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card hover:bg-muted/20 hover:border-secondary/20 hover:shadow-subtle transition-smooth"
           >
             <div className="flex items-center gap-3 min-w-0">
-              {/* Icon */}
-              <div className="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0 shadow-subtle">
-                <RefreshCw className="w-4 h-4 text-secondary" />
-              </div>
-
               {/* Info */}
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -77,9 +68,8 @@ export function RecurringTemplateList({
                   </p>
                   <Badge
                     variant="outline"
-                    className="text-[10px] px-1.5 py-0 bg-secondary/8 text-secondary border-secondary/20 flex items-center gap-1"
+                    className="text-[10px] px-1.5 py-0 bg-secondary/8 text-secondary border-secondary/20"
                   >
-                    <CalendarClock className="w-2.5 h-2.5" />
                     {ordinal(Number(t.dayOfMonth))} of month
                   </Badge>
                 </div>
@@ -97,21 +87,21 @@ export function RecurringTemplateList({
               </span>
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground hover:bg-muted transition-smooth rounded-lg"
+                size="sm"
+                className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground hover:bg-muted transition-smooth rounded-lg"
                 onClick={() => onEdit(t.id)}
                 aria-label={`Edit ${t.name}`}
               >
-                <Pencil className="w-3.5 h-3.5" />
+                Edit
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg"
+                size="sm"
+                className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg"
                 onClick={() => setDeleteId(t.id)}
                 aria-label={`Delete ${t.name}`}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                Delete
               </Button>
             </div>
           </div>

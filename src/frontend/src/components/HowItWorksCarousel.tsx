@@ -1,11 +1,10 @@
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 interface Step {
@@ -89,7 +88,9 @@ export function HowItWorksCarousel({
                 onClick={() => setIndex(i)}
                 aria-label={`Go to step ${i + 1}`}
                 className={`h-1.5 rounded-full transition-all duration-200 ${
-                  i === index ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/30"
+                  i === index
+                    ? "w-6 bg-primary"
+                    : "w-1.5 bg-muted-foreground/30"
                 }`}
               />
             ))}
@@ -97,25 +98,23 @@ export function HowItWorksCarousel({
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-lg"
+              size="sm"
+              className="h-8 px-3 text-xs rounded-lg"
               onClick={() => setIndex((i) => Math.max(0, i - 1))}
               disabled={index === 0}
               aria-label="Previous step"
             >
-              <ChevronLeft size={15} />
+              Back
             </Button>
             <Button
               variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-lg"
-              onClick={() =>
-                setIndex((i) => Math.min(STEPS.length - 1, i + 1))
-              }
+              size="sm"
+              className="h-8 px-3 text-xs rounded-lg"
+              onClick={() => setIndex((i) => Math.min(STEPS.length - 1, i + 1))}
               disabled={index === STEPS.length - 1}
               aria-label="Next step"
             >
-              <ChevronRight size={15} />
+              Next
             </Button>
           </div>
         </div>

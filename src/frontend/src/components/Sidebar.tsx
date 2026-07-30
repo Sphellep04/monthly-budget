@@ -1,24 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  BarChart2,
-  Bell,
-  BookTemplate,
-  CalendarDays,
-  Images,
-  LayoutDashboard,
-  Lightbulb,
-  LogOut,
-  Menu,
-  PiggyBank,
-  Search,
-  Settings,
-  StickyNote,
-  Wallet,
-  WalletCards,
-  X,
-} from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { SettingsModal } from "./SettingsModal";
@@ -26,25 +8,24 @@ import { SettingsModal } from "./SettingsModal";
 interface NavItem {
   label: string;
   href: string;
-  icon: React.ElementType;
 }
 
 const NAV_MAIN: NavItem[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Budgets", href: "/budgets", icon: Wallet },
-  { label: "Income", href: "/income", icon: WalletCards },
-  { label: "Savings Goals", href: "/savings-goals", icon: PiggyBank },
-  { label: "Charts", href: "/charts", icon: BarChart2 },
-  { label: "Annual Summary", href: "/annual-summary", icon: CalendarDays },
-  { label: "Insights", href: "/insights", icon: Lightbulb },
-  { label: "Bills", href: "/bills", icon: Bell },
+  { label: "Dashboard", href: "/" },
+  { label: "Budgets", href: "/budgets" },
+  { label: "Income", href: "/income" },
+  { label: "Savings Goals", href: "/savings-goals" },
+  { label: "Charts", href: "/charts" },
+  { label: "Annual Summary", href: "/annual-summary" },
+  { label: "Insights", href: "/insights" },
+  { label: "Bills", href: "/bills" },
 ];
 
 const NAV_TOOLS: NavItem[] = [
-  { label: "Templates", href: "/templates", icon: BookTemplate },
-  { label: "Search", href: "/search", icon: Search },
-  { label: "Notes", href: "/notes", icon: StickyNote },
-  { label: "Receipts", href: "/receipts", icon: Images },
+  { label: "Templates", href: "/templates" },
+  { label: "Search", href: "/search" },
+  { label: "Notes", href: "/notes" },
+  { label: "Receipts", href: "/receipts" },
 ];
 
 function NavLink({
@@ -58,29 +39,18 @@ function NavLink({
   onClick?: () => void;
   delay: number;
 }) {
-  const Icon = item.icon;
   return (
     <Link
       to={item.href}
       onClick={onClick}
       style={{ animationDelay: `${delay}ms` }}
       className={cn(
-        "group flex items-center gap-3 px-3 py-2 rounded-xl text-[0.8125rem] font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+        "flex items-center px-3 py-2 rounded-xl text-[0.8125rem] font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
         isActive
           ? "bg-primary text-primary-foreground shadow-sm"
           : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
       )}
     >
-      <Icon
-        size={16}
-        strokeWidth={isActive ? 2.5 : 2}
-        className={cn(
-          "flex-shrink-0 transition-all duration-150",
-          isActive
-            ? "text-primary-foreground"
-            : "text-muted-foreground/60 group-hover:text-sidebar-accent-foreground",
-        )}
-      />
       <span className="truncate">{item.label}</span>
     </Link>
   );
@@ -168,18 +138,16 @@ function SidebarInner({
           variant="ghost"
           size="sm"
           onClick={onSettingsOpen}
-          className="w-full justify-start gap-3 text-[0.8125rem] text-muted-foreground/70 hover:text-foreground hover:bg-muted/60 rounded-xl h-9 px-3 font-medium"
+          className="w-full justify-start text-[0.8125rem] text-muted-foreground/70 hover:text-foreground hover:bg-muted/60 rounded-xl h-9 px-3 font-medium"
         >
-          <Settings size={15} strokeWidth={2} className="flex-shrink-0" />
           Settings
         </Button>
         <Button
           variant="ghost"
           size="sm"
           onClick={logout}
-          className="w-full justify-start gap-3 text-[0.8125rem] text-muted-foreground/70 hover:text-destructive hover:bg-destructive/8 rounded-xl h-9 px-3 font-medium"
+          className="w-full justify-start text-[0.8125rem] text-muted-foreground/70 hover:text-destructive hover:bg-destructive/8 rounded-xl h-9 px-3 font-medium"
         >
-          <LogOut size={15} strokeWidth={2} className="flex-shrink-0" />
           Sign out
         </Button>
       </div>
@@ -196,18 +164,11 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         type="button"
-        className="fixed top-4 left-4 z-50 md:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-card border border-border shadow-elevated hover:bg-muted active:scale-95 transition-spring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+        className="fixed top-4 left-4 z-50 md:hidden flex items-center justify-center h-9 px-3.5 rounded-xl bg-card border border-border shadow-elevated hover:bg-muted active:scale-95 transition-spring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 text-[0.8125rem] font-medium"
         onClick={() => setMobileOpen((o) => !o)}
         aria-label="Toggle sidebar"
       >
-        <span
-          className={cn(
-            "transition-spring",
-            mobileOpen ? "rotate-90" : "rotate-0",
-          )}
-        >
-          {mobileOpen ? <X size={16} /> : <Menu size={16} />}
-        </span>
+        {mobileOpen ? "Close" : "Menu"}
       </button>
 
       {/* Mobile backdrop */}

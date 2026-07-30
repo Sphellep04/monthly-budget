@@ -10,18 +10,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  BookTemplate,
-  CalendarDays,
-  Check,
-  Layers,
-  Loader2,
-  Pencil,
-  Plus,
-  Save,
-  Trash2,
-} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
@@ -34,7 +24,7 @@ import {
   useListBudgetTemplates,
   useUpdateBudgetTemplate,
 } from "../hooks/useTemplates";
-import { CATEGORY_ICONS, formatCents, getMonthName } from "../types";
+import { formatCents, getMonthName } from "../types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -102,19 +92,12 @@ function SaveBudgetDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg shadow-premium">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-              <Save size={18} />
-            </div>
-            <div>
-              <DialogTitle className="font-display text-lg font-bold">
-                Save Current Budget as Template
-              </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground">
-                {getMonthName(month)} {year} · {budgets.length} categories
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle className="font-display text-lg font-bold">
+            Save Current Budget as Template
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            {getMonthName(month)} {year} · {budgets.length} categories
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -159,9 +142,6 @@ function SaveBudgetDialog({
                       className="w-3 h-3 rounded-full flex-shrink-0 ring-1 ring-border/40"
                       style={{ background: bs.budget.color }}
                     />
-                    <span className="text-sm">
-                      {CATEGORY_ICONS[bs.budget.category] ?? "📦"}
-                    </span>
                     <span className="flex-1 text-sm font-medium text-foreground truncate">
                       {bs.budget.name}
                     </span>
@@ -190,14 +170,11 @@ function SaveBudgetDialog({
             >
               {createTemplate.isPending ? (
                 <>
-                  <Loader2 size={14} className="mr-1.5 animate-spin" />
+                  <Spinner className="w-3.5 h-3.5 mr-1.5" />
                   Saving…
                 </>
               ) : (
-                <>
-                  <Save size={14} className="mr-1.5" />
-                  Save Template
-                </>
+                "Save Template"
               )}
             </Button>
           </div>
@@ -259,7 +236,7 @@ function RenameDialog({
               disabled={updateTemplate.isPending || !name.trim()}
             >
               {updateTemplate.isPending ? (
-                <Loader2 size={14} className="animate-spin" />
+                <Spinner className="w-3.5 h-3.5" />
               ) : (
                 "Save"
               )}
@@ -309,9 +286,6 @@ function ApplyTemplateDialog({
     <Dialog open={!!template} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-sm shadow-premium">
         <DialogHeader>
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-2">
-            <Check size={18} />
-          </div>
           <DialogTitle className="font-display text-base font-bold">
             Apply Template
           </DialogTitle>
@@ -337,7 +311,7 @@ function ApplyTemplateDialog({
           >
             {applyTemplate.isPending ? (
               <>
-                <Loader2 size={14} className="mr-1.5 animate-spin" />
+                <Spinner className="w-3.5 h-3.5 mr-1.5" />
                 Applying…
               </>
             ) : (
@@ -375,8 +349,7 @@ function TemplateCard({
           <h3 className="font-display font-semibold text-[0.9375rem] text-foreground truncate leading-tight">
             {template.name}
           </h3>
-          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-            <CalendarDays size={11} />
+          <p className="text-xs text-muted-foreground mt-0.5">
             Saved {formatDate(template.createdAt)}
           </p>
         </div>
@@ -400,9 +373,6 @@ function TemplateCard({
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                 style={{ background: cat.color }}
               />
-              <span className="text-xs">
-                {CATEGORY_ICONS[cat.category] ?? "📦"}
-              </span>
               <span className="truncate text-[0.8125rem]">{cat.name}</span>
             </li>
           ))}
@@ -431,26 +401,25 @@ function TemplateCard({
           onClick={() => onApply(template)}
           className="flex-1 h-8 text-xs font-medium"
         >
-          <Layers size={13} className="mr-1.5" />
           Load Template
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => onRename(template)}
-          className="h-8 w-8 p-0"
+          className="h-8 px-2.5 text-xs"
           aria-label="Rename template"
         >
-          <Pencil size={13} />
+          Rename
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => onDelete(template)}
-          className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+          className="h-8 px-2.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
           aria-label="Delete template"
         >
-          <Trash2 size={13} />
+          Delete
         </Button>
       </div>
     </article>
@@ -491,24 +460,18 @@ export function TemplatesPage() {
       {/* Page header */}
       <div className="bg-card border-b border-border/60 px-6 py-5">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-subtle">
-              <BookTemplate size={18} />
-            </div>
-            <div>
-              <h1 className="font-display text-xl font-bold text-foreground tracking-tight">
-                Budget Templates
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Save your budget setup and reuse it in future months.
-              </p>
-            </div>
+          <div>
+            <h1 className="font-display text-xl font-bold text-foreground tracking-tight">
+              Budget Templates
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Save your budget setup and reuse it in future months.
+            </p>
           </div>
           <Button
             onClick={() => setSaveOpen(true)}
-            className="flex items-center gap-2 self-start sm:self-auto"
+            className="self-start sm:self-auto"
           >
-            <Plus size={15} />
             Save Current Budget
           </Button>
         </div>
@@ -525,9 +488,6 @@ export function TemplatesPage() {
         ) : !templates || templates.length === 0 ? (
           /* Empty state */
           <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5 shadow-subtle">
-              <BookTemplate size={28} />
-            </div>
             <h2 className="font-display text-lg font-bold text-foreground mb-2">
               No templates yet
             </h2>
@@ -535,21 +495,16 @@ export function TemplatesPage() {
               Save your current month's budget categories as a reusable template
               so you can apply them to any future month in seconds.
             </p>
-            <Button
-              onClick={() => setSaveOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <Save size={15} />
+            <Button onClick={() => setSaveOpen(true)}>
               Save Current Budget
             </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates.map((tpl, i) => (
+            {templates.map((tpl) => (
               <TemplateCard
                 key={tpl.id}
                 template={tpl}
-                index={i + 1}
                 onApply={setApplyTarget}
                 onRename={setRenameTarget}
                 onDelete={setDeleteTarget}

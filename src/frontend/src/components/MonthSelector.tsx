@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { getMonthName } from "../types";
 
@@ -47,12 +46,12 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
     <div className="flex items-center gap-0.5 bg-card border border-border rounded-xl px-1 py-1 shadow-subtle">
       <Button
         variant="ghost"
-        size="icon"
-        className="h-8 w-8 rounded-lg hover:bg-muted transition-spring active:scale-95"
+        size="sm"
+        className="h-8 px-2.5 text-xs rounded-lg hover:bg-muted transition-spring active:scale-95 text-muted-foreground"
         onClick={goBack}
         aria-label="Previous month"
       >
-        <ChevronLeft size={15} className="text-muted-foreground" />
+        Prev
       </Button>
 
       <div className="flex items-center gap-2 px-3 min-w-[156px] justify-center overflow-hidden">
@@ -75,13 +74,13 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
 
       <Button
         variant="ghost"
-        size="icon"
-        className="h-8 w-8 rounded-lg hover:bg-muted transition-spring active:scale-95 disabled:opacity-30"
+        size="sm"
+        className="h-8 px-2.5 text-xs rounded-lg hover:bg-muted transition-spring active:scale-95 disabled:opacity-30 text-muted-foreground"
         onClick={goForward}
         disabled={isCurrentMonth}
         aria-label="Next month"
       >
-        <ChevronRight size={15} className="text-muted-foreground" />
+        Next
       </Button>
     </div>
   );

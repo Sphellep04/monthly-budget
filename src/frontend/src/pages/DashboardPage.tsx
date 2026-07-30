@@ -1,13 +1,7 @@
 ﻿import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Download,
-  Loader2,
-  PlusCircle,
-  Sparkles,
-} from "lucide-react";
 import { useState } from "react";
 import { AlertsPanel } from "../components/AlertsPanel";
 import { BudgetCard } from "../components/BudgetCard";
@@ -30,19 +24,7 @@ function BudgetGridSkeleton() {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
-      {/* Icon */}
-      <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center shadow-elevated">
-          <Sparkles className="h-10 w-10 text-primary" />
-        </div>
-        {/* Glow ring */}
-        <div
-          className="absolute inset-0 rounded-2xl bg-primary/5 blur-xl scale-125 pointer-events-none"
-          aria-hidden="true"
-        />
-      </div>
-
+    <div className="flex flex-col items-center justify-center py-16 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
       <h3 className="font-display font-bold text-xl text-foreground mb-2 tracking-tight">
         No budgets set up yet
       </h3>
@@ -53,8 +35,7 @@ function EmptyState() {
       </p>
 
       <Link to="/budgets">
-        <Button className="gap-2 font-body px-6 h-10 rounded-xl shadow-elevated button-hover transition-spring">
-          <PlusCircle className="h-4 w-4" />
+        <Button className="font-body px-6 h-10 rounded-xl shadow-elevated button-hover transition-spring">
           Create your first budget
         </Button>
       </Link>
@@ -162,11 +143,7 @@ function ExportCsvButton({
       onClick={handleExport}
       disabled={!summary || !actor || isExporting}
     >
-      {isExporting ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Download className="h-4 w-4" />
-      )}
+      {isExporting && <Spinner className="h-4 w-4" />}
       {isExporting ? "Exporting…" : "Export CSV"}
     </Button>
   );
@@ -225,9 +202,8 @@ export function DashboardPage() {
           <Link to="/budgets">
             <Button
               size="sm"
-              className="gap-2 font-body h-9 px-4 rounded-xl shadow-elevated button-hover transition-spring"
+              className="font-body h-9 px-4 rounded-xl shadow-elevated button-hover transition-spring"
             >
-              <PlusCircle className="h-4 w-4" />
               New Budget
             </Button>
           </Link>
@@ -259,10 +235,9 @@ export function DashboardPage() {
           {hasBudgets && (
             <Link
               to="/budgets"
-              className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 font-medium font-body transition-colors duration-200 group"
+              className="text-xs text-primary hover:text-primary/80 font-medium font-body transition-colors duration-200"
             >
               Manage budgets
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />
             </Link>
           )}
         </div>
@@ -287,5 +262,3 @@ export function DashboardPage() {
     </div>
   );
 }
-
-

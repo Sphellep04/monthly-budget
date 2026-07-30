@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { Banknote, Pencil, Plus, Trash2, Wallet } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
@@ -219,9 +218,6 @@ function IncomeRow({
 }) {
   return (
     <div className="group flex items-center gap-3 bg-card border border-border rounded-2xl p-4 shadow-subtle hover:shadow-elevated transition-all duration-200">
-      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-        <Banknote size={18} className="text-emerald-600 dark:text-emerald-400" />
-      </div>
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm text-foreground truncate font-display">
           {income.source}
@@ -241,21 +237,21 @@ function IncomeRow({
       <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <Button
           variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-lg"
+          size="sm"
+          className="h-8 px-2 text-xs rounded-lg"
           onClick={() => onEdit(income)}
           aria-label="Edit income"
         >
-          <Pencil size={14} />
+          Edit
         </Button>
         <Button
           variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-lg hover:text-destructive"
+          size="sm"
+          className="h-8 px-2 text-xs rounded-lg hover:text-destructive"
           onClick={() => onDelete(income)}
           aria-label="Delete income"
         >
-          <Trash2 size={14} />
+          Delete
         </Button>
       </div>
     </div>
@@ -309,30 +305,24 @@ export function IncomePage() {
             }}
           />
           <Button
-            className="gap-1.5 h-9 rounded-xl text-xs shadow-elevated"
+            className="h-9 rounded-xl text-xs shadow-elevated"
             onClick={() => {
               setEditing(null);
               setFormOpen(true);
             }}
           >
-            <Plus size={14} />
             Add Income
           </Button>
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl p-5 shadow-subtle flex items-center justify-between">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
-            Total Income
-          </p>
-          <p className="font-display text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
-            {formatCents(BigInt(total))}
-          </p>
-        </div>
-        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-          <Wallet size={22} className="text-emerald-600 dark:text-emerald-400" />
-        </div>
+      <div className="bg-card border border-border rounded-2xl p-5 shadow-subtle">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
+          Total Income
+        </p>
+        <p className="font-display text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+          {formatCents(BigInt(total))}
+        </p>
       </div>
 
       {isLoading ? (
@@ -342,10 +332,7 @@ export function IncomePage() {
           ))}
         </div>
       ) : income.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 shadow-elevated">
-            <Banknote size={26} className="text-primary" />
-          </div>
+        <div className="flex flex-col items-center justify-center py-16 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
           <h3 className="font-display font-bold text-lg text-foreground mb-2 tracking-tight">
             No income logged this month
           </h3>
@@ -354,13 +341,12 @@ export function IncomePage() {
             (income minus expenses).
           </p>
           <Button
-            className="gap-2 rounded-xl h-10 shadow-elevated"
+            className="rounded-xl h-10 shadow-elevated"
             onClick={() => {
               setEditing(null);
               setFormOpen(true);
             }}
           >
-            <Plus size={15} />
             Add Income
           </Button>
         </div>

@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { Edit2, FileText, Plus, StickyNote, Trash2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -125,21 +125,16 @@ function NoteModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-              <StickyNote size={15} className="text-primary" />
-            </div>
-            <h2 className="font-display text-base font-semibold text-foreground">
-              {editNote ? "Edit Note" : "New Note"}
-            </h2>
-          </div>
+          <h2 className="font-display text-base font-semibold text-foreground">
+            {editNote ? "Edit Note" : "New Note"}
+          </h2>
           <button
             type="button"
             onClick={handleClose}
-            className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
+            className="flex items-center justify-center h-7 px-2.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground text-xs font-medium"
             aria-label="Close"
           >
-            <X size={15} />
+            Close
           </button>
         </div>
 
@@ -190,7 +185,7 @@ function NoteModal({
             <Button type="submit" className="flex-1" disabled={isPending}>
               {isPending ? (
                 <span className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                  <Spinner className="w-3.5 h-3.5" />
                   Saving…
                 </span>
               ) : editNote ? (
@@ -234,23 +229,23 @@ function NoteCard({
         <button
           type="button"
           onClick={() => onEdit(note)}
-          className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+          className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors text-xs font-medium"
           aria-label="Edit note"
         >
-          <Edit2 size={13} />
+          Edit
         </button>
         <button
           type="button"
           onClick={() => onDelete(note)}
-          className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+          className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors text-xs font-medium"
           aria-label="Delete note"
         >
-          <Trash2 size={13} />
+          Delete
         </button>
       </div>
 
       {/* Content */}
-      <div className="space-y-1.5 pr-16">
+      <div className="space-y-1.5 pr-24">
         <h3 className="font-display text-sm font-semibold text-foreground leading-snug truncate">
           {note.title}
         </h3>
@@ -262,8 +257,7 @@ function NoteCard({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center gap-2 pt-1 border-t border-border">
-        <FileText size={11} className="text-muted-foreground/50 shrink-0" />
+      <div className="pt-1 border-t border-border">
         <span className="text-[10px] text-muted-foreground/70 truncate">
           Updated {formatNoteDate(note.updatedAt)}
         </span>
@@ -315,13 +309,10 @@ export function NotesPage() {
         {/* ── Page Header ── */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <StickyNote className="w-4 h-4 text-primary opacity-70" />
-              <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-                Notes
-              </span>
-            </div>
-            <h1 className="font-display text-3xl font-bold text-foreground leading-tight">
+            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+              Notes
+            </span>
+            <h1 className="font-display text-3xl font-bold text-foreground leading-tight mt-1">
               My Notes
             </h1>
             <p className="text-sm text-muted-foreground mt-1.5 max-w-md leading-relaxed">
@@ -329,8 +320,7 @@ export function NotesPage() {
               mind.
             </p>
           </div>
-          <Button onClick={openCreate} className="gap-2 shrink-0 mt-1">
-            <Plus size={15} />
+          <Button onClick={openCreate} className="shrink-0 mt-1">
             New Note
           </Button>
         </div>
@@ -357,9 +347,6 @@ export function NotesPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
           >
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
-              <StickyNote className="w-8 h-8 text-primary opacity-60" />
-            </div>
             <p className="font-display text-base font-semibold text-foreground mb-2">
               No notes yet
             </p>
@@ -367,10 +354,7 @@ export function NotesPage() {
               Create your first note - track financial goals, reminders, or
               monthly reflections.
             </p>
-            <Button onClick={openCreate} className="gap-2">
-              <Plus size={15} />
-              Create your first note
-            </Button>
+            <Button onClick={openCreate}>Create your first note</Button>
           </motion.div>
         ) : (
           <AnimatePresence mode="popLayout">
@@ -432,5 +416,3 @@ export function NotesPage() {
     </>
   );
 }
-
-

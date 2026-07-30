@@ -8,7 +8,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, CheckCircle2, PiggyBank, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
@@ -162,18 +161,14 @@ function NewGoalDialog({
                   type="button"
                   aria-pressed={color === c}
                   onClick={() => setColor(c)}
-                  className={`w-8 h-8 rounded-full transition-spring relative flex items-center justify-center ${
+                  className={`w-8 h-8 rounded-full transition-spring ${
                     color === c
                       ? "ring-2 ring-offset-2 ring-foreground/60 scale-110"
                       : "hover:scale-110"
                   }`}
                   style={{ backgroundColor: c }}
                   aria-label={`Color ${c}`}
-                >
-                  {color === c && (
-                    <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                  )}
-                </button>
+                />
               ))}
             </div>
           </div>
@@ -341,12 +336,6 @@ function GoalCard({
       <div className="h-[3px] w-full" style={{ background: goal.color }} />
       <div className="p-5 flex flex-col gap-4 flex-1">
         <div className="flex items-start gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: `${goal.color}18` }}
-          >
-            <PiggyBank size={18} style={{ color: goal.color }} />
-          </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-display font-semibold text-sm text-foreground truncate">
               {goal.name}
@@ -363,8 +352,7 @@ function GoalCard({
             )}
           </div>
           {isComplete && (
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold flex-shrink-0">
-              <CheckCircle2 size={11} />
+            <div className="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold flex-shrink-0">
               Complete
             </div>
           )}
@@ -396,17 +384,16 @@ function GoalCard({
             onClick={() => onContribute(goal)}
             disabled={isComplete}
           >
-            <Plus size={13} className="mr-1" />
             Contribute
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className="h-8 w-8 p-0 rounded-lg hover:text-destructive"
+            className="h-8 px-2.5 text-xs rounded-lg hover:text-destructive"
             onClick={() => onDelete(goal)}
             aria-label="Delete goal"
           >
-            <Trash2 size={14} />
+            Delete
           </Button>
         </div>
       </div>
@@ -446,10 +433,9 @@ export function SavingsGoalsPage() {
           </p>
         </div>
         <Button
-          className="gap-1.5 h-9 rounded-xl text-xs shadow-elevated"
+          className="h-9 rounded-xl text-xs shadow-elevated"
           onClick={() => setNewGoalOpen(true)}
         >
-          <Plus size={14} />
           New Goal
         </Button>
       </div>
@@ -462,9 +448,6 @@ export function SavingsGoalsPage() {
         </div>
       ) : goals.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-dashed border-border bg-card/40 shadow-subtle">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 shadow-elevated">
-            <PiggyBank size={26} className="text-primary" />
-          </div>
           <h3 className="font-display font-bold text-lg text-foreground mb-2 tracking-tight">
             No savings goals yet
           </h3>
@@ -473,10 +456,9 @@ export function SavingsGoalsPage() {
             emergency fund, a trip - and track your progress over time.
           </p>
           <Button
-            className="gap-2 rounded-xl h-10 shadow-elevated"
+            className="rounded-xl h-10 shadow-elevated"
             onClick={() => setNewGoalOpen(true)}
           >
-            <Plus size={15} />
             New Goal
           </Button>
         </div>

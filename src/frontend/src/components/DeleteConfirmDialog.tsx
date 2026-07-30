@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -31,11 +31,6 @@ export function DeleteConfirmDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-md shadow-premium backdrop-blur-md">
         <AlertDialogHeader>
-          {/* Warning icon */}
-          <div className="w-12 h-12 rounded-2xl bg-destructive/10 flex items-center justify-center mb-2">
-            <AlertTriangle className="w-6 h-6 text-destructive" />
-          </div>
-
           <AlertDialogTitle className="font-display text-lg font-bold text-foreground">
             {title}
           </AlertDialogTitle>
@@ -58,14 +53,11 @@ export function DeleteConfirmDialog({
           >
             {isPending ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Spinner className="w-4 h-4 mr-2" />
                 Deleting…
               </>
             ) : (
-              <>
-                <AlertTriangle className="w-4 h-4 mr-1.5" />
-                Delete
-              </>
+              "Delete"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

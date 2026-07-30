@@ -2,11 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, PiggyBank, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useDeleteBudget } from "../hooks/useBudget";
 import type { Budget } from "../types";
-import { CATEGORY_ICONS, formatCents } from "../types";
+import { formatCents } from "../types";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 
 interface BudgetListProps {
@@ -40,7 +39,6 @@ interface BudgetRowProps {
 function BudgetRow({ budget }: BudgetRowProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const deleteMutation = useDeleteBudget();
-  const categoryIcon = CATEGORY_ICONS[budget.category] ?? "📦";
 
   async function handleDelete() {
     await deleteMutation.mutateAsync(budget.id);
@@ -50,14 +48,6 @@ function BudgetRow({ budget }: BudgetRowProps) {
   return (
     <>
       <div className="group flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-hover hover:border-primary/20 hover:shadow-elevated">
-        {/* Icon + color dot */}
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 shadow-subtle"
-          style={{ backgroundColor: `${budget.color}20` }}
-        >
-          {categoryIcon}
-        </div>
-
         {/* Name + subline */}
         <div className="flex-1 min-w-0">
           <p className="font-display font-semibold text-foreground truncate text-sm leading-tight">
@@ -78,10 +68,9 @@ function BudgetRow({ budget }: BudgetRowProps) {
         {/* Category badge */}
         <Badge
           variant="secondary"
-          className="hidden sm:flex items-center gap-1.5 text-[11px] flex-shrink-0 font-medium"
+          className="hidden sm:flex items-center text-[11px] flex-shrink-0 font-medium"
         >
-          <span>{categoryIcon}</span>
-          <span>{budget.category}</span>
+          {budget.category}
         </Badge>
 
         {/* Limit */}
@@ -99,21 +88,21 @@ function BudgetRow({ budget }: BudgetRowProps) {
           <Link to="/budgets/$id" params={{ id: budget.id.toString() }}>
             <Button
               variant="ghost"
-              size="icon"
-              className="w-8 h-8 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-primary"
+              size="sm"
+              className="h-8 px-2.5 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-primary"
               aria-label={`View ${budget.name}`}
             >
-              <ArrowRight className="w-3.5 h-3.5" />
+              View
             </Button>
           </Link>
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={() => setConfirmOpen(true)}
-            className="w-8 h-8 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-destructive hover:bg-destructive/8"
+            className="h-8 px-2.5 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-destructive hover:bg-destructive/8"
             aria-label={`Delete ${budget.name}`}
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            Delete
           </Button>
         </div>
       </div>
@@ -147,10 +136,7 @@ export function BudgetList({
 
   if (budgets.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 px-6 rounded-2xl border border-dashed border-border bg-card/40 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-primary/8 flex items-center justify-center mb-5 shadow-subtle">
-          <PiggyBank className="w-8 h-8 text-primary" />
-        </div>
+      <div className="flex flex-col items-center justify-center py-16 px-6 rounded-2xl border border-dashed border-border bg-card/40 text-center">
         <h3 className="font-display font-bold text-xl text-foreground mb-2">
           No budgets yet
         </h3>
@@ -158,12 +144,8 @@ export function BudgetList({
           Set up your first monthly budget to start tracking where your money
           goes - and stay in control.
         </p>
-        <Button
-          onClick={onAddBudget}
-          className="gap-2 button-hover shadow-elevated"
-        >
-          <span>Create Your First Budget</span>
-          <ArrowRight className="w-4 h-4" />
+        <Button onClick={onAddBudget} className="button-hover shadow-elevated">
+          Create Your First Budget
         </Button>
       </div>
     );
@@ -171,11 +153,9 @@ export function BudgetList({
 
   return (
     <div className="space-y-3">
-      {budgets.map((budget, i) => (
-        <BudgetRow key={budget.id.toString()} budget={budget} index={i + 1} />
+      {budgets.map((budget) => (
+        <BudgetRow key={budget.id.toString()} budget={budget} />
       ))}
     </div>
   );
 }
-
-

@@ -8,15 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertCircle,
-  CalendarClock,
-  Loader2,
-  RefreshCw,
-  StickyNote,
-  Wallet,
-} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -36,14 +29,12 @@ interface Props {
 function FieldLabel({
   children,
   htmlFor,
-  icon,
-}: { children: React.ReactNode; htmlFor?: string; icon?: React.ReactNode }) {
+}: { children: React.ReactNode; htmlFor?: string }) {
   return (
     <Label
       htmlFor={htmlFor}
-      className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1.5"
+      className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
     >
-      {icon}
       {children}
     </Label>
   );
@@ -142,14 +133,9 @@ export function RecurringTemplateForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md shadow-premium backdrop-blur-md">
         <DialogHeader>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">
-              <RefreshCw className="w-4 h-4 text-secondary" />
-            </div>
-            <DialogTitle className="font-display text-xl font-bold">
-              {isEditing ? "Edit Recurring Expense" : "Add Recurring Expense"}
-            </DialogTitle>
-          </div>
+          <DialogTitle className="font-display text-xl font-bold">
+            {isEditing ? "Edit Recurring Expense" : "Add Recurring Expense"}
+          </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             {isEditing
               ? "Update this recurring expense template."
@@ -160,12 +146,7 @@ export function RecurringTemplateForm({
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           {/* Name */}
           <div>
-            <FieldLabel
-              htmlFor="rt-name"
-              icon={<StickyNote className="w-3 h-3" />}
-            >
-              Name
-            </FieldLabel>
+            <FieldLabel htmlFor="rt-name">Name</FieldLabel>
             <Input
               id="rt-name"
               placeholder="e.g. Netflix subscription"
@@ -175,21 +156,13 @@ export function RecurringTemplateForm({
               className={`input-focus h-10 ${errors.name ? "border-destructive" : ""}`}
             />
             {errors.name && (
-              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
-                <AlertCircle className="w-3.5 h-3.5" />
-                {errors.name}
-              </p>
+              <p className="text-xs text-destructive mt-1">{errors.name}</p>
             )}
           </div>
 
           {/* Amount */}
           <div>
-            <FieldLabel
-              htmlFor="rt-amount"
-              icon={<Wallet className="w-3 h-3" />}
-            >
-              Amount
-            </FieldLabel>
+            <FieldLabel htmlFor="rt-amount">Amount</FieldLabel>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none">
                 N$
@@ -207,21 +180,13 @@ export function RecurringTemplateForm({
               />
             </div>
             {errors.amount && (
-              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
-                <AlertCircle className="w-3.5 h-3.5" />
-                {errors.amount}
-              </p>
+              <p className="text-xs text-destructive mt-1">{errors.amount}</p>
             )}
           </div>
 
           {/* Day of month */}
           <div>
-            <FieldLabel
-              htmlFor="rt-day"
-              icon={<CalendarClock className="w-3 h-3" />}
-            >
-              Day of Month
-            </FieldLabel>
+            <FieldLabel htmlFor="rt-day">Day of Month</FieldLabel>
             <Input
               id="rt-day"
               type="number"
@@ -234,10 +199,7 @@ export function RecurringTemplateForm({
               className={`input-focus h-10 font-mono w-32 ${errors.day ? "border-destructive" : ""}`}
             />
             {errors.day ? (
-              <p className="flex items-center gap-1.5 text-xs text-destructive mt-1">
-                <AlertCircle className="w-3.5 h-3.5" />
-                {errors.day}
-              </p>
+              <p className="text-xs text-destructive mt-1">{errors.day}</p>
             ) : (
               <p className="text-xs text-muted-foreground mt-1.5">
                 For months with fewer days, the expense will be created on the
@@ -248,10 +210,7 @@ export function RecurringTemplateForm({
 
           {/* Notes */}
           <div>
-            <FieldLabel
-              htmlFor="rt-notes"
-              icon={<StickyNote className="w-3 h-3" />}
-            >
+            <FieldLabel htmlFor="rt-notes">
               Notes{" "}
               <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
                 (optional)
@@ -284,7 +243,7 @@ export function RecurringTemplateForm({
             >
               {isPending ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Spinner className="w-4 h-4 mr-2" />
                   Saving…
                 </>
               ) : isEditing ? (
