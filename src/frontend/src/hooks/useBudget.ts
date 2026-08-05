@@ -487,7 +487,7 @@ export function useUpdateUserSettings() {
     mutationFn: async (settings: UserSettings) => {
       if (!actor) throw new Error("Actor not ready");
       return actor.updateUserSettings({
-        alertThresholdPercent: BigInt(settings.alertThresholdPercent),
+        alertThresholdPercent: settings.alertThresholdPercent,
       });
     },
     onSuccess: () => {
