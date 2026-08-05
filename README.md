@@ -1,6 +1,6 @@
-﻿# BudgetWise
+# BudgetWise
 
-A personal finance app for tracking monthly budgets and expenses. Built with a React + TypeScript frontend and a local browser storage backend for offline-friendly budgeting.
+A personal finance app for tracking monthly budgets and expenses. Built with a React + TypeScript frontend backed by Supabase (Postgres + Auth + Storage), deployed on Cloudflare.
 
 ---
 
@@ -11,11 +11,12 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 - **Receipt scanning (OCR)** - snap a photo of a receipt and the amount is auto-filled via on-device OCR
 - **Receipt gallery** - browse every scanned/attached receipt in one place
 - **Income tracking** - log salary and other income sources per month
+- **Recurring income** - set up income sources (e.g. salary) that auto-log each month on a chosen day
 - **Savings goals** - set named targets (e.g. "New Laptop") and track contributions toward them
 - **Net savings** - real income-minus-expenses figure on the Dashboard, alongside budget utilization
 - **Recurring templates** - set up recurring expenses (subscriptions, rent, etc.) that auto-apply each month
 - **Bill reminders** - optional browser notifications for bills due within 3 days
-- **Backup & restore** - export/import all your data as a JSON file (everything lives in this browser only)
+- **Backup & restore** - export/import all your data as a JSON file
 - **Spending insights** - progress bars, status indicators (On Track / Near Limit / Over Budget), and alerts
 - **Annual summary** - year-over-year view of all categories
 - **Charts** - visualise spending trends over time
@@ -34,101 +35,8 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 | State / data fetching | TanStack Query                                             |
 | Styling               | Tailwind CSS v3 (oklch color space), shadcn/ui             |
 | Fonts                 | Inter (display/body), JetBrains Mono                       |
-| Backend               | Browser local storage (interim, DB planned)                |
-| Auth                  | Local browser-based auth                                   |
+| Backend               | Supabase (Postgres, Row Level Security)                    |
+| Auth                  | Supabase Auth (email/password)                             |
+| File storage          | Supabase Storage (receipt photos)                          |
+| Hosting               | Cloudflare Workers (static assets)                         |
 | PWA                   | vite-plugin-pwa + Workbox                                  |
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) 18+
-- [pnpm](https://pnpm.io/) 8+
-
-### Local development
-
-The frontend runs fully in the browser using local storage and does not require a backend server.
-
-> **Important:** open/run everything from `monthly-budget/` — that's the repo root (it's the folder containing `package.json` and `.git`). If your editor or terminal is instead pointed at its parent folder, commands will fail with errors like `ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND` or `npm error enoent` because there's no project there.
-
-**Step 1 - Navigate to the project folder**
-
-```powershell
-cd monthly-budget
-```
-
-**Step 2 - Install dependencies** *(first time only)*
-
-```powershell
-pnpm install
-```
-
-**Step 3 - Start the dev server**
-
-```powershell
-pnpm dev
-```
-
-**Step 4 - Open in your browser**
-
-```
-http://localhost:5173
-```
-
-The app will load using local browser storage and local authentication.
-
----
-
-## Project Structure
-
-```text
-monthly-budget/
-└── src/
-    └── frontend/          # React app (Vite)
-        ├── src/
-        │   ├── components/    # UI components (Sidebar, BudgetCard, …)
-        │   ├── hooks/         # Data hooks (useBudget, useActorOrMock, …)
-        │   ├── backends/      # Browser storage backend implementation
-        │   ├── pages/         # Route pages
-        │   └── types/         # Shared types + helpers
-        ├── public/
-        │   ├── icons/             # PWA icons (generated from BudgetWise-Logo.png)
-        │   ├── BudgetWise-Logo.png  # Source logo - run gen-pwa-icons.mjs after updating
-        │   └── apple-touch-icon.png
-        └── vite.config.js
-```
-
----
-
-## PWA / Mobile
-
-BudgetWise is configured as a Progressive Web App. After starting the frontend:
-
-1. Open the app in Chrome (Android) or Safari (iOS)
-2. Tap **Add to Home Screen**
-3. The app will launch full-screen, like a native app
-
-**Updating icons:** PWA icons are generated from `public/BudgetWise-Logo.png`. If you update the logo file, regenerate all icon sizes by running:
-
-```bash
-cd src/frontend
-node scripts/gen-pwa-icons.mjs
-```
-
-This will overwrite `public/icons/*.png` and `public/apple-touch-icon.png`.
-
----
-
-## Theme
-
-The app respects your OS preference by default (light/dark/system). You can override it any time via **Settings → Appearance**.
-
----
-
-## License
-
-Private - all rights reserved.
-
-
