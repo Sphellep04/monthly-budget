@@ -1,20 +1,22 @@
 ﻿import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { HowItWorksCarousel } from "./HowItWorksCarousel";
 
 const trustPoints = [
-  "No password or email required",
-  "Your data stays in your browser storage",
-  "Works locally without any hosted backend",
+  "Your data is private to your account",
+  "Access your budget from any device",
+  "Passwords are never stored in plain text",
 ];
 
 const features = [
   {
     label: "Private & Secure",
-    description: "Your data stays in your browser storage",
+    description: "Your data is private to your account",
   },
   {
     label: "Visual Insights",
@@ -72,8 +74,27 @@ const previewCards = [
 ];
 
 export function LoginPage() {
-  const { login, isLoading } = useAuth();
+  const { signIn, signUp, isLoading } = useAuth();
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
+  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    const { error: authError } =
+      mode === "sign-in"
+        ? await signIn(email, password)
+        : await signUp(email, password);
+    setSubmitting(false);
+    if (authError) {
+      setError(authError);
+    }
+  }
 
   return (
     <div className="min-h-screen flex overflow-hidden">
@@ -176,7 +197,7 @@ export function LoginPage() {
               style={{ color: "oklch(0.60 0.02 265)" }}
             >
               Track budgets, spot trends, and stay on top of recurring bills -
-              all with private local storage.
+              synced securely to your account.
             </p>
           </div>
 
@@ -299,7 +320,7 @@ export function LoginPage() {
               draggable={false}
             />
             <p className="text-sm text-muted-foreground">
-              Private. Local-first. Yours.
+              Private. Synced. Yours.
             </p>
           </div>
 
@@ -329,42 +350,91 @@ export function LoginPage() {
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-muted/50 border border-border/50 mb-5">
-                <p className="text-xs font-semibold text-foreground">
-                  Local Sign-In
-                </p>
-                <p className="text-[11px] text-muted-foreground leading-tight">
-                  Secure, lightweight browser authentication
-                </p>
-              </div>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="email" className="text-xs font-medium">
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="password" className="text-xs font-medium">
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    autoComplete={
+                      mode === "sign-in" ? "current-password" : "new-password"
+                    }
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
 
-              {/* CTA */}
-              <Button
-                size="lg"
-                className={cn(
-                  "w-full gap-2.5 font-semibold text-[0.9375rem] h-12 rounded-xl button-hover",
-                  "bg-primary hover:bg-primary/90 text-primary-foreground",
-                  "relative overflow-hidden group shadow-elevated",
+                {error && (
+                  <p className="text-xs text-destructive leading-relaxed">
+                    {error}
+                  </p>
                 )}
-                onClick={login}
-                disabled={isLoading}
+
+                {/* CTA */}
+                <Button
+                  type="submit"
+                  size="lg"
+                  className={cn(
+                    "w-full gap-2.5 font-semibold text-[0.9375rem] h-12 rounded-xl button-hover mt-1",
+                    "bg-primary hover:bg-primary/90 text-primary-foreground",
+                    "relative overflow-hidden group shadow-elevated",
+                  )}
+                  disabled={isLoading || submitting}
+                >
+                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-smooth bg-gradient-to-r from-transparent via-primary-foreground/10 to-transparent -skew-x-12 translate-x-[-120%] group-hover:translate-x-[120%] duration-700" />
+                  {submitting ? (
+                    <>
+                      <Spinner className="w-4 h-4 flex-shrink-0" />
+                      <span>
+                        {mode === "sign-in" ? "Signing in…" : "Signing up…"}
+                      </span>
+                    </>
+                  ) : (
+                    <span>
+                      {mode === "sign-in" ? "Sign in" : "Create account"}
+                    </span>
+                  )}
+                </Button>
+              </form>
+
+              {/* Mode toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  setMode(mode === "sign-in" ? "sign-up" : "sign-in");
+                  setError(null);
+                }}
+                className="w-full mt-3 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
               >
-                <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-smooth bg-gradient-to-r from-transparent via-primary-foreground/10 to-transparent -skew-x-12 translate-x-[-120%] group-hover:translate-x-[120%] duration-700" />
-                {isLoading ? (
-                  <>
-                    <Spinner className="w-4 h-4 flex-shrink-0" />
-                    <span>Connecting…</span>
-                  </>
-                ) : (
-                  <span>Continue with Local Sign-In</span>
-                )}
-              </Button>
+                {mode === "sign-in"
+                  ? "New here? Create an account"
+                  : "Already have an account? Sign in"}
+              </button>
 
               {/* How it works trigger */}
               <button
                 type="button"
                 onClick={() => setHowItWorksOpen(true)}
-                className="w-full mt-3 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="w-full mt-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 See how it works
               </button>

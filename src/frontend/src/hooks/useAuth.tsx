@@ -1,76 +1,67 @@
+import type { Session } from "@supabase/supabase-js";
 import {
   type ReactNode,
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
-
-const AUTH_KEY = "budgetwise-auth";
+import { supabase } from "../lib/supabaseClient";
 
 interface AuthContextValue {
-  identity: null;
+  session: Session | null;
+  userId: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  loginStatus: string;
-  login: () => Promise<void>;
-  logout: () => void;
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [loginStatus, setLoginStatus] = useState<string>("idle");
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setIsInitializing(false);
+    });
 
-    const stored = window.localStorage.getItem(AUTH_KEY);
-    if (stored === "true") {
-      setIsAuthenticated(true);
-      setLoginStatus("authenticated");
-    }
-    setIsInitializing(false);
+    const { data: subscription } = supabase.auth.onAuthStateChange(
+      (_event, nextSession) => {
+        setSession(nextSession);
+      },
+    );
+
+    return () => subscription.subscription.unsubscribe();
   }, []);
 
-  const login = useCallback(async () => {
-    setIsLoggingIn(true);
-    setLoginStatus("logging-in");
-
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(AUTH_KEY, "true");
-    }
-
-    setIsAuthenticated(true);
-    setLoginStatus("authenticated");
-    setIsLoggingIn(false);
-  }, []);
-
-  const clear = useCallback(() => {
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(AUTH_KEY);
-    }
-    setIsAuthenticated(false);
-    setLoginStatus("logged-out");
-  }, []);
-
-  const value = useMemo(
+  const value = useMemo<AuthContextValue>(
     () => ({
-      identity: null,
-      isAuthenticated,
-      isLoading: isInitializing || isLoggingIn,
-      loginStatus,
-      login,
-      logout: clear,
+      session,
+      userId: session?.user.id ?? null,
+      isAuthenticated: !!session,
+      isLoading: isInitializing,
+      signIn: async (email, password) => {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        return { error: error?.message ?? null };
+      },
+      signUp: async (email, password) => {
+        const { error } = await supabase.auth.signUp({ email, password });
+        return { error: error?.message ?? null };
+      },
+      signOut: async () => {
+        await supabase.auth.signOut();
+      },
     }),
-    [isAuthenticated, isInitializing, isLoggingIn, loginStatus, login, clear],
+    [session, isInitializing],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

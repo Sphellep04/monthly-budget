@@ -98,7 +98,7 @@ function SidebarInner({
   onNavClick?: () => void;
   onSettingsOpen: () => void;
 }) {
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
 
@@ -145,7 +145,7 @@ function SidebarInner({
         <Button
           variant="ghost"
           size="sm"
-          onClick={logout}
+          onClick={signOut}
           className="w-full justify-start text-[0.8125rem] text-muted-foreground/70 hover:text-destructive hover:bg-destructive/8 rounded-xl h-9 px-3 font-medium"
         >
           Sign out
