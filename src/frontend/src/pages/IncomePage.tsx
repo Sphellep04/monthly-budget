@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,10 +14,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
 import { MonthSelector } from "../components/MonthSelector";
+import { RecurringIncomeForm } from "../components/RecurringIncomeForm";
+import { RecurringIncomeList } from "../components/RecurringIncomeList";
 import {
   useCreateIncome,
   useDeleteIncome,
   useIncome,
+  useRecurringIncomes,
   useUpdateIncome,
 } from "../hooks/useBudget";
 import type { Income } from "../types";
@@ -267,9 +271,15 @@ export function IncomePage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Income | null>(null);
   const [deleting, setDeleting] = useState<Income | null>(null);
+  const [recurringFormOpen, setRecurringFormOpen] = useState(false);
+  const [editingRecurringIncome, setEditingRecurringIncome] = useState<
+    bigint | null
+  >(null);
 
   const { data: income = [], isLoading } = useIncome(year, month);
   const deleteIncome = useDeleteIncome();
+  const { data: recurringIncomes = [], isLoading: recurringLoading } =
+    useRecurringIncomes();
 
   const total = income.reduce((sum, i) => sum + Number(i.amountCents), 0);
 
@@ -323,6 +333,41 @@ export function IncomePage() {
         <p className="font-display text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
           {formatCents(BigInt(total))}
         </p>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h2 className="font-display text-base font-bold text-foreground">
+              Recurring Income
+            </h2>
+            <Badge
+              variant="outline"
+              className="text-[10px] px-2 py-0 bg-secondary/8 text-secondary border-secondary/20"
+            >
+              Auto-monthly
+            </Badge>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="button-hover"
+            onClick={() => {
+              setEditingRecurringIncome(null);
+              setRecurringFormOpen(true);
+            }}
+          >
+            Add
+          </Button>
+        </div>
+        <RecurringIncomeList
+          templates={recurringIncomes}
+          isLoading={recurringLoading}
+          onEdit={(incomeId) => {
+            setEditingRecurringIncome(incomeId);
+            setRecurringFormOpen(true);
+          }}
+        />
       </div>
 
       {isLoading ? (
@@ -385,6 +430,16 @@ export function IncomePage() {
         description={`This will permanently remove "${deleting?.source}" from your records.`}
         onConfirm={handleDelete}
         isPending={deleteIncome.isPending}
+      />
+
+      <RecurringIncomeForm
+        incomeId={editingRecurringIncome}
+        templates={recurringIncomes}
+        open={recurringFormOpen}
+        onOpenChange={(open) => {
+          setRecurringFormOpen(open);
+          if (!open) setEditingRecurringIncome(null);
+        }}
       />
     </div>
   );

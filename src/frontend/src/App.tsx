@@ -12,7 +12,10 @@ import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { useBillReminders } from "./hooks/useBillReminders";
-import { useApplyRecurringTemplates } from "./hooks/useBudget";
+import {
+  useApplyRecurringIncome,
+  useApplyRecurringTemplates,
+} from "./hooks/useBudget";
 
 const DashboardPage = lazy(() =>
   import("./pages/DashboardPage").then((m) => ({ default: m.DashboardPage })),
@@ -90,6 +93,13 @@ function RecurringTemplateApplier() {
   return null;
 }
 
+/** Silently applies recurring income for the current month on login */
+function RecurringIncomeApplier() {
+  const now = new Date();
+  useApplyRecurringIncome(now.getFullYear(), now.getMonth() + 1);
+  return null;
+}
+
 /** Silently checks for bills due soon and surfaces a reminder */
 function BillReminderNotifier() {
   useBillReminders();
@@ -117,6 +127,7 @@ function AuthGuard() {
   return (
     <>
       <RecurringTemplateApplier />
+      <RecurringIncomeApplier />
       <BillReminderNotifier />
       <Outlet />
     </>
