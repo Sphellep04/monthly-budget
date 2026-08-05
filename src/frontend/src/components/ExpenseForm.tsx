@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAddExpense } from "../hooks/useBudget";
+import { useAuth } from "../hooks/useAuth";
+import { supabase } from "../lib/supabaseClient";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -99,6 +101,7 @@ export function ExpenseForm({
   onOpenChange,
 }: ExpenseFormProps) {
   const addExpense = useAddExpense();
+  const { userId } = useAuth();
   const [date, setDate] = useState(todayISO());
   const [amountStr, setAmountStr] = useState("");
   const [notes, setNotes] = useState("");
@@ -263,27 +266,30 @@ export function ExpenseForm({
 
     let receiptUrl: string | undefined;
     if (receiptFile) {
+      if (!userId) {
+        setReceiptError("You must be signed in to attach a receipt.");
+        return;
+      }
       setIsUploading(true);
       setUploadProgress(10);
+      const tick = setInterval(() => {
+        setUploadProgress((p) => Math.min(p + 15, 85));
+      }, 120);
       try {
-        if (receiptDataUrl) {
-          // Camera capture already has a data URL
-          receiptUrl = receiptDataUrl;
-          setUploadProgress(100);
-        } else {
-          // File upload - convert now
-          const tick = setInterval(() => {
-            setUploadProgress((p) => Math.min(p + 15, 85));
-          }, 120);
-          receiptUrl = await fileToDataURL(receiptFile);
-          clearInterval(tick);
-          setUploadProgress(100);
-        }
+        const path = `${userId}/${crypto.randomUUID()}-${receiptFile.name}`;
+        const { error } = await supabase.storage
+          .from("receipts")
+          .upload(path, receiptFile, { contentType: receiptFile.type });
+        if (error) throw error;
+        receiptUrl = path;
+        setUploadProgress(100);
       } catch {
+        clearInterval(tick);
         setIsUploading(false);
-        setReceiptError("Failed to process receipt image. Please try again.");
+        setReceiptError("Failed to upload receipt image. Please try again.");
         return;
       } finally {
+        clearInterval(tick);
         setIsUploading(false);
       }
     }
