@@ -3,5 +3,8 @@ dist
 .claude
 .settings.local.json
 caffeine.toml
+.env
+.env.local
+.env.*.local
 
 

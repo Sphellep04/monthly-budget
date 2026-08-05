@@ -21,14 +21,6 @@ export default defineConfig({
       },
     },
   },
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://127.0.0.1:4943",
-        changeOrigin: true,
-      },
-    },
-  },
   plugins: [
     react(),
     VitePWA({
@@ -58,6 +50,10 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/[^/]+\.supabase\.co\/.*/i,
+            handler: "NetworkOnly",
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
