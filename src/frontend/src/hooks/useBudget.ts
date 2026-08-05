@@ -13,6 +13,8 @@ import type {
   MonthlySummary,
   MonthlyTrendPoint,
   Note,
+  RecurringIncome,
+  RecurringIncomeInput,
   RecurringTemplate,
   RecurringTemplateInput,
   SavingsGoal,
@@ -556,6 +558,86 @@ export function useDeleteIncome() {
   });
 }
 
+// ─── Recurring Income ─────────────────────────────────────────────────────────
+
+export function useRecurringIncomes() {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<RecurringIncome[]>({
+    queryKey: ["recurring-incomes"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listRecurringIncomes();
+      return result as unknown as RecurringIncome[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateRecurringIncome() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (input: RecurringIncomeInput) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.createRecurringIncome(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurring-incomes"] });
+    },
+  });
+}
+
+export function useUpdateRecurringIncome() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      input,
+    }: {
+      id: bigint;
+      input: RecurringIncomeInput;
+    }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.updateRecurringIncome(id, input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurring-incomes"] });
+    },
+  });
+}
+
+export function useDeleteRecurringIncome() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.deleteRecurringIncome(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurring-incomes"] });
+    },
+  });
+}
+
+export function useApplyRecurringIncome(year: number, month: number) {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<Income[]>({
+    queryKey: ["apply-recurring-income", year, month],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.applyRecurringIncomes(
+        BigInt(year),
+        BigInt(month),
+      );
+      return result as unknown as Income[];
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+}
+
 // ─── Savings Goals ────────────────────────────────────────────────────────────
 
 export function useSavingsGoals() {
@@ -890,6 +972,8 @@ export type {
   BillPaymentInput,
   Income,
   IncomeInput,
+  RecurringIncome,
+  RecurringIncomeInput,
   SavingsGoal,
   SavingsGoalInput,
   UpcomingBill,

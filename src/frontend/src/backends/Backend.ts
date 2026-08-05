@@ -13,6 +13,8 @@ import type {
   MonthlySummary,
   MonthlyTrendPoint,
   Note,
+  RecurringIncome,
+  RecurringIncomeInput,
   RecurringTemplate,
   RecurringTemplateInput,
   SavingsGoal,
@@ -45,6 +47,7 @@ export interface Backend {
     year: bigint,
     month: bigint,
   ): Promise<Budget[]>;
+  applyRecurringIncomes(year: bigint, month: bigint): Promise<Income[]>;
   applyRecurringTemplates(year: bigint, month: bigint): Promise<Expense[]>;
   contributeSavingsGoal(
     id: string,
@@ -57,6 +60,7 @@ export interface Backend {
   createExpense(input: ExpenseInput): Promise<Expense>;
   createIncome(input: IncomeInput): Promise<Income>;
   createNote(title: string, content: string): Promise<Note>;
+  createRecurringIncome(input: RecurringIncomeInput): Promise<RecurringIncome>;
   createRecurringTemplate(
     input: RecurringTemplateInput,
   ): Promise<RecurringTemplate>;
@@ -68,6 +72,7 @@ export interface Backend {
   deleteExpense(id: bigint): Promise<boolean>;
   deleteIncome(id: bigint): Promise<boolean>;
   deleteNote(id: string): Promise<boolean>;
+  deleteRecurringIncome(id: bigint): Promise<boolean>;
   deleteRecurringTemplate(id: bigint): Promise<boolean>;
   deleteSavingsGoal(id: string): Promise<boolean>;
 
@@ -103,6 +108,7 @@ export interface Backend {
     currentYear: bigint,
     currentMonth: bigint,
   ): Promise<MonthlyTrendPoint[]>;
+  getRecurringIncome(id: bigint): Promise<RecurringIncome | null>;
   getRecurringTemplate(id: bigint): Promise<RecurringTemplate | null>;
   getSavingsGoal(id: string): Promise<SavingsGoal | null>;
   getUpcomingBills(withinDays: bigint): Promise<UpcomingBill[]>;
@@ -118,6 +124,7 @@ export interface Backend {
   listExpensesWithReceipts(): Promise<Expense[]>;
   listIncome(year: bigint, month: bigint): Promise<Income[]>;
   listNotes(): Promise<Note[]>;
+  listRecurringIncomes(): Promise<RecurringIncome[]>;
   listRecurringTemplates(budgetId: bigint): Promise<RecurringTemplate[]>;
   listSavingsGoals(): Promise<SavingsGoal[]>;
 
@@ -142,6 +149,10 @@ export interface Backend {
   updateExpense(id: bigint, input: ExpenseInput): Promise<Expense | null>;
   updateIncome(id: bigint, input: IncomeInput): Promise<Income | null>;
   updateNote(id: string, title: string, content: string): Promise<Note | null>;
+  updateRecurringIncome(
+    id: bigint,
+    input: RecurringIncomeInput,
+  ): Promise<RecurringIncome | null>;
   updateRecurringTemplate(
     id: bigint,
     input: RecurringTemplateInput,

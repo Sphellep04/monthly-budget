@@ -44,6 +44,23 @@ export interface RecurringTemplateInput {
   notes?: string;
 }
 
+export interface RecurringIncome {
+  id: bigint;
+  owner: UserId;
+  source: string;
+  amountCents: bigint;
+  dayOfMonth: bigint;
+  notes?: string;
+  createdAt: Timestamp;
+}
+
+export interface RecurringIncomeInput {
+  source: string;
+  amountCents: bigint;
+  dayOfMonth: bigint;
+  notes?: string;
+}
+
 export interface MonthlyTrendPoint {
   year: bigint;
   month: bigint;
@@ -160,6 +177,7 @@ export interface Income {
   amountCents: bigint;
   date: string;
   notes?: string;
+  recurringIncomeId?: bigint;
   createdAt: Timestamp;
 }
 

@@ -16,6 +16,8 @@ import type {
   MonthlySummary,
   MonthlyTrendPoint,
   Note,
+  RecurringIncome,
+  RecurringIncomeInput,
   RecurringTemplate,
   RecurringTemplateInput,
   SavingsGoal,
@@ -132,6 +134,28 @@ function mapRecurringTemplate(row: RecurringTemplateRow): RecurringTemplate {
   };
 }
 
+interface RecurringIncomeRow {
+  id: number | string;
+  owner: string;
+  source: string;
+  amount_cents: string;
+  day_of_month: number;
+  notes: string | null;
+  created_at: string;
+}
+
+function mapRecurringIncome(row: RecurringIncomeRow): RecurringIncome {
+  return {
+    id: BigInt(row.id),
+    owner: row.owner,
+    source: row.source,
+    amountCents: BigInt(row.amount_cents),
+    dayOfMonth: BigInt(row.day_of_month),
+    notes: row.notes ?? undefined,
+    createdAt: toEpochMs(row.created_at),
+  };
+}
+
 interface ExpenseRow {
   id: number | string;
   budget_id: number | string;
@@ -218,6 +242,7 @@ interface IncomeRow {
   amount_cents: string;
   date: string;
   notes: string | null;
+  recurring_income_id: number | string | null;
   created_at: string;
 }
 
@@ -229,6 +254,10 @@ function mapIncome(row: IncomeRow): Income {
     amountCents: BigInt(row.amount_cents),
     date: row.date,
     notes: row.notes ?? undefined,
+    recurringIncomeId:
+      row.recurring_income_id != null
+        ? BigInt(row.recurring_income_id)
+        : undefined,
     createdAt: toEpochMs(row.created_at),
   };
 }
@@ -407,6 +436,49 @@ function shiftMonth(currentYear: bigint, currentMonth: bigint, index: number) {
 
 export function createSupabaseBackend(userId: string): Backend {
   return {
+    async applyRecurringIncomes(year, month) {
+      const templateRows = unwrap(
+        await supabase
+          .from("recurring_incomes")
+          .select("*")
+          .eq("owner", userId),
+      ) as RecurringIncomeRow[];
+
+      const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
+      const createdIncomes: Income[] = [];
+
+      for (const templateRow of templateRows) {
+        const day = Math.min(templateRow.day_of_month, daysInMonth);
+        const date = `${Number(year)}-${pad(Number(month))}-${pad(day)}`;
+
+        const { data: existing } = await supabase
+          .from("incomes")
+          .select("id")
+          .eq("owner", userId)
+          .eq("recurring_income_id", templateRow.id)
+          .eq("date", date)
+          .maybeSingle();
+        if (existing) continue;
+
+        const inserted = unwrap(
+          await supabase
+            .from("incomes")
+            .insert({
+              owner: userId,
+              source: templateRow.source,
+              amount_cents: templateRow.amount_cents,
+              date,
+              notes: templateRow.notes,
+              recurring_income_id: templateRow.id,
+            })
+            .select()
+            .single(),
+        ) as IncomeRow;
+        createdIncomes.push(mapIncome(inserted));
+      }
+      return createdIncomes;
+    },
+
     async applyBudgetTemplate(templateId, year, month) {
       const templateRow = unwrap(
         await supabase
@@ -659,6 +731,23 @@ export function createSupabaseBackend(userId: string): Backend {
       return mapNote(inserted);
     },
 
+    async createRecurringIncome(input: RecurringIncomeInput) {
+      const inserted = unwrap(
+        await supabase
+          .from("recurring_incomes")
+          .insert({
+            owner: userId,
+            source: input.source,
+            amount_cents: input.amountCents.toString(),
+            day_of_month: Number(input.dayOfMonth),
+            notes: input.notes ?? null,
+          })
+          .select()
+          .single(),
+      ) as RecurringIncomeRow;
+      return mapRecurringIncome(inserted);
+    },
+
     async createRecurringTemplate(input: RecurringTemplateInput) {
       const inserted = unwrap(
         await supabase
@@ -771,6 +860,16 @@ export function createSupabaseBackend(userId: string): Backend {
       return (data?.length ?? 0) > 0;
     },
 
+    async deleteRecurringIncome(id) {
+      const { data } = await supabase
+        .from("recurring_incomes")
+        .delete()
+        .eq("owner", userId)
+        .eq("id", id)
+        .select();
+      return (data?.length ?? 0) > 0;
+    },
+
     async deleteRecurringTemplate(id) {
       const { data } = await supabase
         .from("recurring_templates")
@@ -796,6 +895,7 @@ export function createSupabaseBackend(userId: string): Backend {
         budgets,
         expenses,
         recurringTemplates,
+        recurringIncomes,
         billPayments,
         incomes,
         savingsGoals,
@@ -807,6 +907,7 @@ export function createSupabaseBackend(userId: string): Backend {
         supabase.from("budgets").select("*").eq("owner", userId),
         supabase.from("expenses").select("*").eq("owner", userId),
         supabase.from("recurring_templates").select("*").eq("owner", userId),
+        supabase.from("recurring_incomes").select("*").eq("owner", userId),
         supabase.from("bill_payments").select("*").eq("owner", userId),
         supabase.from("incomes").select("*").eq("owner", userId),
         supabase.from("savings_goals").select("*").eq("owner", userId),
@@ -825,10 +926,11 @@ export function createSupabaseBackend(userId: string): Backend {
 
       return JSON.stringify(
         {
-          version: 2,
+          version: 3,
           budgets: budgets.data ?? [],
           expenses: expenses.data ?? [],
           recurringTemplates: recurringTemplates.data ?? [],
+          recurringIncomes: recurringIncomes.data ?? [],
           billPayments: billPayments.data ?? [],
           incomes: incomes.data ?? [],
           savingsGoals: savingsGoals.data ?? [],
@@ -1078,6 +1180,18 @@ export function createSupabaseBackend(userId: string): Backend {
       return points;
     },
 
+    async getRecurringIncome(id) {
+      const row = unwrap(
+        await supabase
+          .from("recurring_incomes")
+          .select("*")
+          .eq("owner", userId)
+          .eq("id", id)
+          .maybeSingle(),
+      ) as RecurringIncomeRow | null;
+      return row ? mapRecurringIncome(row) : null;
+    },
+
     async getRecurringTemplate(id) {
       const row = unwrap(
         await supabase
@@ -1172,6 +1286,7 @@ export function createSupabaseBackend(userId: string): Backend {
         budgets?: BudgetRow[];
         expenses?: ExpenseRow[];
         recurringTemplates?: RecurringTemplateRow[];
+        recurringIncomes?: RecurringIncomeRow[];
         billPayments?: BillPaymentRow[];
         incomes?: IncomeRow[];
         savingsGoals?: SavingsGoalRow[];
@@ -1187,6 +1302,7 @@ export function createSupabaseBackend(userId: string): Backend {
         ["recurring_templates", parsed.recurringTemplates],
         ["budgets", parsed.budgets],
         ["incomes", parsed.incomes],
+        ["recurring_incomes", parsed.recurringIncomes],
         ["savings_goals", parsed.savingsGoals],
         ["budget_template_categories", parsed.budgetTemplateCategories],
         ["budget_templates", parsed.budgetTemplates],
@@ -1315,6 +1431,13 @@ export function createSupabaseBackend(userId: string): Backend {
         await supabase.from("notes").select("*").eq("owner", userId),
       ) as NoteRow[];
       return rows.map(mapNote);
+    },
+
+    async listRecurringIncomes() {
+      const rows = unwrap(
+        await supabase.from("recurring_incomes").select("*").eq("owner", userId),
+      ) as RecurringIncomeRow[];
+      return rows.map(mapRecurringIncome);
     },
 
     async listRecurringTemplates(budgetId) {
@@ -1501,6 +1624,23 @@ export function createSupabaseBackend(userId: string): Backend {
         .maybeSingle();
       if (error) throw new Error(error.message);
       return data ? mapNote(data as NoteRow) : null;
+    },
+
+    async updateRecurringIncome(id, input: RecurringIncomeInput) {
+      const { data, error } = await supabase
+        .from("recurring_incomes")
+        .update({
+          source: input.source,
+          amount_cents: input.amountCents.toString(),
+          day_of_month: Number(input.dayOfMonth),
+          notes: input.notes ?? null,
+        })
+        .eq("owner", userId)
+        .eq("id", id)
+        .select()
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data ? mapRecurringIncome(data as RecurringIncomeRow) : null;
     },
 
     async updateRecurringTemplate(id, input: RecurringTemplateInput) {
