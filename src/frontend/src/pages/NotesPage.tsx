@@ -105,11 +105,7 @@ function NoteModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-background/70"
-        style={{
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-        }}
+        className="absolute inset-0 bg-background/80"
         role="button"
         tabIndex={0}
         aria-label="Close"

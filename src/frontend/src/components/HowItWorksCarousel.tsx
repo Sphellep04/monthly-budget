@@ -53,7 +53,7 @@ export function HowItWorksCarousel({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg bg-card border-border shadow-premium backdrop-blur-md p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-lg bg-card border-border shadow-premium p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle className="font-display text-xl font-bold text-foreground">
             How BudgetWise works

@@ -84,7 +84,7 @@ function NewGoalDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium backdrop-blur-md">
+      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-bold text-foreground">
             New Savings Goal

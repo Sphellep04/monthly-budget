@@ -12,8 +12,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useAddExpense } from "../hooks/useBudget";
 import { useAuth } from "../hooks/useAuth";
+import { useAddExpense } from "../hooks/useBudget";
 import { supabase } from "../lib/supabaseClient";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -110,7 +110,6 @@ export function ExpenseForm({
   // Receipt state
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
-  const [receiptDataUrl, setReceiptDataUrl] = useState<string | null>(null);
   const [receiptError, setReceiptError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -127,7 +126,6 @@ export function ExpenseForm({
     setAmountError("");
     setReceiptFile(null);
     setReceiptPreview(null);
-    setReceiptDataUrl(null);
     setReceiptError("");
     setIsUploading(false);
     setUploadProgress(0);
@@ -152,7 +150,6 @@ export function ExpenseForm({
   function applyReceiptFile(file: File, preview: string) {
     setReceiptFile(file);
     setReceiptPreview(preview);
-    setReceiptDataUrl(null); // will be generated on submit
     setReceiptError("");
   }
 
@@ -211,7 +208,6 @@ export function ExpenseForm({
       // Set preview immediately so user can see the photo
       setReceiptFile(file);
       setReceiptPreview(dataUrl);
-      setReceiptDataUrl(dataUrl);
 
       // Run OCR
       try {
@@ -251,7 +247,6 @@ export function ExpenseForm({
       URL.revokeObjectURL(receiptPreview);
     }
     setReceiptPreview(null);
-    setReceiptDataUrl(null);
     setReceiptError("");
     setScanState("idle");
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -314,7 +309,7 @@ export function ExpenseForm({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium backdrop-blur-md">
+      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-bold text-foreground">
             Add Expense
@@ -400,7 +395,7 @@ export function ExpenseForm({
                 />
                 {/* Scan overlay while OCR is running */}
                 {scanState === "scanning" && (
-                  <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2">
+                  <div className="absolute inset-0 bg-background/85 flex flex-col items-center justify-center gap-2">
                     <Spinner className="w-8 h-8 text-primary" />
                     <p className="text-xs font-medium text-foreground">
                       Scanning receipt…

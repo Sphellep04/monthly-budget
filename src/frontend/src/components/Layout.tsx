@@ -12,7 +12,7 @@ export function Layout() {
             <Outlet />
           </div>
         </main>
-        <footer className="bg-card/80 border-t border-border/60 backdrop-blur-sm px-6 py-3.5 flex items-center justify-center">
+        <footer className="bg-card border-t border-border/60 px-6 py-3.5 flex items-center justify-center">
           <span className="text-xs text-muted-foreground/50">
             © {new Date().getFullYear()} BudgetWise
           </span>

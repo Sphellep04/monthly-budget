@@ -52,7 +52,7 @@ function ReceiptDetailDialog({
 }) {
   return (
     <Dialog open={!!expense} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium backdrop-blur-md">
+      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-bold text-foreground">
             Receipt Detail

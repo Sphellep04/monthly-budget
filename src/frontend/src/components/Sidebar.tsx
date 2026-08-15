@@ -180,9 +180,7 @@ export function Sidebar() {
             : "opacity-0 pointer-events-none",
         )}
         style={{
-          background: "oklch(0 0 0 / 0.45)",
-          backdropFilter: "blur(4px)",
-          WebkitBackdropFilter: "blur(4px)",
+          background: "oklch(0 0 0 / 0.55)",
         }}
         role="button"
         tabIndex={0}

@@ -29,7 +29,7 @@ export function DeleteConfirmDialog({
 }: DeleteConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md shadow-premium backdrop-blur-md">
+      <AlertDialogContent className="max-w-md shadow-premium">
         <AlertDialogHeader>
           <AlertDialogTitle className="font-display text-lg font-bold text-foreground">
             {title}

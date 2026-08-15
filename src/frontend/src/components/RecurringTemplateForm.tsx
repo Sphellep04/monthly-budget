@@ -131,7 +131,7 @@ export function RecurringTemplateForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md shadow-premium backdrop-blur-md">
+      <DialogContent className="sm:max-w-md shadow-premium">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-bold">
             {isEditing ? "Edit Recurring Expense" : "Add Recurring Expense"}

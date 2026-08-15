@@ -175,7 +175,7 @@ export function BudgetsPage() {
       {/* Add Budget Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent
-          className="max-w-md shadow-premium backdrop-blur-md"
+          className="max-w-md shadow-premium"
           onInteractOutside={(e) => {
             if (createBudget.isPending) e.preventDefault();
           }}

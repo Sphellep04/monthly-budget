@@ -97,7 +97,7 @@ function IncomeForm({ editing, open, onOpenChange }: IncomeFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium backdrop-blur-md">
+      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-bold text-foreground">
             {editing ? "Edit Income" : "Add Income"}
