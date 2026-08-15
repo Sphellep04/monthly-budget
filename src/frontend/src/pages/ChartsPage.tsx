@@ -27,8 +27,8 @@ import { formatCents, getMonthName } from "../types";
 
 /* ─── Design-system chart palette ─── */
 const CHART_PALETTE = [
-  "oklch(0.52 0.15 250)", // primary blue
-  "oklch(0.65 0.18 48)", // secondary orange
+  "oklch(0.42 0.12 150)", // primary forest green
+  "oklch(0.58 0.14 35)", // secondary terracotta
   "oklch(0.6 0.18 142)", // success green
   "oklch(0.62 0.20 82)", // warm yellow
   "oklch(0.55 0.22 300)", // violet
@@ -265,7 +265,7 @@ function SpendingTrendChart() {
           <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
             <stop
               offset="0%"
-              stopColor="oklch(0.52 0.15 250)"
+              stopColor="oklch(0.42 0.12 150)"
               stopOpacity={0.9}
             />
             <stop
@@ -313,7 +313,7 @@ function SpendingTrendChart() {
           dot={<CustomLineDot />}
           activeDot={{
             r: 6,
-            fill: "oklch(0.52 0.15 250)",
+            fill: "oklch(0.42 0.12 150)",
             stroke: "oklch(var(--card))",
             strokeWidth: 2,
           }}
@@ -657,7 +657,7 @@ function DailySpendingChart({ year, month }: { year: number; month: number }) {
             />
             <stop
               offset="100%"
-              stopColor="oklch(0.52 0.15 250)"
+              stopColor="oklch(0.42 0.12 150)"
               stopOpacity={0.9}
             />
           </linearGradient>
@@ -782,7 +782,7 @@ export function ChartsPage() {
             className="inline-block w-8 h-[2.5px] rounded-full"
             style={{
               background:
-                "linear-gradient(90deg, oklch(0.52 0.15 250), oklch(0.72 0.16 200))",
+                "linear-gradient(90deg, oklch(0.42 0.12 150), oklch(0.72 0.16 200))",
             }}
           />
           <span className="text-xs text-muted-foreground">
@@ -918,7 +918,7 @@ export function ChartsPage() {
             className="inline-block w-8 h-[2.5px] rounded-full"
             style={{
               background:
-                "linear-gradient(90deg, oklch(0.6 0.18 142), oklch(0.52 0.15 250))",
+                "linear-gradient(90deg, oklch(0.6 0.18 142), oklch(0.42 0.12 150))",
             }}
           />
           <span className="text-xs text-muted-foreground">Daily spend</span>

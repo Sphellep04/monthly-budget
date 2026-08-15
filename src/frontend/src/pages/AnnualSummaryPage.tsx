@@ -180,7 +180,7 @@ function AnnualBarChart({
                 ? "oklch(0.58 0.20 26)"
                 : ratio > 0.75
                   ? "oklch(0.62 0.20 82)"
-                  : "oklch(0.52 0.15 250)";
+                  : "oklch(0.42 0.12 150)";
             return (
               <linearGradient
                 key={`grad-${entry.month}`}

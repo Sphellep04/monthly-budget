@@ -89,7 +89,7 @@ export function LoginPage() {
       {/* ── Left Hero Panel ── */}
       <div
         className="hidden lg:flex w-[58%] relative flex-col justify-between p-12 overflow-hidden"
-        style={{ background: "oklch(0.12 0.014 265)" }}
+        style={{ background: "oklch(0.12 0.011 150)" }}
       >
         {/* Top: Logo */}
         <div className="relative z-10">
@@ -108,7 +108,7 @@ export function LoginPage() {
           <div>
             <p
               className="text-xs font-bold tracking-[0.2em] uppercase mb-4"
-              style={{ color: "oklch(0.67 0.16 250 / 0.7)" }}
+              style={{ color: "oklch(0.64 0.14 150 / 0.7)" }}
             >
               Personal Finance
             </p>
@@ -124,7 +124,7 @@ export function LoginPage() {
             </h2>
             <p
               className="text-[0.9375rem] leading-relaxed max-w-[340px]"
-              style={{ color: "oklch(0.60 0.02 265)" }}
+              style={{ color: "oklch(0.60 0.02 150)" }}
             >
               Track budgets, spot trends, and stay on top of recurring bills -
               synced securely to your account.
@@ -138,14 +138,14 @@ export function LoginPage() {
                 key={card.title}
                 className="rounded-2xl p-4"
                 style={{
-                  background: "oklch(0.16 0.016 265)",
+                  background: "oklch(0.16 0.013 150)",
                   border: "1px solid oklch(1 0 0 / 0.08)",
                 }}
               >
                 <div className="flex items-center justify-between mb-3">
                   <span
                     className="text-xs font-semibold"
-                    style={{ color: "oklch(0.65 0.02 265)" }}
+                    style={{ color: "oklch(0.65 0.02 150)" }}
                   >
                     {card.title}
                   </span>
@@ -161,13 +161,13 @@ export function LoginPage() {
                 </div>
                 <p
                   className="text-[1.3rem] font-bold mb-0.5 leading-none"
-                  style={{ color: "oklch(0.94 0.005 250)" }}
+                  style={{ color: "oklch(0.94 0.005 150)" }}
                 >
                   {card.value}
                 </p>
                 <p
                   className="text-xs mb-3"
-                  style={{ color: "oklch(0.48 0.02 265)" }}
+                  style={{ color: "oklch(0.48 0.02 150)" }}
                 >
                   {card.sub}
                 </p>
@@ -197,7 +197,7 @@ export function LoginPage() {
               style={{
                 background: "oklch(1 0 0 / 0.05)",
                 border: "1px solid oklch(1 0 0 / 0.09)",
-                color: "oklch(0.58 0.02 265)",
+                color: "oklch(0.58 0.02 150)",
               }}
             >
               {label}
