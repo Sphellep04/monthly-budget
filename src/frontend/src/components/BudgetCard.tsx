@@ -53,7 +53,6 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
           width: mounted ? `${Math.min(pct, 100)}%` : "0%",
           background: color,
           transition: "width 0.75s cubic-bezier(0.4, 0, 0.2, 1)",
-          boxShadow: pct > 80 ? `0 0 6px ${color}60` : undefined,
         }}
       />
     </div>
