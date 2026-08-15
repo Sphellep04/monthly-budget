@@ -580,7 +580,7 @@ export function InsightsPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Insights are recalculated every time you visit this page using
                 your latest expense data. Add more expenses across multiple
-                months to unlock richer patterns.
+                months to see more detailed patterns.
               </p>
             </motion.div>
           </>

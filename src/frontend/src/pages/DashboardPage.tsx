@@ -29,9 +29,8 @@ function EmptyState() {
         No budgets set up yet
       </h3>
       <p className="text-sm text-muted-foreground max-w-sm mb-8 font-body leading-relaxed">
-        Take control of your spending by creating your first budget category. It
-        only takes a minute - you'll get instant insight into where your money
-        goes.
+        Create your first budget category to start tracking spending. It only
+        takes a minute, and you'll see exactly where your money goes.
       </p>
 
       <Link to="/budgets">
