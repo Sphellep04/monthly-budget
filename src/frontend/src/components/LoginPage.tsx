@@ -5,18 +5,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { type FormEvent, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { HowItWorksCarousel } from "./HowItWorksCarousel";
-
-const footnotePoints = [
-  "Private to your account",
-  "Synced across devices",
-  "Visual insights",
-  "Recurring bills auto-fill",
-];
 
 export function LoginPage() {
   const { signIn, signUp, isLoading } = useAuth();
-  const [howItWorksOpen, setHowItWorksOpen] = useState(false);
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,13 +30,13 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6 py-12">
-      <div className="w-full max-w-md flex flex-col gap-8">
+      <div className="w-full max-w-sm flex flex-col gap-8">
         {/* Wordmark + headline */}
-        <div className="flex flex-col items-center text-center gap-4">
+        <div className="flex flex-col gap-4">
           <img
             src="/BudgetWise-Logo.png"
             alt="BudgetWise"
-            className="h-14 w-auto object-contain"
+            className="h-10 w-auto object-contain"
             draggable={false}
           />
           <div className="w-12 h-px bg-border" aria-hidden />
@@ -53,7 +44,7 @@ export function LoginPage() {
             <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">
               Know where every dollar goes.
             </h1>
-            <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
+            <p className="text-sm text-muted-foreground mt-2">
               Track budgets, spot trends, and stay on top of recurring bills.
             </p>
           </div>
@@ -142,31 +133,13 @@ export function LoginPage() {
                 ? "New here? Create an account"
                 : "Already have an account? Sign in"}
             </button>
-
-            <button
-              type="button"
-              onClick={() => setHowItWorksOpen(true)}
-              className="w-full mt-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              See how it works
-            </button>
           </div>
         </div>
 
-        {/* Printed footnote */}
-        <p className="font-mono text-[10px] tracking-wide uppercase text-muted-foreground/70 text-center">
-          {footnotePoints.join("  ·  ")}
-        </p>
-
-        <p className="text-xs text-muted-foreground/40 text-center">
+        <p className="text-xs text-muted-foreground/40">
           © {new Date().getFullYear()} BudgetWise
         </p>
       </div>
-
-      <HowItWorksCarousel
-        open={howItWorksOpen}
-        onOpenChange={setHowItWorksOpen}
-      />
     </div>
   );
 }
