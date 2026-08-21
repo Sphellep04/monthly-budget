@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
+import { toast } from "sonner";
 import { useDeleteRecurringIncome } from "../hooks/useBudget";
 import type { RecurringIncome } from "../types";
 import { formatCents } from "../types";
@@ -108,7 +109,9 @@ export function RecurringIncomeList({ templates, isLoading, onEdit }: Props) {
         description="This will stop future auto-logged income from this source. Existing income entries are not affected."
         onConfirm={() => {
           if (deleteId !== null) {
-            deleteRecurringIncome.mutate(deleteId);
+            deleteRecurringIncome.mutate(deleteId, {
+              onError: () => toast.error("Failed to delete recurring income"),
+            });
             setDeleteId(null);
           }
         }}

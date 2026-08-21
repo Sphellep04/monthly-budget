@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
+import { toast } from "sonner";
 import { useDeleteRecurringTemplate } from "../hooks/useBudget";
 import type { RecurringTemplate } from "../types";
 import { formatCents } from "../types";
@@ -115,7 +116,10 @@ export function RecurringTemplateList({
         description="This will stop future auto-expenses from this template. Existing expenses are not affected."
         onConfirm={() => {
           if (deleteId !== null) {
-            deleteTemplate.mutate({ id: deleteId, budgetId });
+            deleteTemplate.mutate(
+              { id: deleteId, budgetId },
+              { onError: () => toast.error("Failed to delete template") },
+            );
             setDeleteId(null);
           }
         }}

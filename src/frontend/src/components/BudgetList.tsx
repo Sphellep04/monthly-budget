@@ -3,14 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { useDeleteBudget } from "../hooks/useBudget";
 import type { Budget } from "../types";
 import { formatCents } from "../types";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
+import { QueryErrorState } from "./QueryErrorState";
 
 interface BudgetListProps {
   budgets: Budget[];
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   onAddBudget: () => void;
 }
 
@@ -41,8 +45,12 @@ function BudgetRow({ budget }: BudgetRowProps) {
   const deleteMutation = useDeleteBudget();
 
   async function handleDelete() {
-    await deleteMutation.mutateAsync(budget.id);
-    setConfirmOpen(false);
+    try {
+      await deleteMutation.mutateAsync(budget.id);
+      setConfirmOpen(false);
+    } catch {
+      toast.error("Failed to delete budget");
+    }
   }
 
   return (
@@ -122,8 +130,14 @@ function BudgetRow({ budget }: BudgetRowProps) {
 export function BudgetList({
   budgets,
   isLoading,
+  isError,
+  onRetry,
   onAddBudget,
 }: BudgetListProps) {
+  if (isError) {
+    return <QueryErrorState onRetry={onRetry} />;
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -141,8 +155,8 @@ export function BudgetList({
           No budgets yet
         </h3>
         <p className="text-muted-foreground text-sm text-center mb-7 max-w-xs leading-relaxed">
-          Set up your first monthly budget to start tracking where your money
-          goes - and stay in control.
+          Set up your first monthly budget to see where your money goes each
+          month.
         </p>
         <Button onClick={onAddBudget} className="button-hover shadow-elevated">
           Create Your First Budget
