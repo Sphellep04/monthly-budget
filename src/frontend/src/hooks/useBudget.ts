@@ -86,6 +86,8 @@ export function useCreateBudget() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["all-budgets"] });
+      queryClient.invalidateQueries({ queryKey: ["budgets-list"] });
     },
   });
 }
@@ -114,6 +116,16 @@ export function useAddExpense() {
         queryKey: ["expenses", variables.budgetId.toString()],
       });
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["monthly-trend"] });
+      queryClient.invalidateQueries({ queryKey: ["category-trend"] });
+      queryClient.invalidateQueries({ queryKey: ["daily-spending"] });
+      queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
+      queryClient.invalidateQueries({
+        queryKey: ["category-breakdown-range"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["annual-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses-in-range"] });
+      queryClient.invalidateQueries({ queryKey: ["receipt-gallery"] });
     },
   });
 }
@@ -129,6 +141,16 @@ export function useDeleteExpense() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["monthly-trend"] });
+      queryClient.invalidateQueries({ queryKey: ["category-trend"] });
+      queryClient.invalidateQueries({ queryKey: ["daily-spending"] });
+      queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
+      queryClient.invalidateQueries({
+        queryKey: ["category-breakdown-range"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["annual-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses-in-range"] });
+      queryClient.invalidateQueries({ queryKey: ["receipt-gallery"] });
     },
   });
 }
@@ -143,6 +165,12 @@ export function useDeleteBudget() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["all-budgets"] });
+      queryClient.invalidateQueries({ queryKey: ["budgets-list"] });
+      queryClient.invalidateQueries({ queryKey: ["monthly-trend"] });
+      queryClient.invalidateQueries({ queryKey: ["category-trend"] });
+      queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
+      queryClient.invalidateQueries({ queryKey: ["annual-summary"] });
     },
   });
 }
@@ -524,6 +552,7 @@ export function useCreateIncome() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["income"] });
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["annual-summary"] });
     },
   });
 }
@@ -539,6 +568,7 @@ export function useUpdateIncome() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["income"] });
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["annual-summary"] });
     },
   });
 }
@@ -554,6 +584,7 @@ export function useDeleteIncome() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["income"] });
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["annual-summary"] });
     },
   });
 }
@@ -881,6 +912,7 @@ export function useCreateBillPayment() {
           Number(variables.month),
         ],
       });
+      queryClient.invalidateQueries({ queryKey: ["upcoming-bills"] });
     },
   });
 }
@@ -907,6 +939,7 @@ export function useUpdateBillPayment() {
           Number(variables.input.month),
         ],
       });
+      queryClient.invalidateQueries({ queryKey: ["upcoming-bills"] });
     },
   });
 }
@@ -923,6 +956,7 @@ export function useDeleteBillPayment() {
       queryClient.invalidateQueries({
         queryKey: ["bill-payments", variables.year, variables.month],
       });
+      queryClient.invalidateQueries({ queryKey: ["upcoming-bills"] });
     },
   });
 }

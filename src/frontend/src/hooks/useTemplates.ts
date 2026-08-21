@@ -107,6 +107,8 @@ export function useApplyBudgetTemplate() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["all-budgets"] });
+      queryClient.invalidateQueries({ queryKey: ["budgets-list"] });
     },
   });
 }

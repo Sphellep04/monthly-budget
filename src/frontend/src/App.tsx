@@ -7,7 +7,8 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
+import { toast } from "sonner";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
@@ -86,17 +87,37 @@ function PageLoader() {
   );
 }
 
-/** Silently applies recurring templates for the current month on login */
+/** Applies recurring templates for the current month on login; toasts on failure only */
 function RecurringTemplateApplier() {
   const now = new Date();
-  useApplyRecurringTemplates(now.getFullYear(), now.getMonth() + 1);
+  const { isError } = useApplyRecurringTemplates(
+    now.getFullYear(),
+    now.getMonth() + 1,
+  );
+  useEffect(() => {
+    if (isError) {
+      toast.error("Couldn't apply recurring expenses", {
+        description: "Some recurring items may be missing this month.",
+      });
+    }
+  }, [isError]);
   return null;
 }
 
-/** Silently applies recurring income for the current month on login */
+/** Applies recurring income for the current month on login; toasts on failure only */
 function RecurringIncomeApplier() {
   const now = new Date();
-  useApplyRecurringIncome(now.getFullYear(), now.getMonth() + 1);
+  const { isError } = useApplyRecurringIncome(
+    now.getFullYear(),
+    now.getMonth() + 1,
+  );
+  useEffect(() => {
+    if (isError) {
+      toast.error("Couldn't apply recurring income", {
+        description: "Some recurring items may be missing this month.",
+      });
+    }
+  }, [isError]);
   return null;
 }
 
