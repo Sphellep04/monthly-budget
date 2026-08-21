@@ -2,11 +2,13 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { AlertsPanel } from "../components/AlertsPanel";
 import { BudgetCard } from "../components/BudgetCard";
 import { MonthSelector } from "../components/MonthSelector";
 import { MonthlySummaryHeader } from "../components/MonthlySummaryHeader";
+import { QueryErrorState } from "../components/QueryErrorState";
 import { useActorOrMock } from "../hooks/useActorOrMock";
 import { useMonthlySummary, useUserSettings } from "../hooks/useBudget";
 import type { Expense } from "../types";
@@ -160,9 +162,23 @@ export function DashboardPage() {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
-  const { data: summary, isLoading } = useMonthlySummary(year, month);
-  const { data: userSettings } = useUserSettings();
+  const {
+    data: summary,
+    isLoading,
+    isError,
+    refetch,
+  } = useMonthlySummary(year, month);
+  const { data: userSettings, isError: settingsError } = useUserSettings();
   const alertThreshold = userSettings?.alertThresholdPercent ?? 80;
+
+  useEffect(() => {
+    if (settingsError) {
+      console.error("Failed to load user settings, using defaults");
+      toast.error("Couldn't load your settings", {
+        description: "Using default alert thresholds for now.",
+      });
+    }
+  }, [settingsError]);
 
   const budgets = summary?.budgets ?? [];
   const hasBudgets = budgets.length > 0;
@@ -241,7 +257,9 @@ export function DashboardPage() {
           )}
         </div>
 
-        {isLoading ? (
+        {isError ? (
+          <QueryErrorState onRetry={refetch} />
+        ) : isLoading ? (
           <BudgetGridSkeleton />
         ) : hasBudgets ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -72,12 +72,24 @@ async function toSignedReceiptUrls(
   return map;
 }
 
+/** Use for .single() results (e.g. after an insert) where a null row is a real bug. */
 function unwrap<T>(result: { data: T | null; error: { message: string } | null }): T {
   if (result.error) {
     throw new Error(result.error.message);
   }
   if (result.data == null) {
     throw new Error("Expected data in Supabase response but got null");
+  }
+  return result.data;
+}
+
+/** Use for .maybeSingle() results, where a null row means "not found", not an error. */
+function unwrapNullable<T>(result: {
+  data: T | null;
+  error: { message: string } | null;
+}): T | null {
+  if (result.error) {
+    throw new Error(result.error.message);
   }
   return result.data;
 }
@@ -432,6 +444,18 @@ function shiftMonth(currentYear: bigint, currentMonth: bigint, index: number) {
   return { year: BigInt(year), month: BigInt(month) };
 }
 
+/** Ordered oldest -> newest: [currentMonth - (months-1), ..., currentMonth]. */
+function buildMonthList(
+  currentYear: bigint,
+  currentMonth: bigint,
+  months: bigint,
+) {
+  const count = Number(months);
+  return Array.from({ length: count }, (_, i) =>
+    shiftMonth(currentYear, currentMonth, count - 1 - i),
+  );
+}
+
 // ─── Backend factory ────────────────────────────────────────────────────────
 
 export function createSupabaseBackend(userId: string): Backend {
@@ -443,44 +467,35 @@ export function createSupabaseBackend(userId: string): Backend {
           .select("*")
           .eq("owner", userId),
       ) as RecurringIncomeRow[];
+      if (templateRows.length === 0) return [];
 
       const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
-      const createdIncomes: Income[] = [];
+      const rowsToUpsert = templateRows.map((t) => {
+        const day = Math.min(t.day_of_month, daysInMonth);
+        return {
+          owner: userId,
+          source: t.source,
+          amount_cents: t.amount_cents,
+          date: `${Number(year)}-${pad(Number(month))}-${pad(day)}`,
+          notes: t.notes,
+          recurring_income_id: t.id,
+        };
+      });
 
-      for (const templateRow of templateRows) {
-        const day = Math.min(templateRow.day_of_month, daysInMonth);
-        const date = `${Number(year)}-${pad(Number(month))}-${pad(day)}`;
-
-        const { data: existing } = await supabase
+      const inserted = unwrap(
+        await supabase
           .from("incomes")
-          .select("id")
-          .eq("owner", userId)
-          .eq("recurring_income_id", templateRow.id)
-          .eq("date", date)
-          .maybeSingle();
-        if (existing) continue;
-
-        const inserted = unwrap(
-          await supabase
-            .from("incomes")
-            .insert({
-              owner: userId,
-              source: templateRow.source,
-              amount_cents: templateRow.amount_cents,
-              date,
-              notes: templateRow.notes,
-              recurring_income_id: templateRow.id,
-            })
-            .select()
-            .single(),
-        ) as IncomeRow;
-        createdIncomes.push(mapIncome(inserted));
-      }
-      return createdIncomes;
+          .upsert(rowsToUpsert, {
+            onConflict: "owner,recurring_income_id,date",
+            ignoreDuplicates: true,
+          })
+          .select(),
+      ) as IncomeRow[];
+      return inserted.map(mapIncome);
     },
 
     async applyBudgetTemplate(templateId, year, month) {
-      const templateRow = unwrap(
+      const templateRow = unwrapNullable(
         await supabase
           .from("budget_templates")
           .select("*")
@@ -542,45 +557,35 @@ export function createSupabaseBackend(userId: string): Backend {
           .select("*")
           .eq("owner", userId),
       ) as RecurringTemplateRow[];
+      if (templateRows.length === 0) return [];
 
       const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
-      const createdExpenses: Expense[] = [];
+      const rowsToUpsert = templateRows.map((t) => {
+        const day = Math.min(t.day_of_month, daysInMonth);
+        return {
+          owner: userId,
+          budget_id: t.budget_id,
+          date: `${Number(year)}-${pad(Number(month))}-${pad(day)}`,
+          amount_cents: t.amount_cents,
+          notes: t.notes,
+          recurring_template_id: t.id,
+        };
+      });
 
-      for (const templateRow of templateRows) {
-        const day = Math.min(templateRow.day_of_month, daysInMonth);
-        const date = `${Number(year)}-${pad(Number(month))}-${pad(day)}`;
-
-        const { data: existing } = await supabase
+      const inserted = unwrap(
+        await supabase
           .from("expenses")
-          .select("id")
-          .eq("owner", userId)
-          .eq("recurring_template_id", templateRow.id)
-          .eq("date", date)
-          .eq("budget_id", templateRow.budget_id)
-          .maybeSingle();
-        if (existing) continue;
-
-        const inserted = unwrap(
-          await supabase
-            .from("expenses")
-            .insert({
-              owner: userId,
-              budget_id: templateRow.budget_id,
-              date,
-              amount_cents: templateRow.amount_cents,
-              notes: templateRow.notes,
-              recurring_template_id: templateRow.id,
-            })
-            .select()
-            .single(),
-        ) as ExpenseRow;
-        createdExpenses.push(await mapExpense(inserted));
-      }
-      return createdExpenses;
+          .upsert(rowsToUpsert, {
+            onConflict: "owner,recurring_template_id,date",
+            ignoreDuplicates: true,
+          })
+          .select(),
+      ) as ExpenseRow[];
+      return Promise.all(inserted.map(mapExpense));
     },
 
     async contributeSavingsGoal(id, amountCents) {
-      const goalRow = unwrap(
+      const goalRow = unwrapNullable(
         await supabase
           .from("savings_goals")
           .select("*")
@@ -785,37 +790,40 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async deleteBillPayment(id) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("bill_payments")
         .delete()
         .eq("owner", userId)
         .eq("id", id)
         .select();
+      if (error) throw new Error(error.message);
       return (data?.length ?? 0) > 0;
     },
 
     async deleteBudget(id) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("budgets")
         .delete()
         .eq("owner", userId)
         .eq("id", id)
         .select();
+      if (error) throw new Error(error.message);
       return (data?.length ?? 0) > 0;
     },
 
     async deleteBudgetTemplate(id) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("budget_templates")
         .delete()
         .eq("owner", userId)
         .eq("id", id)
         .select();
+      if (error) throw new Error(error.message);
       return (data?.length ?? 0) > 0;
     },
 
     async deleteExpense(id) {
-      const existingRow = unwrap(
+      const existingRow = unwrapNullable(
         await supabase
           .from("expenses")
           .select("receipt_url")
@@ -824,12 +832,13 @@ export function createSupabaseBackend(userId: string): Backend {
           .maybeSingle(),
       ) as { receipt_url: string | null } | null;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("expenses")
         .delete()
         .eq("owner", userId)
         .eq("id", id)
         .select();
+      if (error) throw new Error(error.message);
       const deleted = (data?.length ?? 0) > 0;
 
       if (deleted && existingRow?.receipt_url) {
@@ -841,69 +850,62 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async deleteIncome(id) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("incomes")
         .delete()
         .eq("owner", userId)
         .eq("id", id)
         .select();
+      if (error) throw new Error(error.message);
       return (data?.length ?? 0) > 0;
     },
 
     async deleteNote(id) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("notes")
         .delete()
         .eq("owner", userId)
         .eq("id", id)
         .select();
+      if (error) throw new Error(error.message);
       return (data?.length ?? 0) > 0;
     },
 
     async deleteRecurringIncome(id) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("recurring_incomes")
         .delete()
         .eq("owner", userId)
         .eq("id", id)
         .select();
+      if (error) throw new Error(error.message);
       return (data?.length ?? 0) > 0;
     },
 
     async deleteRecurringTemplate(id) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("recurring_templates")
         .delete()
         .eq("owner", userId)
         .eq("id", id)
         .select();
+      if (error) throw new Error(error.message);
       return (data?.length ?? 0) > 0;
     },
 
     async deleteSavingsGoal(id) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("savings_goals")
         .delete()
         .eq("owner", userId)
         .eq("id", id)
         .select();
+      if (error) throw new Error(error.message);
       return (data?.length ?? 0) > 0;
     },
 
     async exportAllData() {
-      const [
-        budgets,
-        expenses,
-        recurringTemplates,
-        recurringIncomes,
-        billPayments,
-        incomes,
-        savingsGoals,
-        budgetTemplates,
-        budgetTemplateCategories,
-        notes,
-        userSettings,
-      ] = await Promise.all([
+      const results = await Promise.all([
         supabase.from("budgets").select("*").eq("owner", userId),
         supabase.from("expenses").select("*").eq("owner", userId),
         supabase.from("recurring_templates").select("*").eq("owner", userId),
@@ -923,6 +925,25 @@ export function createSupabaseBackend(userId: string): Backend {
           .eq("owner", userId)
           .maybeSingle(),
       ]);
+
+      const failed = results.find((r) => r.error);
+      if (failed?.error) {
+        throw new Error(`Export failed: ${failed.error.message}`);
+      }
+
+      const [
+        budgets,
+        expenses,
+        recurringTemplates,
+        recurringIncomes,
+        billPayments,
+        incomes,
+        savingsGoals,
+        budgetTemplates,
+        budgetTemplateCategories,
+        notes,
+        userSettings,
+      ] = results;
 
       return JSON.stringify(
         {
@@ -945,7 +966,7 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getBillPayment(id) {
-      const row = unwrap(
+      const row = unwrapNullable(
         await supabase
           .from("bill_payments")
           .select("*")
@@ -957,7 +978,7 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getBudget(id) {
-      const row = unwrap(
+      const row = unwrapNullable(
         await supabase
           .from("budgets")
           .select("*")
@@ -969,7 +990,7 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getBudgetTemplate(id) {
-      const templateRow = unwrap(
+      const templateRow = unwrapNullable(
         await supabase
           .from("budget_templates")
           .select("*")
@@ -1054,7 +1075,7 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getCategoryTrend(budgetId, months, currentYear, currentMonth) {
-      const budgetRow = unwrap(
+      const budgetRow = unwrapNullable(
         await supabase
           .from("budgets")
           .select("*")
@@ -1065,36 +1086,37 @@ export function createSupabaseBackend(userId: string): Backend {
       if (!budgetRow) return [];
       const budget = mapBudget(budgetRow);
 
-      const points: CategoryTrendPoint[] = [];
-      for (let index = Number(months) - 1; index >= 0; index -= 1) {
-        const { year, month } = shiftMonth(currentYear, currentMonth, index);
-        const { start, end } = monthRange(year, month);
+      const monthList = buildMonthList(currentYear, currentMonth, months);
+      const { start } = monthRange(monthList[0].year, monthList[0].month);
+      const { end } = monthRange(
+        monthList[monthList.length - 1].year,
+        monthList[monthList.length - 1].month,
+      );
 
-        const expenseRows = unwrap(
-          await supabase
-            .from("expenses")
-            .select("amount_cents")
-            .eq("owner", userId)
-            .eq("budget_id", budgetId)
-            .gte("date", start)
-            .lt("date", end),
-        ) as { amount_cents: string }[];
+      const expenseRows = unwrap(
+        await supabase
+          .from("expenses")
+          .select("date, amount_cents")
+          .eq("owner", userId)
+          .eq("budget_id", budgetId)
+          .gte("date", start)
+          .lt("date", end),
+      ) as { date: string; amount_cents: string }[];
 
-        const spentCents = expenseRows.reduce(
-          (sum, row) => sum + BigInt(row.amount_cents),
-          0n,
-        );
-
-        points.push({
+      return monthList.map(({ year, month }): CategoryTrendPoint => {
+        const key = `${Number(year)}-${pad(Number(month))}`;
+        const spentCents = expenseRows
+          .filter((row) => row.date.slice(0, 7) === key)
+          .reduce((sum, row) => sum + BigInt(row.amount_cents), 0n);
+        return {
           year,
           month,
           budgetId,
           budgetName: budget.name,
           spentCents,
           limitCents: budget.limitCents,
-        });
-      }
-      return points;
+        };
+      });
     },
 
     async getDailySpending(year, month) {
@@ -1127,7 +1149,7 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getExpense(id) {
-      const row = unwrap(
+      const row = unwrapNullable(
         await supabase
           .from("expenses")
           .select("*")
@@ -1151,7 +1173,7 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getIncome(id) {
-      const row = unwrap(
+      const row = unwrapNullable(
         await supabase
           .from("incomes")
           .select("*")
@@ -1167,21 +1189,58 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getMonthlyTrend(months, currentYear, currentMonth) {
-      const points: MonthlyTrendPoint[] = [];
-      for (let index = Number(months) - 1; index >= 0; index -= 1) {
-        const { year, month } = shiftMonth(currentYear, currentMonth, index);
-        const summary = await computeMonthlySummary(userId, year, month);
-        points.push({
-          year,
-          month,
-          totalSpentCents: summary.totalSpentCents,
-        });
-      }
-      return points;
+      const monthList = buildMonthList(currentYear, currentMonth, months);
+      const { start } = monthRange(monthList[0].year, monthList[0].month);
+      const { end } = monthRange(
+        monthList[monthList.length - 1].year,
+        monthList[monthList.length - 1].month,
+      );
+
+      const [budgetRows, expenseRows] = await Promise.all([
+        supabase
+          .from("budgets")
+          .select("id, year, month")
+          .eq("owner", userId)
+          .then(
+            (r) =>
+              unwrap(r) as { id: number | string; year: number; month: number }[],
+          ),
+        supabase
+          .from("expenses")
+          .select("date, budget_id, amount_cents")
+          .eq("owner", userId)
+          .gte("date", start)
+          .lt("date", end)
+          .then(
+            (r) =>
+              unwrap(r) as {
+                date: string;
+                budget_id: number | string;
+                amount_cents: string;
+              }[],
+          ),
+      ]);
+
+      return monthList.map(({ year, month }): MonthlyTrendPoint => {
+        const budgetIdsThisMonth = new Set(
+          budgetRows
+            .filter((b) => b.year === Number(year) && b.month === Number(month))
+            .map((b) => String(b.id)),
+        );
+        const key = `${Number(year)}-${pad(Number(month))}`;
+        const totalSpentCents = expenseRows
+          .filter(
+            (e) =>
+              e.date.slice(0, 7) === key &&
+              budgetIdsThisMonth.has(String(e.budget_id)),
+          )
+          .reduce((sum, e) => sum + BigInt(e.amount_cents), 0n);
+        return { year, month, totalSpentCents };
+      });
     },
 
     async getRecurringIncome(id) {
-      const row = unwrap(
+      const row = unwrapNullable(
         await supabase
           .from("recurring_incomes")
           .select("*")
@@ -1193,7 +1252,7 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getRecurringTemplate(id) {
-      const row = unwrap(
+      const row = unwrapNullable(
         await supabase
           .from("recurring_templates")
           .select("*")
@@ -1205,7 +1264,7 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getSavingsGoal(id) {
-      const row = unwrap(
+      const row = unwrapNullable(
         await supabase
           .from("savings_goals")
           .select("*")
@@ -1269,7 +1328,7 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async getUserSettings() {
-      const row = unwrap(
+      const row = unwrapNullable(
         await supabase
           .from("user_settings")
           .select("*")
@@ -1282,56 +1341,11 @@ export function createSupabaseBackend(userId: string): Backend {
     },
 
     async importAllData(json) {
-      const parsed = JSON.parse(json) as {
-        budgets?: BudgetRow[];
-        expenses?: ExpenseRow[];
-        recurringTemplates?: RecurringTemplateRow[];
-        recurringIncomes?: RecurringIncomeRow[];
-        billPayments?: BillPaymentRow[];
-        incomes?: IncomeRow[];
-        savingsGoals?: SavingsGoalRow[];
-        budgetTemplates?: BudgetTemplateRow[];
-        budgetTemplateCategories?: BudgetTemplateCategoryRow[];
-        notes?: NoteRow[];
-        userSettings?: { alert_threshold_percent?: number };
-      };
-
-      const tables: [string, unknown[] | undefined][] = [
-        ["expenses", parsed.expenses],
-        ["bill_payments", parsed.billPayments],
-        ["recurring_templates", parsed.recurringTemplates],
-        ["budgets", parsed.budgets],
-        ["incomes", parsed.incomes],
-        ["recurring_incomes", parsed.recurringIncomes],
-        ["savings_goals", parsed.savingsGoals],
-        ["budget_template_categories", parsed.budgetTemplateCategories],
-        ["budget_templates", parsed.budgetTemplates],
-        ["notes", parsed.notes],
-      ];
-
-      // Delete children before parents to respect foreign keys, then re-insert
-      // everything re-stamped with the current user's id.
-      for (const [table] of tables) {
-        await supabase.from(table).delete().eq("owner", userId);
-      }
-      for (const [table, rows] of [...tables].reverse()) {
-        if (!rows || rows.length === 0) continue;
-        const restamped = rows.map((row) => ({
-          ...(row as Record<string, unknown>),
-          owner: userId,
-        }));
-        const { error } = await supabase.from(table).insert(restamped);
-        if (error) throw new Error(error.message);
-      }
-
-      if (parsed.userSettings) {
-        await supabase.from("user_settings").upsert({
-          owner: userId,
-          alert_threshold_percent:
-            parsed.userSettings.alert_threshold_percent ?? 80,
-        });
-      }
-
+      const parsed = JSON.parse(json);
+      const { error } = await supabase.rpc("import_all_data", {
+        payload: parsed,
+      });
+      if (error) throw new Error(error.message);
       return true;
     },
 
