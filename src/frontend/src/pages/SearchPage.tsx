@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCallback, useMemo, useState } from "react";
+import { QueryErrorState } from "../components/QueryErrorState";
 import {
   useGetExpensesInRange,
   useMonthlySummary,
@@ -111,18 +112,27 @@ export function SearchPage() {
 
   // Use searchExpenses when any filter is active, else getExpensesInRange for default 30-day view
   const shouldSearch = hasActiveFilters || submitted;
-  const { data: searchResults, isLoading: searchLoading } = useSearchExpenses(
-    shouldSearch ? searchParams : null,
+  const {
+    data: searchResults,
+    isLoading: searchLoading,
+    isError: searchError,
+    refetch: refetchSearch,
+  } = useSearchExpenses(shouldSearch ? searchParams : null);
+  const {
+    data: defaultResults,
+    isLoading: defaultLoading,
+    isError: defaultError,
+    refetch: refetchDefault,
+  } = useGetExpensesInRange(
+    DEFAULT_FILTERS.startDate,
+    DEFAULT_FILTERS.endDate,
+    !shouldSearch,
   );
-  const { data: defaultResults, isLoading: defaultLoading } =
-    useGetExpensesInRange(
-      DEFAULT_FILTERS.startDate,
-      DEFAULT_FILTERS.endDate,
-      !shouldSearch,
-    );
 
   const results = shouldSearch ? (searchResults ?? []) : (defaultResults ?? []);
   const isLoading = shouldSearch ? searchLoading : defaultLoading;
+  const isError = shouldSearch ? searchError : defaultError;
+  const retry = shouldSearch ? refetchSearch : refetchDefault;
 
   // Build budget lookup map
   const budgetMap = useMemo(() => {
@@ -340,7 +350,11 @@ export function SearchPage() {
             )}
           </div>
 
-          {isLoading ? (
+          {isError ? (
+            <div className="p-5">
+              <QueryErrorState onRetry={retry} />
+            </div>
+          ) : isLoading ? (
             <div className="p-5 space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-12 rounded-lg" />

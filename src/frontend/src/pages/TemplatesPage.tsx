@@ -15,6 +15,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
+import { QueryErrorState } from "../components/QueryErrorState";
 import { useBudgets, useMonthlySummary } from "../hooks/useBudget";
 import {
   type BudgetTemplate,
@@ -433,7 +434,12 @@ export function TemplatesPage() {
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
 
-  const { data: templates, isLoading } = useListBudgetTemplates();
+  const {
+    data: templates,
+    isLoading,
+    isError,
+    refetch,
+  } = useListBudgetTemplates();
   // Preload budgets for the save dialog
   useBudgets(year, month);
 
@@ -479,7 +485,9 @@ export function TemplatesPage() {
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-6 py-6">
-        {isLoading ? (
+        {isError ? (
+          <QueryErrorState onRetry={refetch} />
+        ) : isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((k) => (
               <Skeleton key={k} className="h-64 rounded-xl" />

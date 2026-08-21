@@ -45,7 +45,12 @@ function useMonthNav() {
 
 export function BudgetsPage() {
   const { year, month, prev, next, isCurrent } = useMonthNav();
-  const { data: budgets, isLoading } = useBudgets(year, month);
+  const {
+    data: budgets,
+    isLoading,
+    isError,
+    refetch,
+  } = useBudgets(year, month);
   const createBudget = useCreateBudget();
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -168,6 +173,8 @@ export function BudgetsPage() {
         <BudgetList
           budgets={budgets}
           isLoading={isLoading}
+          isError={isError}
+          onRetry={refetch}
           onAddBudget={() => setDialogOpen(true)}
         />
       </section>

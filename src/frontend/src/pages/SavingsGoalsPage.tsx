@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
+import { QueryErrorState } from "../components/QueryErrorState";
 import {
   useContributeSavingsGoal,
   useCreateSavingsGoal,
@@ -404,7 +405,12 @@ function GoalCard({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export function SavingsGoalsPage() {
-  const { data: goals = [], isLoading } = useSavingsGoals();
+  const {
+    data: goals = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useSavingsGoals();
   const deleteGoal = useDeleteSavingsGoal();
   const [newGoalOpen, setNewGoalOpen] = useState(false);
   const [contributing, setContributing] = useState<SavingsGoal | null>(null);
@@ -440,7 +446,9 @@ export function SavingsGoalsPage() {
         </Button>
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <QueryErrorState onRetry={refetch} />
+      ) : isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((k) => (
             <Skeleton key={k} className="h-56 rounded-2xl" />

@@ -5,6 +5,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ExpenseForm } from "../components/ExpenseForm";
 import { ExpenseList } from "../components/ExpenseList";
+import { QueryErrorState } from "../components/QueryErrorState";
 import { RecurringTemplateForm } from "../components/RecurringTemplateForm";
 import { RecurringTemplateList } from "../components/RecurringTemplateList";
 import {
@@ -104,15 +105,27 @@ export function BudgetDetailPage() {
   const [recurringFormOpen, setRecurringFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<bigint | null>(null);
 
-  const { data: summary, isLoading: summaryLoading } = useBudgetSummary(
-    budgetId,
-    year,
-    month,
-  );
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+    isError: summaryError,
+    refetch: refetchSummary,
+  } = useBudgetSummary(budgetId, year, month);
   const { data: expenses = [], isLoading: expensesLoading } =
     useExpenses(budgetId);
   const { data: templates = [], isLoading: templatesLoading } =
     useRecurringTemplates(budgetId);
+
+  if (summaryError) {
+    return (
+      <div className="p-4 md:p-8 max-w-2xl mx-auto">
+        <QueryErrorState
+          title="Couldn't load this budget"
+          onRetry={refetchSummary}
+        />
+      </div>
+    );
+  }
 
   if (summaryLoading) {
     return (

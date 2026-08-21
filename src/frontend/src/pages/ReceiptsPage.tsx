@@ -7,6 +7,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { QueryErrorState } from "../components/QueryErrorState";
 import { useAllBudgets, useReceiptGallery } from "../hooks/useBudget";
 import type { Expense } from "../types";
 import { formatCents } from "../types";
@@ -118,12 +119,26 @@ function ReceiptDetailDialog({
 }
 
 export function ReceiptsPage() {
-  const { data: receipts = [], isLoading: receiptsLoading } =
-    useReceiptGallery();
-  const { data: budgets = [], isLoading: budgetsLoading } = useAllBudgets();
+  const {
+    data: receipts = [],
+    isLoading: receiptsLoading,
+    isError: receiptsError,
+    refetch: refetchReceipts,
+  } = useReceiptGallery();
+  const {
+    data: budgets = [],
+    isLoading: budgetsLoading,
+    isError: budgetsError,
+    refetch: refetchBudgets,
+  } = useAllBudgets();
   const [selected, setSelected] = useState<Expense | null>(null);
 
   const isLoading = receiptsLoading || budgetsLoading;
+  const isError = receiptsError || budgetsError;
+  const retry = () => {
+    refetchReceipts();
+    refetchBudgets();
+  };
   const budgetNameFor = (budgetId: bigint) =>
     budgets.find((b) => b.id === budgetId)?.name ?? "Unknown Budget";
 
@@ -138,7 +153,9 @@ export function ReceiptsPage() {
         </p>
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <QueryErrorState onRetry={retry} />
+      ) : isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((k) => (
             <Skeleton key={k} className="aspect-square rounded-2xl" />

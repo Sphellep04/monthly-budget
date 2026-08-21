@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { QueryErrorState } from "../components/QueryErrorState";
 import {
   useCreateNote,
   useDeleteNote,
@@ -264,7 +265,7 @@ function NoteCard({
 
 /* ─── Notes Page ─── */
 export function NotesPage() {
-  const { data: notes, isLoading } = useListNotes();
+  const { data: notes, isLoading, isError, refetch } = useListNotes();
   const deleteNote = useDeleteNote();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -322,7 +323,9 @@ export function NotesPage() {
         </div>
 
         {/* ── Notes Grid ── */}
-        {isLoading ? (
+        {isError ? (
+          <QueryErrorState onRetry={refetch} />
+        ) : isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {(["a", "b", "c", "d", "e", "f"] as const).map((k) => (
               <div

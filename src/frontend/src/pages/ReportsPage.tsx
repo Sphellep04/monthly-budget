@@ -20,6 +20,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { QueryErrorState } from "../components/QueryErrorState";
 import {
   useGetCategoryBreakdownForRange,
   useGetExpensesInRange,
@@ -155,14 +156,19 @@ export function ReportsPage() {
   const hasRange = !!startDate && !!endDate && startDate <= endDate;
 
   // Fetch both datasets only when range is valid
-  const { data: expenses, isLoading: expLoading } = useGetExpensesInRange(
-    startDate,
-    endDate,
-    hasRange,
-  );
+  const {
+    data: expenses,
+    isLoading: expLoading,
+    isError: expError,
+    refetch: refetchExpenses,
+  } = useGetExpensesInRange(startDate, endDate, hasRange);
 
-  const { data: breakdown, isLoading: brkLoading } =
-    useGetCategoryBreakdownForRange(startDate, endDate, hasRange);
+  const {
+    data: breakdown,
+    isLoading: brkLoading,
+    isError: brkError,
+    refetch: refetchBreakdown,
+  } = useGetCategoryBreakdownForRange(startDate, endDate, hasRange);
 
   // We need budget names for the expense list - use current month as reference
   const now = new Date();
@@ -234,6 +240,11 @@ export function ReportsPage() {
   }
 
   const isLoading = expLoading || brkLoading;
+  const isError = expError || brkError;
+  const retry = () => {
+    refetchExpenses();
+    refetchBreakdown();
+  };
 
   return (
     <div className="page-enter p-4 md:p-6 max-w-6xl mx-auto space-y-6">
@@ -308,6 +319,8 @@ export function ReportsPage() {
       {/* ── Content ── */}
       {!hasRange ? (
         <EmptyState message="Select a start and end date above to generate your expense report." />
+      ) : isError ? (
+        <QueryErrorState onRetry={retry} />
       ) : isLoading ? (
         <ReportSkeleton />
       ) : !expenses || expenses.length === 0 ? (

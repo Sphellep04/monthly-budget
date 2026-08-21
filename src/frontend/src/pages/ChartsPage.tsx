@@ -16,6 +16,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { QueryErrorState } from "../components/QueryErrorState";
 import {
   useBudgets,
   useCategoryBreakdown,
@@ -220,7 +221,11 @@ function ChartCardSkeleton() {
 
 /* ─── Spending Trend Chart (12 months global) ─── */
 function SpendingTrendChart() {
-  const { data: trend, isLoading } = useMonthlyTrend(12);
+  const { data: trend, isLoading, isError, refetch } = useMonthlyTrend(12);
+
+  if (isError) {
+    return <QueryErrorState onRetry={refetch} />;
+  }
 
   if (isLoading) {
     return (
@@ -331,8 +336,17 @@ function CategoryBreakdownChart({
   budgetId: bigint;
   colorIndex: number;
 }) {
-  const { data: trend, isLoading } = useCategoryTrend(budgetId, 6);
+  const {
+    data: trend,
+    isLoading,
+    isError,
+    refetch,
+  } = useCategoryTrend(budgetId, 6);
   const color = CHART_PALETTE[colorIndex % CHART_PALETTE.length];
+
+  if (isError) {
+    return <QueryErrorState onRetry={refetch} />;
+  }
 
   if (isLoading) {
     return <Skeleton className="h-[180px] w-full rounded-xl" />;
@@ -416,7 +430,16 @@ function CategoryBreakdownChart({
 
 /* ─── Donut/Pie Chart for selected month ─── */
 function MonthlyPieChart({ year, month }: { year: number; month: number }) {
-  const { data: breakdown, isLoading } = useCategoryBreakdown(year, month);
+  const {
+    data: breakdown,
+    isLoading,
+    isError,
+    refetch,
+  } = useCategoryBreakdown(year, month);
+
+  if (isError) {
+    return <QueryErrorState onRetry={refetch} />;
+  }
 
   if (isLoading) {
     return <Skeleton className="h-[260px] w-full rounded-xl" />;
@@ -508,11 +531,29 @@ function MonthlyPieChart({ year, month }: { year: number; month: number }) {
 
 /* ─── Budget vs Actual side-by-side bar chart ─── */
 function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
-  const { summaries, isLoading: summaryLoading } = useBudgets(year, month);
-  const { data: breakdown, isLoading: breakdownLoading } = useCategoryBreakdown(
-    year,
-    month,
-  );
+  const {
+    summaries,
+    isLoading: summaryLoading,
+    isError: summaryError,
+    refetch: refetchSummary,
+  } = useBudgets(year, month);
+  const {
+    data: breakdown,
+    isLoading: breakdownLoading,
+    isError: breakdownError,
+    refetch: refetchBreakdown,
+  } = useCategoryBreakdown(year, month);
+
+  if (summaryError || breakdownError) {
+    return (
+      <QueryErrorState
+        onRetry={() => {
+          refetchSummary();
+          refetchBreakdown();
+        }}
+      />
+    );
+  }
 
   if (summaryLoading || breakdownLoading) {
     return <Skeleton className="h-[260px] w-full rounded-xl" />;
@@ -611,7 +652,16 @@ function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
 
 /* ─── Daily Spending Line Chart ─── */
 function DailySpendingChart({ year, month }: { year: number; month: number }) {
-  const { data: daily, isLoading } = useDailySpending(year, month);
+  const {
+    data: daily,
+    isLoading,
+    isError,
+    refetch,
+  } = useDailySpending(year, month);
+
+  if (isError) {
+    return <QueryErrorState onRetry={refetch} />;
+  }
 
   if (isLoading) {
     return <Skeleton className="h-[260px] w-full rounded-xl" />;

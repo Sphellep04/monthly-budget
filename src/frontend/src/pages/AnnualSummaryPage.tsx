@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { QueryErrorState } from "../components/QueryErrorState";
 import { useAnnualSummary } from "../hooks/useBudget";
 import { formatCents, getMonthName } from "../types";
 
@@ -417,7 +418,23 @@ export function AnnualSummaryPage() {
     navigate({ to: "/annual-summary", search: { year: selectedYear + 1 } });
   }
 
-  const { data: annualData, isLoading } = useAnnualSummary(selectedYear);
+  const {
+    data: annualData,
+    isLoading,
+    isError,
+    refetch,
+  } = useAnnualSummary(selectedYear);
+
+  if (isError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
+        <QueryErrorState
+          title="Couldn't load the annual summary"
+          onRetry={refetch}
+        />
+      </div>
+    );
+  }
 
   const monthRows = annualData?.monthRows ?? [];
   const stats = annualData?.stats ?? {

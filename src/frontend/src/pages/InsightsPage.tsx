@@ -1,6 +1,7 @@
 ﻿import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "motion/react";
+import { QueryErrorState } from "../components/QueryErrorState";
 import {
   useCategoryBreakdown,
   useDailySpending,
@@ -505,6 +506,25 @@ export function InsightsPage() {
     dailyPrev.isLoading ||
     monthlySummary.isLoading;
 
+  const isError =
+    trend12.isError ||
+    breakdownCurr.isError ||
+    breakdownPrev.isError ||
+    breakdownPrevPrev.isError ||
+    dailyCurr.isError ||
+    dailyPrev.isError ||
+    monthlySummary.isError;
+
+  const retryAll = () => {
+    trend12.refetch();
+    breakdownCurr.refetch();
+    breakdownPrev.refetch();
+    breakdownPrevPrev.refetch();
+    dailyCurr.refetch();
+    dailyPrev.refetch();
+    monthlySummary.refetch();
+  };
+
   const insights =
     !isLoading &&
     trend12.data &&
@@ -546,7 +566,9 @@ export function InsightsPage() {
 
       {/* Content */}
       <div className="px-6 py-6 max-w-7xl mx-auto">
-        {isLoading ? (
+        {isError ? (
+          <QueryErrorState onRetry={retryAll} />
+        ) : isLoading ? (
           <InsightsLoader />
         ) : insights.length === 0 ? (
           <EmptyInsights />

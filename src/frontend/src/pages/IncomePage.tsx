@@ -14,6 +14,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
 import { MonthSelector } from "../components/MonthSelector";
+import { QueryErrorState } from "../components/QueryErrorState";
 import { RecurringIncomeForm } from "../components/RecurringIncomeForm";
 import { RecurringIncomeList } from "../components/RecurringIncomeList";
 import {
@@ -276,7 +277,12 @@ export function IncomePage() {
     bigint | null
   >(null);
 
-  const { data: income = [], isLoading } = useIncome(year, month);
+  const {
+    data: income = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useIncome(year, month);
   const deleteIncome = useDeleteIncome();
   const { data: recurringIncomes = [], isLoading: recurringLoading } =
     useRecurringIncomes();
@@ -370,7 +376,9 @@ export function IncomePage() {
         />
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <QueryErrorState onRetry={refetch} />
+      ) : isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((k) => (
             <Skeleton key={k} className="h-20 rounded-2xl" />

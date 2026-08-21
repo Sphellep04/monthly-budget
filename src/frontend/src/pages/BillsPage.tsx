@@ -13,6 +13,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MonthSelector } from "../components/MonthSelector";
+import { QueryErrorState } from "../components/QueryErrorState";
 import {
   useCreateBillPayment,
   useListBillPayments,
@@ -311,15 +312,22 @@ function BillCard({ bill, onMarkPaid }: BillCardProps) {
 // ─── Hooks for all templates (across all budgets) ─────────────────────────────
 
 function useAllRecurringTemplates(year: number, month: number) {
-  const { data: budgets = [], isLoading: budgetsLoading } = useListBudgets(
-    year,
-    month,
-  );
+  const {
+    data: budgets = [],
+    isLoading: budgetsLoading,
+    isError: budgetsError,
+    refetch: refetchBudgets,
+  } = useListBudgets(year, month);
   // We need to call hooks for each budget - but hooks can't be conditional.
   // Strategy: fetch budgets first, then fetch all templates in one combined hook.
   // Since we don't know how many budgets there are, we fetch in sequence via effect.
   // For simplicity: fetch up to 20 budgets' templates using a stable list.
-  return { budgets, isLoading: budgetsLoading };
+  return {
+    budgets,
+    isLoading: budgetsLoading,
+    isError: budgetsError,
+    refetch: refetchBudgets,
+  };
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
@@ -331,12 +339,18 @@ export function BillsPage() {
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
   const [markPaidBill, setMarkPaidBill] = useState<BillItem | null>(null);
 
-  const { budgets, isLoading: budgetsLoading } = useAllRecurringTemplates(
-    year,
-    month,
-  );
-  const { data: payments = [], isLoading: paymentsLoading } =
-    useListBillPayments(year, month);
+  const {
+    budgets,
+    isLoading: budgetsLoading,
+    isError: budgetsError,
+    refetch: refetchBudgets,
+  } = useAllRecurringTemplates(year, month);
+  const {
+    data: payments = [],
+    isLoading: paymentsLoading,
+    isError: paymentsError,
+    refetch: refetchPayments,
+  } = useListBillPayments(year, month);
 
   // We render a sub-component that does the multi-budget template fetch
   const [allTemplates, setAllTemplates] = useState<
@@ -348,6 +362,11 @@ export function BillsPage() {
   >([]);
 
   const isLoading = budgetsLoading || paymentsLoading;
+  const isError = budgetsError || paymentsError;
+  const retry = () => {
+    refetchBudgets();
+    refetchPayments();
+  };
 
   const bills = useMemo<BillItem[]>(() => {
     return allTemplates
@@ -482,7 +501,9 @@ export function BillsPage() {
       )}
 
       {/* Content */}
-      {isLoading ? (
+      {isError ? (
+        <QueryErrorState onRetry={retry} />
+      ) : isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((k) => (
             <Skeleton key={k} className="h-20 rounded-2xl" />
