@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,40 +10,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { BudgetForm, type BudgetFormValues } from "../components/BudgetForm";
 import { BudgetList } from "../components/BudgetList";
+import { MonthSelector } from "../components/MonthSelector";
 import { useBudgets, useCreateBudget } from "../hooks/useBudget";
 import { formatCents, getMonthName } from "../types";
 
-function useMonthNav() {
+export function BudgetsPage() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
-
-  function prev() {
-    if (month === 1) {
-      setMonth(12);
-      setYear((y) => y - 1);
-    } else setMonth((m) => m - 1);
-  }
-
-  function next() {
-    const isCurrent =
-      year === now.getFullYear() && month === now.getMonth() + 1;
-    const isFuture =
-      year > now.getFullYear() ||
-      (year === now.getFullYear() && month > now.getMonth() + 1);
-    if (isCurrent || isFuture) return;
-    if (month === 12) {
-      setMonth(1);
-      setYear((y) => y + 1);
-    } else setMonth((m) => m + 1);
-  }
-
-  const isCurrent = year === now.getFullYear() && month === now.getMonth() + 1;
-  return { year, month, prev, next, isCurrent };
-}
-
-export function BudgetsPage() {
-  const { year, month, prev, next, isCurrent } = useMonthNav();
   const {
     data: budgets,
     isLoading,
@@ -101,42 +74,14 @@ export function BudgetsPage() {
       </div>
 
       {/* Month navigator */}
-      <div className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border shadow-subtle">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={prev}
-          aria-label="Previous month"
-          className="h-9 px-3 rounded-xl hover:bg-muted transition-colors-fast text-xs"
-        >
-          Prev
-        </Button>
-
-        <div className="text-center">
-          <p className="font-display font-semibold text-foreground text-lg leading-tight">
-            {getMonthName(month)} {year}
-          </p>
-          {isCurrent && (
-            <Badge
-              variant="secondary"
-              className="text-[10px] mt-1 px-2 py-0 bg-primary/10 text-primary border-primary/20"
-            >
-              Current Month
-            </Badge>
-          )}
-        </div>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={next}
-          disabled={isCurrent}
-          aria-label="Next month"
-          className="h-9 px-3 rounded-xl hover:bg-muted transition-colors-fast disabled:opacity-30 text-xs"
-        >
-          Next
-        </Button>
-      </div>
+      <MonthSelector
+        year={year}
+        month={month}
+        onChange={(y, m) => {
+          setYear(y);
+          setMonth(m);
+        }}
+      />
 
       {/* Summary strip */}
       {!isLoading && budgets.length > 0 && (

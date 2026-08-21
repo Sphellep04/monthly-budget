@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
@@ -166,45 +167,28 @@ export function Sidebar() {
       <button
         type="button"
         className="fixed top-4 left-4 z-50 md:hidden flex items-center justify-center h-9 px-3.5 rounded-xl bg-card border border-border shadow-elevated hover:bg-muted active:scale-95 transition-spring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 text-[0.8125rem] font-medium"
-        onClick={() => setMobileOpen((o) => !o)}
-        aria-label="Toggle sidebar"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open sidebar"
       >
-        {mobileOpen ? "Close" : "Menu"}
+        Menu
       </button>
 
-      {/* Mobile backdrop */}
-      <div
-        className={cn(
-          "fixed inset-0 z-40 md:hidden transition-smooth",
-          mobileOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none",
-        )}
-        style={{
-          background: "oklch(0 0 0 / 0.55)",
-        }}
-        role="button"
-        tabIndex={0}
-        aria-label="Close sidebar"
-        onClick={() => setMobileOpen(false)}
-        onKeyDown={(e) => e.key === "Enter" && setMobileOpen(false)}
-      />
-
       {/* Mobile drawer */}
-      <aside
-        className={cn(
-          "fixed top-0 left-0 z-40 h-full w-64 bg-sidebar border-r border-sidebar-border shadow-premium md:hidden transition-smooth",
-          mobileOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <SidebarInner
-          onNavClick={() => setMobileOpen(false)}
-          onSettingsOpen={() => {
-            setMobileOpen(false);
-            setSettingsOpen(true);
-          }}
-        />
-      </aside>
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent
+          side="left"
+          className="w-64 p-0 bg-sidebar border-sidebar-border md:hidden"
+        >
+          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <SidebarInner
+            onNavClick={() => setMobileOpen(false)}
+            onSettingsOpen={() => {
+              setMobileOpen(false);
+              setSettingsOpen(true);
+            }}
+          />
+        </SheetContent>
+      </Sheet>
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-[220px] flex-shrink-0 h-screen bg-sidebar border-r border-sidebar-border/70 flex-col sticky top-0">

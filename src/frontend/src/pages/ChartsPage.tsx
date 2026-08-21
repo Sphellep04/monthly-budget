@@ -16,6 +16,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { MonthSelector } from "../components/MonthSelector";
 import { QueryErrorState } from "../components/QueryErrorState";
 import {
   useBudgets,
@@ -46,58 +47,6 @@ function formatMonthLabel(year: bigint, month: bigint) {
 
 function formatCurrency(v: number) {
   return `N$${v.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
-
-/* ─── Month Selector ─── */
-function MonthSelector({
-  year,
-  month,
-  onChange,
-}: {
-  year: number;
-  month: number;
-  onChange: (year: number, month: number) => void;
-}) {
-  function prev() {
-    if (month === 1) onChange(year - 1, 12);
-    else onChange(year, month - 1);
-  }
-  function next() {
-    const now = new Date();
-    const isCurrentOrFuture =
-      year > now.getFullYear() ||
-      (year === now.getFullYear() && month >= now.getMonth() + 1);
-    if (isCurrentOrFuture) return;
-    if (month === 12) onChange(year + 1, 1);
-    else onChange(year, month + 1);
-  }
-  const now = new Date();
-  const isLatest = year === now.getFullYear() && month === now.getMonth() + 1;
-
-  return (
-    <div className="flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-subtle">
-      <button
-        type="button"
-        onClick={prev}
-        className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-muted transition-colors text-xs text-muted-foreground"
-        aria-label="Previous month"
-      >
-        Prev
-      </button>
-      <span className="min-w-[110px] text-center text-[0.8125rem] font-semibold text-foreground px-1 select-none">
-        {getMonthName(month)} {year}
-      </span>
-      <button
-        type="button"
-        onClick={next}
-        disabled={isLatest}
-        className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-xs text-muted-foreground"
-        aria-label="Next month"
-      >
-        Next
-      </button>
-    </div>
-  );
 }
 
 /* ─── Custom Tooltip ─── */
