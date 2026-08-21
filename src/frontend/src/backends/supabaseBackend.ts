@@ -73,7 +73,10 @@ async function toSignedReceiptUrls(
 }
 
 /** Use for .single() results (e.g. after an insert) where a null row is a real bug. */
-function unwrap<T>(result: { data: T | null; error: { message: string } | null }): T {
+function unwrap<T>(result: {
+  data: T | null;
+  error: { message: string } | null;
+}): T {
   if (result.error) {
     throw new Error(result.error.message);
   }
@@ -96,7 +99,7 @@ function unwrapNullable<T>(result: {
 
 // ─── Row → app-type mapping ────────────────────────────────────────────────
 
-interface BudgetRow {
+export interface BudgetRow {
   id: number | string;
   owner: string;
   name: string;
@@ -168,7 +171,7 @@ function mapRecurringIncome(row: RecurringIncomeRow): RecurringIncome {
   };
 }
 
-interface ExpenseRow {
+export interface ExpenseRow {
   id: number | string;
   budget_id: number | string;
   owner: string;
@@ -209,9 +212,7 @@ async function mapExpenses(rows: ExpenseRow[]): Promise<Expense[]> {
     date: row.date,
     amountCents: BigInt(row.amount_cents),
     notes: row.notes ?? undefined,
-    receiptUrl: row.receipt_url
-      ? signedUrls.get(row.receipt_url)
-      : undefined,
+    receiptUrl: row.receipt_url ? signedUrls.get(row.receipt_url) : undefined,
     recurringTemplateId:
       row.recurring_template_id != null
         ? BigInt(row.recurring_template_id)
@@ -247,7 +248,7 @@ function mapBillPayment(row: BillPaymentRow): BillPayment {
   };
 }
 
-interface IncomeRow {
+export interface IncomeRow {
   id: number | string;
   owner: string;
   source: string;
@@ -365,6 +366,48 @@ function mapNote(row: NoteRow): Note {
 
 // ─── Aggregation helpers ────────────────────────────────────────────────────
 
+export function aggregateMonthlySummary(
+  year: bigint,
+  month: bigint,
+  budgetRows: BudgetRow[],
+  expenseRows: ExpenseRow[],
+  incomeRows: IncomeRow[],
+): MonthlySummary {
+  const budgets = budgetRows.map(mapBudget);
+  const budgetSummaries: BudgetSummary[] = budgets.map((budget) => {
+    const totalSpentCents = expenseRows
+      .filter((row) => BigInt(row.budget_id) === budget.id)
+      .reduce((sum, row) => sum + BigInt(row.amount_cents), 0n);
+    return {
+      budget,
+      totalSpentCents,
+      remainingCents: budget.limitCents - totalSpentCents,
+    };
+  });
+
+  const totalBudgetCents = budgetSummaries.reduce(
+    (sum, s) => sum + s.budget.limitCents,
+    0n,
+  );
+  const totalSpentCents = budgetSummaries.reduce(
+    (sum, s) => sum + s.totalSpentCents,
+    0n,
+  );
+  const totalIncomeCents = incomeRows.reduce(
+    (sum, row) => sum + BigInt(row.amount_cents),
+    0n,
+  );
+
+  return {
+    year,
+    month,
+    totalBudgetCents,
+    totalSpentCents,
+    totalIncomeCents,
+    budgets: budgetSummaries,
+  };
+}
+
 async function computeMonthlySummary(
   userId: string,
   year: bigint,
@@ -399,39 +442,13 @@ async function computeMonthlySummary(
       .lt("date", end),
   ) as IncomeRow[];
 
-  const budgets = budgetRows.map(mapBudget);
-  const budgetSummaries: BudgetSummary[] = budgets.map((budget) => {
-    const totalSpentCents = expenseRows
-      .filter((row) => BigInt(row.budget_id) === budget.id)
-      .reduce((sum, row) => sum + BigInt(row.amount_cents), 0n);
-    return {
-      budget,
-      totalSpentCents,
-      remainingCents: budget.limitCents - totalSpentCents,
-    };
-  });
-
-  const totalBudgetCents = budgetSummaries.reduce(
-    (sum, s) => sum + s.budget.limitCents,
-    0n,
-  );
-  const totalSpentCents = budgetSummaries.reduce(
-    (sum, s) => sum + s.totalSpentCents,
-    0n,
-  );
-  const totalIncomeCents = incomeRows.reduce(
-    (sum, row) => sum + BigInt(row.amount_cents),
-    0n,
-  );
-
-  return {
+  return aggregateMonthlySummary(
     year,
     month,
-    totalBudgetCents,
-    totalSpentCents,
-    totalIncomeCents,
-    budgets: budgetSummaries,
-  };
+    budgetRows,
+    expenseRows,
+    incomeRows,
+  );
 }
 
 function shiftMonth(currentYear: bigint, currentMonth: bigint, index: number) {
@@ -1203,7 +1220,11 @@ export function createSupabaseBackend(userId: string): Backend {
           .eq("owner", userId)
           .then(
             (r) =>
-              unwrap(r) as { id: number | string; year: number; month: number }[],
+              unwrap(r) as {
+                id: number | string;
+                year: number;
+                month: number;
+              }[],
           ),
         supabase
           .from("expenses")
@@ -1397,9 +1418,7 @@ export function createSupabaseBackend(userId: string): Backend {
       return templateRows.map((templateRow) =>
         mapBudgetTemplate(
           templateRow,
-          categoryRows.filter(
-            (c) => c.budget_template_id === templateRow.id,
-          ),
+          categoryRows.filter((c) => c.budget_template_id === templateRow.id),
         ),
       );
     },
@@ -1449,7 +1468,10 @@ export function createSupabaseBackend(userId: string): Backend {
 
     async listRecurringIncomes() {
       const rows = unwrap(
-        await supabase.from("recurring_incomes").select("*").eq("owner", userId),
+        await supabase
+          .from("recurring_incomes")
+          .select("*")
+          .eq("owner", userId),
       ) as RecurringIncomeRow[];
       return rows.map(mapRecurringIncome);
     },
@@ -1583,10 +1605,7 @@ export function createSupabaseBackend(userId: string): Backend {
             ) as BudgetTemplateCategoryRow[])
           : [];
 
-      return mapBudgetTemplate(
-        templateRow as BudgetTemplateRow,
-        categoryRows,
-      );
+      return mapBudgetTemplate(templateRow as BudgetTemplateRow, categoryRows);
     },
 
     async updateExpense(id, input: ExpenseInput) {

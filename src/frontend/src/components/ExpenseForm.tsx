@@ -351,10 +351,18 @@ export function ExpenseForm({
                 onBlur={() => validateAmount(amountStr)}
                 className={`pl-9 input-focus h-10 font-mono text-sm ${amountError ? "border-destructive focus:border-destructive" : ""}`}
                 aria-invalid={!!amountError}
+                aria-describedby={
+                  amountError ? "expense-amount-error" : undefined
+                }
               />
             </div>
             {amountError && (
-              <p className="text-xs text-destructive mt-1">{amountError}</p>
+              <p
+                id="expense-amount-error"
+                className="text-xs text-destructive mt-1"
+              >
+                {amountError}
+              </p>
             )}
           </div>
 
@@ -481,7 +489,9 @@ export function ExpenseForm({
             />
 
             {receiptError && (
-              <p className="text-xs text-destructive mt-1">{receiptError}</p>
+              <p role="alert" className="text-xs text-destructive mt-1">
+                {receiptError}
+              </p>
             )}
 
             {/* Upload progress bar (file upload path) */}

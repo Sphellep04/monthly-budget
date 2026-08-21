@@ -38,8 +38,12 @@ interface BudgetFormProps {
   isPending?: boolean;
 }
 
-function FieldError({ message }: { message: string }) {
-  return <p className="text-xs text-destructive mt-1 slide-up">{message}</p>;
+function FieldError({ id, message }: { id?: string; message: string }) {
+  return (
+    <p id={id} className="text-xs text-destructive mt-1 slide-up">
+      {message}
+    </p>
+  );
 }
 
 function FieldLabel({
@@ -105,9 +109,12 @@ export function BudgetForm({
           onChange={(e) => setName(e.target.value)}
           disabled={isPending}
           aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? "budget-name-error" : undefined}
           className={`input-focus h-10 ${errors.name ? "border-destructive focus:border-destructive focus:ring-destructive/15" : ""}`}
         />
-        {errors.name && <FieldError message={errors.name} />}
+        {errors.name && (
+          <FieldError id="budget-name-error" message={errors.name} />
+        )}
       </div>
 
       {/* Monthly Limit */}
@@ -130,9 +137,12 @@ export function BudgetForm({
             disabled={isPending}
             className={`pl-10 input-focus h-10 font-mono ${errors.limit ? "border-destructive focus:border-destructive focus:ring-destructive/15" : ""}`}
             aria-invalid={!!errors.limit}
+            aria-describedby={errors.limit ? "budget-limit-error" : undefined}
           />
         </div>
-        {errors.limit && <FieldError message={errors.limit} />}
+        {errors.limit && (
+          <FieldError id="budget-limit-error" message={errors.limit} />
+        )}
       </div>
 
       {/* Category */}
@@ -145,6 +155,9 @@ export function BudgetForm({
         >
           <SelectTrigger
             aria-invalid={!!errors.category}
+            aria-describedby={
+              errors.category ? "budget-category-error" : undefined
+            }
             className={`input-focus h-10 ${errors.category ? "border-destructive" : ""}`}
           >
             <SelectValue placeholder="Select a category" />
@@ -157,7 +170,9 @@ export function BudgetForm({
             ))}
           </SelectContent>
         </Select>
-        {errors.category && <FieldError message={errors.category} />}
+        {errors.category && (
+          <FieldError id="budget-category-error" message={errors.category} />
+        )}
       </div>
 
       {/* Color */}

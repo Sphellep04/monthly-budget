@@ -158,6 +158,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <button
                     key={value}
                     type="button"
+                    aria-pressed={active}
                     onClick={() => setTheme(value)}
                     className={cn(
                       "px-3 py-2.5 rounded-xl border text-[11px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
@@ -280,6 +281,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 type="button"
                 role="switch"
                 aria-checked={notificationsEnabled}
+                aria-label="Notify me about bills due soon"
                 onClick={() => handleToggleNotifications(!notificationsEnabled)}
                 className={cn(
                   "relative flex-shrink-0 w-10 h-6 rounded-full transition-colors duration-150",

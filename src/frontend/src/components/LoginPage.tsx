@@ -90,7 +90,10 @@ export function LoginPage() {
           </div>
 
           {error && (
-            <p className="text-xs text-destructive leading-relaxed">
+            <p
+              role="alert"
+              className="text-xs text-destructive leading-relaxed"
+            >
               {error}
             </p>
           )}
