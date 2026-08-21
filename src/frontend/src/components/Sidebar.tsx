@@ -24,6 +24,7 @@ const NAV_MAIN: NavItem[] = [
 const NAV_TOOLS: NavItem[] = [
   { label: "Templates", href: "/templates" },
   { label: "Search", href: "/search" },
+  { label: "Reports", href: "/reports" },
   { label: "Notes", href: "/notes" },
   { label: "Receipts", href: "/receipts" },
 ];
