@@ -1,5 +1,8 @@
 import { supabase } from "../lib/supabaseClient";
 import type {
+  Account,
+  AccountInput,
+  AccountType,
   BillPayment,
   BillPaymentInput,
   Budget,
@@ -28,6 +31,26 @@ import type {
   UserSettings,
 } from "../types";
 import type { Backend, BudgetInput, ExpenseInput } from "./Backend";
+
+interface AccountRow {
+  id: number | string;
+  owner: string;
+  name: string;
+  type: AccountType;
+  balance_cents: string;
+  created_at: string;
+}
+
+function mapAccount(row: AccountRow): Account {
+  return {
+    id: BigInt(row.id),
+    owner: row.owner,
+    name: row.name,
+    type: row.type,
+    balanceCents: BigInt(row.balance_cents),
+    createdAt: toEpochMs(row.created_at),
+  };
+}
 
 const RECEIPTS_BUCKET = "receipts";
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
@@ -730,6 +753,22 @@ export function createSupabaseBackend(userId: string): Backend {
       return mapSavingsGoal(updated);
     },
 
+    async createAccount(input: AccountInput) {
+      const inserted = unwrap(
+        await supabase
+          .from("accounts")
+          .insert({
+            owner: userId,
+            name: input.name,
+            type: input.type,
+            balance_cents: input.balanceCents.toString(),
+          })
+          .select()
+          .single(),
+      ) as AccountRow;
+      return mapAccount(inserted);
+    },
+
     async createBillPayment(input: BillPaymentInput) {
       const inserted = unwrap(
         await supabase
@@ -921,6 +960,17 @@ export function createSupabaseBackend(userId: string): Backend {
       return mapSavingsGoal(inserted);
     },
 
+    async deleteAccount(id) {
+      const { data, error } = await supabase
+        .from("accounts")
+        .delete()
+        .eq("owner", userId)
+        .eq("id", id)
+        .select();
+      if (error) throw new Error(error.message);
+      return (data?.length ?? 0) > 0;
+    },
+
     async deleteBillPayment(id) {
       const { data, error } = await supabase
         .from("bill_payments")
@@ -1063,6 +1113,7 @@ export function createSupabaseBackend(userId: string): Backend {
           .eq("owner", userId),
         supabase.from("notes").select("*").eq("owner", userId),
         supabase.from("categories").select("*").eq("owner", userId),
+        supabase.from("accounts").select("*").eq("owner", userId),
         supabase
           .from("user_settings")
           .select("*")
@@ -1087,6 +1138,7 @@ export function createSupabaseBackend(userId: string): Backend {
         budgetTemplateCategories,
         notes,
         categories,
+        accounts,
         userSettings,
       ] = results;
 
@@ -1104,6 +1156,7 @@ export function createSupabaseBackend(userId: string): Backend {
           budgetTemplateCategories: budgetTemplateCategories.data ?? [],
           notes: notes.data ?? [],
           categories: categories.data ?? [],
+          accounts: accounts.data ?? [],
           userSettings: userSettings.data ?? { alert_threshold_percent: 80 },
         },
         null,
@@ -1499,6 +1552,17 @@ export function createSupabaseBackend(userId: string): Backend {
       return true;
     },
 
+    async listAccounts() {
+      const rows = unwrap(
+        await supabase
+          .from("accounts")
+          .select("*")
+          .eq("owner", userId)
+          .order("name"),
+      ) as AccountRow[];
+      return rows.map(mapAccount);
+    },
+
     async listAllBudgets() {
       const rows = unwrap(
         await supabase.from("budgets").select("*").eq("owner", userId),
@@ -1664,6 +1728,22 @@ export function createSupabaseBackend(userId: string): Backend {
 
       const rows = unwrap(await query) as ExpenseRow[];
       return mapExpenses(rows);
+    },
+
+    async updateAccount(id, input: AccountInput) {
+      const { data, error } = await supabase
+        .from("accounts")
+        .update({
+          name: input.name,
+          type: input.type,
+          balance_cents: input.balanceCents.toString(),
+        })
+        .eq("owner", userId)
+        .eq("id", id)
+        .select()
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data ? mapAccount(data as AccountRow) : null;
     },
 
     async updateBillPayment(id, input: BillPaymentInput) {

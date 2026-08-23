@@ -219,6 +219,42 @@ export interface SavingsGoalInput {
   color: string;
 }
 
+export type AccountType =
+  | "checking"
+  | "savings"
+  | "credit_card"
+  | "loan"
+  | "investment"
+  | "other";
+
+export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
+  checking: "Checking",
+  savings: "Savings",
+  credit_card: "Credit Card",
+  loan: "Loan",
+  investment: "Investment",
+  other: "Other",
+};
+
+export function isLiabilityAccountType(type: AccountType): boolean {
+  return type === "credit_card" || type === "loan";
+}
+
+export interface Account {
+  id: bigint;
+  owner: UserId;
+  name: string;
+  type: AccountType;
+  balanceCents: bigint;
+  createdAt: Timestamp;
+}
+
+export interface AccountInput {
+  name: string;
+  type: AccountType;
+  balanceCents: bigint;
+}
+
 export function getBudgetStatus(
   summary: BudgetSummary,
   threshold = 80,

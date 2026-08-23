@@ -1,4 +1,6 @@
 import type {
+  Account,
+  AccountInput,
   BillPayment,
   BillPaymentInput,
   Budget,
@@ -56,6 +58,7 @@ export interface Backend {
     amountCents: bigint,
   ): Promise<SavingsGoal | null>;
 
+  createAccount(input: AccountInput): Promise<Account>;
   createBillPayment(input: BillPaymentInput): Promise<BillPayment>;
   createBudget(input: BudgetInput): Promise<Budget>;
   createBudgetTemplate(input: BudgetTemplateInput): Promise<BudgetTemplate>;
@@ -69,6 +72,7 @@ export interface Backend {
   ): Promise<RecurringTemplate>;
   createSavingsGoal(input: SavingsGoalInput): Promise<SavingsGoal>;
 
+  deleteAccount(id: bigint): Promise<boolean>;
   deleteBillPayment(id: string): Promise<boolean>;
   deleteBudget(id: bigint): Promise<boolean>;
   deleteBudgetTemplate(id: string): Promise<boolean>;
@@ -120,6 +124,7 @@ export interface Backend {
 
   importAllData(json: string): Promise<boolean>;
 
+  listAccounts(): Promise<Account[]>;
   listAllBudgets(): Promise<Budget[]>;
   listBillPayments(year: bigint, month: bigint): Promise<BillPayment[]>;
   listBudgets(year: bigint, month: bigint): Promise<Budget[]>;
@@ -142,6 +147,7 @@ export interface Backend {
     maxAmountCents: bigint | null,
   ): Promise<Expense[]>;
 
+  updateAccount(id: bigint, input: AccountInput): Promise<Account | null>;
   updateBillPayment(
     id: string,
     input: BillPaymentInput,

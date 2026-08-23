@@ -16,6 +16,7 @@ const NAV_MAIN: NavItem[] = [
   { label: "Budgets", href: "/budgets" },
   { label: "Income", href: "/income" },
   { label: "Savings Goals", href: "/savings-goals" },
+  { label: "Accounts", href: "/accounts" },
   { label: "Charts", href: "/charts" },
   { label: "Annual Summary", href: "/annual-summary" },
   { label: "Insights", href: "/insights" },

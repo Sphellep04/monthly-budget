@@ -68,6 +68,9 @@ const SavingsGoalsPage = lazy(() =>
 const ReceiptsPage = lazy(() =>
   import("./pages/ReceiptsPage").then((m) => ({ default: m.ReceiptsPage })),
 );
+const AccountsPage = lazy(() =>
+  import("./pages/AccountsPage").then((m) => ({ default: m.AccountsPage })),
+);
 
 function PageLoader() {
   return (
@@ -316,6 +319,16 @@ const receiptsRoute = createRoute({
   ),
 });
 
+const accountsRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/accounts",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <AccountsPage />
+    </Suspense>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   authRoute.addChildren([
     layoutRoute.addChildren([
@@ -333,6 +346,7 @@ const routeTree = rootRoute.addChildren([
       incomeRoute,
       savingsGoalsRoute,
       receiptsRoute,
+      accountsRoute,
     ]),
   ]),
 ]);

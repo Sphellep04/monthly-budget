@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
+  Account,
+  AccountInput,
   BillPayment,
   BillPaymentInput,
   Budget,
@@ -444,6 +446,63 @@ export function useDeleteCategory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+  });
+}
+
+// ─── Accounts ───────────────────────────────────────────────────────────────
+
+export function useAccounts() {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<Account[]>({
+    queryKey: ["accounts"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listAccounts();
+      return result as unknown as Account[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateAccount() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (input: AccountInput) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.createAccount(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+    },
+  });
+}
+
+export function useUpdateAccount() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async ({ id, input }: { id: bigint; input: AccountInput }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.updateAccount(id, input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+    },
+  });
+}
+
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.deleteAccount(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
   });
 }
