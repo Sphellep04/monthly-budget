@@ -32,6 +32,7 @@ function expenseRow(overrides: Partial<ExpenseRow> = {}): ExpenseRow {
     notes: null,
     receipt_url: null,
     recurring_template_id: null,
+    split_group_id: null,
     created_at: "2026-08-05T00:00:00Z",
     ...overrides,
   };

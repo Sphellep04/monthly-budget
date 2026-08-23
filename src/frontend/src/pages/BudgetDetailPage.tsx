@@ -5,6 +5,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ExpenseForm } from "../components/ExpenseForm";
 import { ExpenseList } from "../components/ExpenseList";
+import { ImportExpensesDialog } from "../components/ImportExpensesDialog";
 import { QueryErrorState } from "../components/QueryErrorState";
 import { RecurringTemplateForm } from "../components/RecurringTemplateForm";
 import { RecurringTemplateList } from "../components/RecurringTemplateList";
@@ -102,6 +103,7 @@ export function BudgetDetailPage() {
   const [year] = useState(now.getFullYear());
   const [month] = useState(now.getMonth() + 1);
   const [expenseFormOpen, setExpenseFormOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [recurringFormOpen, setRecurringFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<bigint | null>(null);
 
@@ -288,13 +290,23 @@ export function BudgetDetailPage() {
             </h2>
             <div className="h-px w-12 bg-border" />
           </div>
-          <Button
-            size="sm"
-            className="button-hover shadow-subtle"
-            onClick={() => setExpenseFormOpen(true)}
-          >
-            Add
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="button-hover"
+              onClick={() => setImportDialogOpen(true)}
+            >
+              Import CSV
+            </Button>
+            <Button
+              size="sm"
+              className="button-hover shadow-subtle"
+              onClick={() => setExpenseFormOpen(true)}
+            >
+              Add
+            </Button>
+          </div>
         </div>
         <ExpenseList
           expenses={expenses}
@@ -346,6 +358,11 @@ export function BudgetDetailPage() {
         month={month}
         open={expenseFormOpen}
         onOpenChange={setExpenseFormOpen}
+      />
+      <ImportExpensesDialog
+        budgetId={budgetId}
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
       />
       <RecurringTemplateForm
         budgetId={budgetId}

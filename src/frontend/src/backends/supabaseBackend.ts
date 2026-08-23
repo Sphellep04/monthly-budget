@@ -33,6 +33,7 @@ import type {
 import type {
   Backend,
   BudgetInput,
+  BulkCreateExpensesInput,
   ExpenseInput,
   SplitExpenseInput,
 } from "./Backend";
@@ -889,6 +890,26 @@ export function createSupabaseBackend(userId: string): Backend {
           .single(),
       ) as ExpenseRow;
       return mapExpense(inserted);
+    },
+
+    async createExpensesBulk(input: BulkCreateExpensesInput) {
+      if (input.rows.length === 0) return [];
+      const inserted = unwrap(
+        await supabase
+          .from("expenses")
+          .insert(
+            input.rows.map((row) => ({
+              owner: userId,
+              budget_id: input.budgetId,
+              date: row.date,
+              amount_cents: row.amountCents.toString(),
+              notes: row.notes ?? null,
+              receipt_url: null,
+            })),
+          )
+          .select(),
+      ) as ExpenseRow[];
+      return mapExpenses(inserted);
     },
 
     async createSplitExpense(input: SplitExpenseInput) {

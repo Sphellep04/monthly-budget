@@ -56,6 +56,17 @@ export interface SplitExpenseInput {
   splits: ExpenseSplitInput[];
 }
 
+export interface BulkExpenseRow {
+  date: string;
+  amountCents: bigint;
+  notes?: string;
+}
+
+export interface BulkCreateExpensesInput {
+  budgetId: bigint;
+  rows: BulkExpenseRow[];
+}
+
 /** Contract implemented by supabaseBackend.ts and consumed by useBudget.ts / useTemplates.ts. */
 export interface Backend {
   applyBudgetTemplate(
@@ -76,6 +87,7 @@ export interface Backend {
   createBudgetTemplate(input: BudgetTemplateInput): Promise<BudgetTemplate>;
   createCategory(name: string): Promise<Category>;
   createExpense(input: ExpenseInput): Promise<Expense>;
+  createExpensesBulk(input: BulkCreateExpensesInput): Promise<Expense[]>;
   createSplitExpense(input: SplitExpenseInput): Promise<Expense[]>;
   createIncome(input: IncomeInput): Promise<Income>;
   createNote(title: string, content: string): Promise<Note>;
