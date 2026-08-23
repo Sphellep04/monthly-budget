@@ -246,6 +246,9 @@ export interface Account {
   name: string;
   type: AccountType;
   balanceCents: bigint;
+  /** Annual interest rate in basis points (1899 = 18.99% APR). Liability accounts only. */
+  interestRateBps: number | null;
+  minimumPaymentCents: bigint | null;
   createdAt: Timestamp;
 }
 
@@ -253,6 +256,8 @@ export interface AccountInput {
   name: string;
   type: AccountType;
   balanceCents: bigint;
+  interestRateBps: number | null;
+  minimumPaymentCents: bigint | null;
 }
 
 export function getBudgetStatus(

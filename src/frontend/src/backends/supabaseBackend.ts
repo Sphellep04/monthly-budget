@@ -38,6 +38,8 @@ interface AccountRow {
   name: string;
   type: AccountType;
   balance_cents: string;
+  interest_rate_bps: number | null;
+  minimum_payment_cents: string | null;
   created_at: string;
 }
 
@@ -48,6 +50,11 @@ function mapAccount(row: AccountRow): Account {
     name: row.name,
     type: row.type,
     balanceCents: BigInt(row.balance_cents),
+    interestRateBps: row.interest_rate_bps,
+    minimumPaymentCents:
+      row.minimum_payment_cents != null
+        ? BigInt(row.minimum_payment_cents)
+        : null,
     createdAt: toEpochMs(row.created_at),
   };
 }
@@ -762,6 +769,9 @@ export function createSupabaseBackend(userId: string): Backend {
             name: input.name,
             type: input.type,
             balance_cents: input.balanceCents.toString(),
+            interest_rate_bps: input.interestRateBps,
+            minimum_payment_cents:
+              input.minimumPaymentCents?.toString() ?? null,
           })
           .select()
           .single(),
@@ -1737,6 +1747,8 @@ export function createSupabaseBackend(userId: string): Backend {
           name: input.name,
           type: input.type,
           balance_cents: input.balanceCents.toString(),
+          interest_rate_bps: input.interestRateBps,
+          minimum_payment_cents: input.minimumPaymentCents?.toString() ?? null,
         })
         .eq("owner", userId)
         .eq("id", id)

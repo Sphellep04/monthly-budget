@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
 import { QueryErrorState } from "../components/QueryErrorState";
@@ -25,6 +25,12 @@ import {
   useDeleteAccount,
   useUpdateAccount,
 } from "../hooks/useBudget";
+import {
+  type DebtInput,
+  type DebtPayoffStrategy,
+  orderDebts,
+  simulateDebtPayoff,
+} from "../lib/debtPayoff";
 import type { Account, AccountType } from "../types";
 import {
   ACCOUNT_TYPE_LABELS,
@@ -55,6 +61,16 @@ function AccountDialog({
   const [balanceStr, setBalanceStr] = useState(
     account ? (Number(account.balanceCents) / 100).toFixed(2) : "",
   );
+  const [interestRateStr, setInterestRateStr] = useState(
+    account?.interestRateBps != null
+      ? (account.interestRateBps / 100).toString()
+      : "",
+  );
+  const [minPaymentStr, setMinPaymentStr] = useState(
+    account?.minimumPaymentCents != null
+      ? (Number(account.minimumPaymentCents) / 100).toFixed(2)
+      : "",
+  );
   const [error, setError] = useState("");
 
   function reset() {
@@ -62,6 +78,16 @@ function AccountDialog({
     setType(account?.type ?? "checking");
     setBalanceStr(
       account ? (Number(account.balanceCents) / 100).toFixed(2) : "",
+    );
+    setInterestRateStr(
+      account?.interestRateBps != null
+        ? (account.interestRateBps / 100).toString()
+        : "",
+    );
+    setMinPaymentStr(
+      account?.minimumPaymentCents != null
+        ? (Number(account.minimumPaymentCents) / 100).toFixed(2)
+        : "",
     );
     setError("");
   }
@@ -82,12 +108,35 @@ function AccountDialog({
       setError("Enter a balance of N$0.00 or more.");
       return;
     }
+    const isLiability = isLiabilityAccountType(type);
+    let interestRateBps: number | null = null;
+    let minimumPaymentCents: bigint | null = null;
+    if (isLiability) {
+      if (interestRateStr) {
+        const rate = Number.parseFloat(interestRateStr);
+        if (!Number.isFinite(rate) || rate < 0) {
+          setError("Enter a valid interest rate.");
+          return;
+        }
+        interestRateBps = Math.round(rate * 100);
+      }
+      if (minPaymentStr) {
+        const minPay = Number.parseFloat(minPaymentStr);
+        if (!Number.isFinite(minPay) || minPay < 0) {
+          setError("Enter a valid minimum payment.");
+          return;
+        }
+        minimumPaymentCents = BigInt(Math.round(minPay * 100));
+      }
+    }
     setError("");
 
     const input = {
       name: name.trim(),
       type,
       balanceCents: BigInt(Math.round(balance * 100)),
+      interestRateBps,
+      minimumPaymentCents,
     };
 
     try {
@@ -183,6 +232,63 @@ function AccountDialog({
             )}
           </div>
 
+          {isLiabilityAccountType(type) && (
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Label
+                  htmlFor="account-rate"
+                  className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+                >
+                  Interest Rate{" "}
+                  <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="account-rate"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={interestRateStr}
+                    onChange={(e) => setInterestRateStr(e.target.value)}
+                    className="pr-7 input-focus h-10 font-mono text-sm"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm select-none pointer-events-none">
+                    %
+                  </span>
+                </div>
+              </div>
+              <div className="flex-1">
+                <Label
+                  htmlFor="account-min-payment"
+                  className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+                >
+                  Min Payment{" "}
+                  <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm select-none pointer-events-none">
+                    N$
+                  </span>
+                  <Input
+                    id="account-min-payment"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={minPaymentStr}
+                    onChange={(e) => setMinPaymentStr(e.target.value)}
+                    className="pl-9 input-focus h-10 font-mono text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {error && <p className="text-xs text-destructive">{error}</p>}
 
           <div className="flex gap-3 pt-1">
@@ -234,6 +340,9 @@ function AccountRow({
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           {ACCOUNT_TYPE_LABELS[account.type]}
+          {isLiability && account.interestRateBps != null && (
+            <span> · {(account.interestRateBps / 100).toFixed(2)}% APR</span>
+          )}
         </p>
       </div>
 
@@ -269,6 +378,141 @@ function AccountRow({
           Delete
         </Button>
       </div>
+    </div>
+  );
+}
+
+// ─── Debt Payoff Plan ───────────────────────────────────────────────────────
+
+function formatDuration(months: number): string {
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  if (years === 0) return `${rest} mo`;
+  if (rest === 0) return `${years} yr`;
+  return `${years} yr ${rest} mo`;
+}
+
+function DebtPayoffPlan({ accounts }: { accounts: Account[] }) {
+  const [strategy, setStrategy] = useState<DebtPayoffStrategy>("avalanche");
+  const [extraStr, setExtraStr] = useState("");
+
+  const debts = useMemo(
+    () =>
+      accounts.filter(
+        (a) =>
+          isLiabilityAccountType(a.type) &&
+          a.balanceCents > 0n &&
+          a.minimumPaymentCents != null &&
+          a.minimumPaymentCents > 0n,
+      ),
+    [accounts],
+  );
+
+  const debtInputs: DebtInput[] = useMemo(
+    () =>
+      debts.map((a) => ({
+        id: a.id.toString(),
+        balanceCents: a.balanceCents,
+        annualRateBps: a.interestRateBps ?? 0,
+        minimumPaymentCents: a.minimumPaymentCents ?? 0n,
+      })),
+    [debts],
+  );
+
+  if (debts.length === 0) return null;
+
+  const extraCents = (() => {
+    const n = Number.parseFloat(extraStr);
+    return Number.isFinite(n) && n > 0 ? BigInt(Math.round(n * 100)) : 0n;
+  })();
+
+  const order = orderDebts(debtInputs, strategy);
+  const plan = simulateDebtPayoff(debtInputs, order, extraCents);
+  const nameById = new Map(debts.map((a) => [a.id.toString(), a.name]));
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-subtle">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="font-display text-base font-bold text-foreground">
+            Debt Payoff Plan
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Minimums on everything, extra funneled to one debt at a time.
+          </p>
+        </div>
+        <div className="flex rounded-lg border border-border overflow-hidden flex-shrink-0">
+          {(["avalanche", "snowball"] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              aria-pressed={strategy === s}
+              onClick={() => setStrategy(s)}
+              className={`px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+                strategy === s
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-transparent text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-[200px]">
+        <Label
+          htmlFor="debt-extra"
+          className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+        >
+          Extra monthly payment
+        </Label>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm select-none pointer-events-none">
+            N$
+          </span>
+          <Input
+            id="debt-extra"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            value={extraStr}
+            onChange={(e) => setExtraStr(e.target.value)}
+            className="pl-9 input-focus h-9 font-mono text-sm"
+          />
+        </div>
+      </div>
+
+      {plan === null ? (
+        <p className="text-xs text-destructive">
+          At this payment level, interest outpaces what you're paying. Add an
+          extra monthly payment to see a payoff plan.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {order.map((id, i) => {
+            const entry = plan.entries.find((e) => e.id === id);
+            return (
+              <div
+                key={id}
+                className="flex items-center justify-between text-sm px-3 py-2 rounded-xl bg-muted/40"
+              >
+                <span className="text-foreground">
+                  {i + 1}. {nameById.get(id)}
+                </span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {entry ? formatDuration(entry.monthsToPayoff) : "—"}
+                </span>
+              </div>
+            );
+          })}
+          <p className="text-xs text-muted-foreground pt-1">
+            Debt-free in {formatDuration(plan.totalMonths)} at this pace
+            (estimate — assumes fixed rates and payments).
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -355,6 +599,8 @@ export function AccountsPage() {
           </div>
         </div>
       )}
+
+      {!isLoading && !isError && <DebtPayoffPlan accounts={accounts} />}
 
       {isError ? (
         <QueryErrorState onRetry={refetch} />
