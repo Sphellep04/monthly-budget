@@ -17,6 +17,7 @@ import type {
   MonthlySummary,
   MonthlyTrendPoint,
   Note,
+  RecurringFrequency,
   RecurringIncome,
   RecurringIncomeInput,
   RecurringTemplate,
@@ -133,6 +134,8 @@ interface RecurringTemplateRow {
   name: string;
   amount_cents: string;
   day_of_month: number;
+  frequency: RecurringFrequency;
+  anchor_month: number | null;
   notes: string | null;
   created_at: string;
 }
@@ -145,6 +148,8 @@ function mapRecurringTemplate(row: RecurringTemplateRow): RecurringTemplate {
     name: row.name,
     amountCents: BigInt(row.amount_cents),
     dayOfMonth: BigInt(row.day_of_month),
+    frequency: row.frequency,
+    anchorMonth: row.anchor_month != null ? BigInt(row.anchor_month) : null,
     notes: row.notes ?? undefined,
     createdAt: toEpochMs(row.created_at),
   };
@@ -156,6 +161,8 @@ interface RecurringIncomeRow {
   source: string;
   amount_cents: string;
   day_of_month: number;
+  frequency: RecurringFrequency;
+  anchor_month: number | null;
   notes: string | null;
   created_at: string;
 }
@@ -167,9 +174,23 @@ function mapRecurringIncome(row: RecurringIncomeRow): RecurringIncome {
     source: row.source,
     amountCents: BigInt(row.amount_cents),
     dayOfMonth: BigInt(row.day_of_month),
+    frequency: row.frequency,
+    anchorMonth: row.anchor_month != null ? BigInt(row.anchor_month) : null,
     notes: row.notes ?? undefined,
     createdAt: toEpochMs(row.created_at),
   };
+}
+
+/** Whether a recurring item with this frequency/anchor should generate an occurrence in `month`. */
+function recurringAppliesInMonth(
+  frequency: RecurringFrequency,
+  anchorMonth: number | null,
+  month: number,
+): boolean {
+  if (frequency === "monthly" || anchorMonth == null) return true;
+  if (frequency === "annually") return month === anchorMonth;
+  // quarterly: recurs every 3 months from the anchor
+  return (((month - anchorMonth) % 3) + 3) % 3 === 0;
 }
 
 export interface ExpenseRow {
@@ -502,17 +523,22 @@ export function createSupabaseBackend(userId: string): Backend {
       if (templateRows.length === 0) return [];
 
       const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
-      const rowsToUpsert = templateRows.map((t) => {
-        const day = Math.min(t.day_of_month, daysInMonth);
-        return {
-          owner: userId,
-          source: t.source,
-          amount_cents: t.amount_cents,
-          date: `${Number(year)}-${pad(Number(month))}-${pad(day)}`,
-          notes: t.notes,
-          recurring_income_id: t.id,
-        };
-      });
+      const rowsToUpsert = templateRows
+        .filter((t) =>
+          recurringAppliesInMonth(t.frequency, t.anchor_month, Number(month)),
+        )
+        .map((t) => {
+          const day = Math.min(t.day_of_month, daysInMonth);
+          return {
+            owner: userId,
+            source: t.source,
+            amount_cents: t.amount_cents,
+            date: `${Number(year)}-${pad(Number(month))}-${pad(day)}`,
+            notes: t.notes,
+            recurring_income_id: t.id,
+          };
+        });
+      if (rowsToUpsert.length === 0) return [];
 
       const inserted = unwrap(
         await supabase
@@ -592,17 +618,22 @@ export function createSupabaseBackend(userId: string): Backend {
       if (templateRows.length === 0) return [];
 
       const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
-      const rowsToUpsert = templateRows.map((t) => {
-        const day = Math.min(t.day_of_month, daysInMonth);
-        return {
-          owner: userId,
-          budget_id: t.budget_id,
-          date: `${Number(year)}-${pad(Number(month))}-${pad(day)}`,
-          amount_cents: t.amount_cents,
-          notes: t.notes,
-          recurring_template_id: t.id,
-        };
-      });
+      const rowsToUpsert = templateRows
+        .filter((t) =>
+          recurringAppliesInMonth(t.frequency, t.anchor_month, Number(month)),
+        )
+        .map((t) => {
+          const day = Math.min(t.day_of_month, daysInMonth);
+          return {
+            owner: userId,
+            budget_id: t.budget_id,
+            date: `${Number(year)}-${pad(Number(month))}-${pad(day)}`,
+            amount_cents: t.amount_cents,
+            notes: t.notes,
+            recurring_template_id: t.id,
+          };
+        });
+      if (rowsToUpsert.length === 0) return [];
 
       const inserted = unwrap(
         await supabase
@@ -788,6 +819,9 @@ export function createSupabaseBackend(userId: string): Backend {
             source: input.source,
             amount_cents: input.amountCents.toString(),
             day_of_month: Number(input.dayOfMonth),
+            frequency: input.frequency,
+            anchor_month:
+              input.anchorMonth != null ? Number(input.anchorMonth) : null,
             notes: input.notes ?? null,
           })
           .select()
@@ -806,6 +840,9 @@ export function createSupabaseBackend(userId: string): Backend {
             name: input.name,
             amount_cents: input.amountCents.toString(),
             day_of_month: Number(input.dayOfMonth),
+            frequency: input.frequency,
+            anchor_month:
+              input.anchorMonth != null ? Number(input.anchorMonth) : null,
             notes: input.notes ?? null,
           })
           .select()
@@ -1717,6 +1754,9 @@ export function createSupabaseBackend(userId: string): Backend {
           source: input.source,
           amount_cents: input.amountCents.toString(),
           day_of_month: Number(input.dayOfMonth),
+          frequency: input.frequency,
+          anchor_month:
+            input.anchorMonth != null ? Number(input.anchorMonth) : null,
           notes: input.notes ?? null,
         })
         .eq("owner", userId)
@@ -1735,6 +1775,9 @@ export function createSupabaseBackend(userId: string): Backend {
           day_of_month: Number(input.dayOfMonth),
           amount_cents: input.amountCents.toString(),
           budget_id: input.budgetId,
+          frequency: input.frequency,
+          anchor_month:
+            input.anchorMonth != null ? Number(input.anchorMonth) : null,
           notes: input.notes ?? null,
         })
         .eq("owner", userId)

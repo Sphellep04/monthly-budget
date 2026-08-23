@@ -5,13 +5,21 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useDeleteRecurringTemplate } from "../hooks/useBudget";
 import type { RecurringTemplate } from "../types";
-import { formatCents } from "../types";
+import { formatCents, getMonthName } from "../types";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 
 function ordinal(n: number): string {
   const s = ["th", "st", "nd", "rd"];
   const v = n % 100;
   return n + (s[(v - 20) % 10] ?? s[v] ?? s[0]);
+}
+
+function frequencyLabel(t: RecurringTemplate): string | null {
+  if (t.frequency === "monthly" || t.anchorMonth == null) return null;
+  const month = getMonthName(Number(t.anchorMonth));
+  return t.frequency === "annually"
+    ? `Yearly · ${month}`
+    : `Quarterly · ${month}`;
 }
 
 interface Props {
@@ -73,6 +81,14 @@ export function RecurringTemplateList({
                   >
                     {ordinal(Number(t.dayOfMonth))} of month
                   </Badge>
+                  {frequencyLabel(t) && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] px-1.5 py-0 bg-accent/8 text-accent border-accent/20"
+                    >
+                      {frequencyLabel(t)}
+                    </Badge>
+                  )}
                 </div>
                 {t.notes && (
                   <p className="text-xs text-muted-foreground mt-0.5 truncate">

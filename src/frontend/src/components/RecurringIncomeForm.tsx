@@ -8,6 +8,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
@@ -16,7 +23,14 @@ import {
   useCreateRecurringIncome,
   useUpdateRecurringIncome,
 } from "../hooks/useBudget";
-import type { RecurringIncome } from "../types";
+import type { RecurringFrequency, RecurringIncome } from "../types";
+import { getMonthName } from "../types";
+
+const FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "annually", label: "Annually" },
+];
 
 interface Props {
   incomeId: bigint | null;
@@ -51,6 +65,10 @@ export function RecurringIncomeForm({
   const [source, setSource] = useState("");
   const [amountStr, setAmountStr] = useState("");
   const [dayOfMonth, setDayOfMonth] = useState("1");
+  const [frequency, setFrequency] = useState<RecurringFrequency>("monthly");
+  const [anchorMonth, setAnchorMonth] = useState(
+    () => new Date().getMonth() + 1,
+  );
   const [notes, setNotes] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -64,11 +82,19 @@ export function RecurringIncomeForm({
       setSource(existing.source);
       setAmountStr((Number(existing.amountCents) / 100).toFixed(2));
       setDayOfMonth(existing.dayOfMonth.toString());
+      setFrequency(existing.frequency);
+      setAnchorMonth(
+        existing.anchorMonth != null
+          ? Number(existing.anchorMonth)
+          : new Date().getMonth() + 1,
+      );
       setNotes(existing.notes ?? "");
     } else {
       setSource("");
       setAmountStr("");
       setDayOfMonth("1");
+      setFrequency("monthly");
+      setAnchorMonth(new Date().getMonth() + 1);
       setNotes("");
     }
     setErrors({});
@@ -102,6 +128,8 @@ export function RecurringIncomeForm({
       source: source.trim(),
       amountCents,
       dayOfMonth: BigInt(day),
+      frequency,
+      anchorMonth: frequency === "monthly" ? null : BigInt(anchorMonth),
       notes: notes.trim() || undefined,
     };
 
@@ -205,6 +233,58 @@ export function RecurringIncomeForm({
               </p>
             )}
           </div>
+
+          {/* Frequency */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <FieldLabel htmlFor="ri-frequency">Repeats</FieldLabel>
+              <Select
+                value={frequency}
+                onValueChange={(v) => setFrequency(v as RecurringFrequency)}
+              >
+                <SelectTrigger id="ri-frequency" className="input-focus h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FREQUENCIES.map((f) => (
+                    <SelectItem key={f.value} value={f.value}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {frequency !== "monthly" && (
+              <div className="flex-1">
+                <FieldLabel htmlFor="ri-anchor-month">
+                  {frequency === "annually" ? "In month" : "Starting month"}
+                </FieldLabel>
+                <Select
+                  value={String(anchorMonth)}
+                  onValueChange={(v) => setAnchorMonth(Number(v))}
+                >
+                  <SelectTrigger
+                    id="ri-anchor-month"
+                    className="input-focus h-10"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                      <SelectItem key={m} value={String(m)}>
+                        {getMonthName(m)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+          {frequency === "quarterly" && (
+            <p className="text-xs text-muted-foreground -mt-2">
+              Repeats every 3 months starting {getMonthName(anchorMonth)}.
+            </p>
+          )}
 
           {/* Notes */}
           <div>

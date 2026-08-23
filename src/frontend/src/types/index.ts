@@ -25,6 +25,8 @@ export interface Expense {
   createdAt: Timestamp;
 }
 
+export type RecurringFrequency = "monthly" | "quarterly" | "annually";
+
 export interface RecurringTemplate {
   id: bigint;
   owner: UserId;
@@ -32,6 +34,8 @@ export interface RecurringTemplate {
   name: string;
   amountCents: bigint;
   dayOfMonth: bigint;
+  frequency: RecurringFrequency;
+  anchorMonth: bigint | null;
   notes?: string;
   createdAt: Timestamp;
 }
@@ -41,6 +45,8 @@ export interface RecurringTemplateInput {
   name: string;
   amountCents: bigint;
   dayOfMonth: bigint;
+  frequency: RecurringFrequency;
+  anchorMonth: bigint | null;
   notes?: string;
 }
 
@@ -50,6 +56,8 @@ export interface RecurringIncome {
   source: string;
   amountCents: bigint;
   dayOfMonth: bigint;
+  frequency: RecurringFrequency;
+  anchorMonth: bigint | null;
   notes?: string;
   createdAt: Timestamp;
 }
@@ -58,6 +66,8 @@ export interface RecurringIncomeInput {
   source: string;
   amountCents: bigint;
   dayOfMonth: bigint;
+  frequency: RecurringFrequency;
+  anchorMonth: bigint | null;
   notes?: string;
 }
 
