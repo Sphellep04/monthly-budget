@@ -31,7 +31,11 @@ import type {
 } from "../types";
 import { useActorOrMock } from "./useActorOrMock";
 
-export function useMonthlySummary(year: number, month: number) {
+export function useMonthlySummary(
+  year: number,
+  month: number,
+  options?: { enabled?: boolean },
+) {
   const { actor, isFetching } = useActorOrMock();
   return useQuery<MonthlySummary>({
     queryKey: ["monthly-summary", year, month],
@@ -40,7 +44,7 @@ export function useMonthlySummary(year: number, month: number) {
       const result = await actor.getMonthlySummary(BigInt(year), BigInt(month));
       return result as unknown as MonthlySummary;
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !isFetching && (options?.enabled ?? true),
   });
 }
 
@@ -53,14 +57,45 @@ export function useBudgets(year: number, month: number) {
   };
 }
 
-export function useBudgetSummary(
-  budgetId: bigint,
-  year: number,
-  month: number,
-) {
-  const { data: summary, ...rest } = useMonthlySummary(year, month);
-  const budgetSummary = summary?.budgets.find((b) => b.budget.id === budgetId);
-  return { data: budgetSummary, ...rest };
+/** Fetches a single budget by id, independent of any month currently being viewed. */
+export function useBudget(id: bigint) {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<Budget | null>({
+    queryKey: ["budget", id.toString()],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.getBudget(id);
+      return result as unknown as Budget | null;
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+/**
+ * Looks up the budget's own year/month first (rather than assuming the
+ * currently-viewed month), so this works for budgets outside the current
+ * calendar month.
+ */
+export function useBudgetSummary(budgetId: bigint) {
+  const budgetQuery = useBudget(budgetId);
+  const budget = budgetQuery.data;
+  const now = new Date();
+  const year = budget ? Number(budget.year) : now.getFullYear();
+  const month = budget ? Number(budget.month) : now.getMonth() + 1;
+  const summaryQuery = useMonthlySummary(year, month, { enabled: !!budget });
+  const budgetSummary = summaryQuery.data?.budgets.find(
+    (b) => b.budget.id === budgetId,
+  );
+
+  return {
+    data: budgetSummary,
+    isLoading: budgetQuery.isLoading || summaryQuery.isLoading,
+    isError: budgetQuery.isError || summaryQuery.isError,
+    refetch: () => {
+      budgetQuery.refetch();
+      summaryQuery.refetch();
+    },
+  };
 }
 
 export function useExpenses(budgetId: bigint) {

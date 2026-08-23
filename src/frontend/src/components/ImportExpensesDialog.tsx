@@ -6,23 +6,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useBulkCreateExpenses } from "../hooks/useBudget";
 import { type CsvParseResult, parseExpensesCsv } from "../lib/csvImport";
-import { formatCents } from "../types";
+import { formatCents, getMonthName } from "../types";
 
 interface Props {
   budgetId: bigint;
+  year: number;
+  month: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function ImportExpensesDialog({ budgetId, open, onOpenChange }: Props) {
+export function ImportExpensesDialog({
+  budgetId,
+  year,
+  month,
+  open,
+  onOpenChange,
+}: Props) {
   const bulkCreate = useBulkCreateExpenses();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
   const [parseResult, setParseResult] = useState<CsvParseResult | null>(null);
+
+  const outOfRangeCount = useMemo(() => {
+    if (!parseResult) return 0;
+    const target = `${year}-${String(month).padStart(2, "0")}`;
+    return parseResult.rows.filter((row) => !row.date.startsWith(target))
+      .length;
+  }, [parseResult, year, month]);
 
   function reset() {
     setFileName("");
@@ -126,6 +141,17 @@ export function ImportExpensesDialog({ budgetId, open, onOpenChange }: Props) {
                       + {parseResult.errors.length - 10} more issues
                     </p>
                   )}
+                </div>
+              )}
+
+              {outOfRangeCount > 0 && (
+                <div className="rounded-xl border border-amber-500/25 bg-amber-500/8 px-3 py-2">
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    {outOfRangeCount} row{outOfRangeCount !== 1 ? "s" : ""}{" "}
+                    {outOfRangeCount === 1 ? "has" : "have"} a date outside{" "}
+                    {getMonthName(month)} {year}. They'll still be added to this
+                    budget, but won't count toward that month's totals.
+                  </p>
                 </div>
               )}
 

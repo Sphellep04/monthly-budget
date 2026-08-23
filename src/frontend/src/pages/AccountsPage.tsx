@@ -396,16 +396,20 @@ function DebtPayoffPlan({ accounts }: { accounts: Account[] }) {
   const [strategy, setStrategy] = useState<DebtPayoffStrategy>("avalanche");
   const [extraStr, setExtraStr] = useState("");
 
-  const debts = useMemo(
+  const liabilitiesWithBalance = useMemo(
     () =>
       accounts.filter(
-        (a) =>
-          isLiabilityAccountType(a.type) &&
-          a.balanceCents > 0n &&
-          a.minimumPaymentCents != null &&
-          a.minimumPaymentCents > 0n,
+        (a) => isLiabilityAccountType(a.type) && a.balanceCents > 0n,
       ),
     [accounts],
+  );
+
+  const debts = useMemo(
+    () =>
+      liabilitiesWithBalance.filter(
+        (a) => a.minimumPaymentCents != null && a.minimumPaymentCents > 0n,
+      ),
+    [liabilitiesWithBalance],
   );
 
   const debtInputs: DebtInput[] = useMemo(
@@ -419,7 +423,24 @@ function DebtPayoffPlan({ accounts }: { accounts: Account[] }) {
     [debts],
   );
 
-  if (debts.length === 0) return null;
+  if (liabilitiesWithBalance.length === 0) return null;
+
+  if (debts.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-1.5 shadow-subtle">
+        <h2 className="font-display text-base font-bold text-foreground">
+          Debt Payoff Plan
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          Add a minimum payment to{" "}
+          {liabilitiesWithBalance.length === 1
+            ? liabilitiesWithBalance[0].name
+            : "your credit card or loan accounts"}{" "}
+          (edit the account) to see a payoff plan here.
+        </p>
+      </div>
+    );
+  }
 
   const extraCents = (() => {
     const n = Number.parseFloat(extraStr);

@@ -670,6 +670,18 @@ export function createSupabaseBackend(userId: string): Backend {
           .eq("month", Number(month)),
       ) as BudgetRow[];
 
+      // Carry rollover forward: if a budget with this name ever had rollover
+      // enabled, keep it on when the template recreates it, instead of
+      // silently resetting to off every time the template is reapplied.
+      const rolloverRows = unwrap(
+        await supabase
+          .from("budgets")
+          .select("name")
+          .eq("owner", userId)
+          .eq("rollover", true),
+      ) as { name: string }[];
+      const namesWithRollover = new Set(rolloverRows.map((r) => r.name));
+
       const createdBudgets: Budget[] = [];
       for (const category of categoryRows) {
         const alreadyExists = existingRows.some(
@@ -689,6 +701,7 @@ export function createSupabaseBackend(userId: string): Backend {
               category: category.category,
               year: Number(year),
               month: Number(month),
+              rollover: namesWithRollover.has(category.name),
             })
             .select()
             .single(),

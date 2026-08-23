@@ -99,9 +99,6 @@ const STATUS_BADGE_CLASS: Record<string, string> = {
 export function BudgetDetailPage() {
   const { id } = useParams({ strict: false }) as { id: string };
   const budgetId = BigInt(id ?? "0");
-  const now = new Date();
-  const [year] = useState(now.getFullYear());
-  const [month] = useState(now.getMonth() + 1);
   const [expenseFormOpen, setExpenseFormOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [recurringFormOpen, setRecurringFormOpen] = useState(false);
@@ -112,7 +109,7 @@ export function BudgetDetailPage() {
     isLoading: summaryLoading,
     isError: summaryError,
     refetch: refetchSummary,
-  } = useBudgetSummary(budgetId, year, month);
+  } = useBudgetSummary(budgetId);
   const { data: expenses = [], isLoading: expensesLoading } =
     useExpenses(budgetId);
   const { data: templates = [], isLoading: templatesLoading } =
@@ -354,13 +351,15 @@ export function BudgetDetailPage() {
 
       <ExpenseForm
         budgetId={budgetId}
-        year={year}
-        month={month}
+        year={Number(summary.budget.year)}
+        month={Number(summary.budget.month)}
         open={expenseFormOpen}
         onOpenChange={setExpenseFormOpen}
       />
       <ImportExpensesDialog
         budgetId={budgetId}
+        year={Number(summary.budget.year)}
+        month={Number(summary.budget.month)}
         open={importDialogOpen}
         onOpenChange={setImportDialogOpen}
       />
