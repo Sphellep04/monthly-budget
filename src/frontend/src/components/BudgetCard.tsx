@@ -64,9 +64,10 @@ export function BudgetCard({
   index,
   alertThreshold = 80,
 }: BudgetCardProps) {
-  const { budget, totalSpentCents, remainingCents } = summary;
+  const { budget, totalSpentCents, remainingCents, rolloverCents } = summary;
   const status = getBudgetStatus(summary, alertThreshold);
-  const limit = Number(budget.limitCents);
+  const effectiveLimitCents = budget.limitCents + rolloverCents;
+  const limit = Number(effectiveLimitCents);
   const spent = Number(totalSpentCents);
   const remaining = Number(remainingCents);
   const pct = limit > 0 ? (spent / limit) * 100 : 0;
@@ -138,7 +139,7 @@ export function BudgetCard({
               <span className="font-display text-muted-foreground tabular-nums">
                 {formatCents(totalSpentCents)}
                 <span className="text-muted-foreground/40 mx-1">/</span>
-                {formatCents(budget.limitCents)}
+                {formatCents(effectiveLimitCents)}
               </span>
               <span
                 className={cn(

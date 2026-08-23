@@ -50,7 +50,8 @@ export function AlertsPanel({
         <div className="divide-y divide-border/60">
           {alerts.map((s) => {
             const status = getBudgetStatus(s, alertThreshold);
-            const limit = Number(s.budget.limitCents);
+            const effectiveLimitCents = s.budget.limitCents + s.rolloverCents;
+            const limit = Number(effectiveLimitCents);
             const spent = Number(s.totalSpentCents);
             const pct = limit > 0 ? Math.round((spent / limit) * 100) : 0;
             const isOver = status === "over-budget";
@@ -68,7 +69,7 @@ export function AlertsPanel({
                   <p className="text-xs text-muted-foreground font-mono mt-0.5 tabular-nums">
                     {formatCents(s.totalSpentCents)}{" "}
                     <span className="text-muted-foreground/60">of</span>{" "}
-                    {formatCents(s.budget.limitCents)}
+                    {formatCents(effectiveLimitCents)}
                   </p>
                 </div>
 

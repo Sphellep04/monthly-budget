@@ -155,7 +155,7 @@ export function BudgetDetailPage() {
 
   const status = getBudgetStatus(summary);
   const spentCents = summary.totalSpentCents;
-  const limitCents = summary.budget.limitCents;
+  const limitCents = summary.budget.limitCents + summary.rolloverCents;
   const remainingCents = limitCents - spentCents;
   const pctNum =
     Number(limitCents) > 0
@@ -240,6 +240,13 @@ export function BudgetDetailPage() {
               </div>
             ))}
           </div>
+
+          {summary.rolloverCents > 0n && (
+            <p className="text-xs text-muted-foreground -mt-1">
+              Includes {formatCents(summary.rolloverCents)} rolled over from
+              last month.
+            </p>
+          )}
 
           {/* Progress bar */}
           <AnimatedProgressBar

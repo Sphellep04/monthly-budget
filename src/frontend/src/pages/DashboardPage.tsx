@@ -79,7 +79,7 @@ function ExportCsvButton({
         "Category,Budget Limit (N$),Amount Spent (N$),Remaining (N$),% Used",
       );
       for (const bs of summary.budgets) {
-        const limit = Number(bs.budget.limitCents) / 100;
+        const limit = Number(bs.budget.limitCents + bs.rolloverCents) / 100;
         const spent = Number(bs.totalSpentCents) / 100;
         const remaining = Number(bs.remainingCents) / 100;
         const pct = limit > 0 ? Math.round((spent / limit) * 100) : 0;

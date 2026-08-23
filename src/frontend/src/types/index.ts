@@ -10,6 +10,7 @@ export interface Budget {
   category: string;
   year: bigint;
   month: bigint;
+  rollover: boolean;
   createdAt: Timestamp;
 }
 
@@ -110,6 +111,7 @@ export interface BudgetSummary {
   budget: Budget;
   totalSpentCents: bigint;
   remainingCents: bigint;
+  rolloverCents: bigint;
 }
 
 export interface MonthlySummary {
@@ -222,7 +224,8 @@ export function getBudgetStatus(
   threshold = 80,
 ): BudgetStatus {
   const spent = Number(summary.totalSpentCents);
-  const limit = Number(summary.budget.limitCents);
+  const limit =
+    Number(summary.budget.limitCents) + Number(summary.rolloverCents);
   if (limit === 0) return "on-track";
   const pct = spent / limit;
   if (pct >= 1) return "over-budget";

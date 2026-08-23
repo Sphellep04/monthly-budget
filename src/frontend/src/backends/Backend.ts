@@ -31,6 +31,7 @@ export interface BudgetInput {
   category: string;
   year: bigint;
   month: bigint;
+  rollover: boolean;
 }
 
 export interface ExpenseInput {

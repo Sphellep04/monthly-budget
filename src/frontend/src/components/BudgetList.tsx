@@ -70,6 +70,14 @@ function BudgetRow({ budget }: BudgetRowProps) {
             <span className="text-xs text-muted-foreground">
               {budget.category}
             </span>
+            {budget.rollover && (
+              <Badge
+                variant="outline"
+                className="text-[9px] px-1.5 py-0 h-4 bg-accent/8 text-accent border-accent/20"
+              >
+                Rollover
+              </Badge>
+            )}
           </div>
         </div>
 

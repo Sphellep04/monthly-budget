@@ -31,6 +31,7 @@ export interface BudgetFormValues {
   limitCents: bigint;
   category: string;
   color: string;
+  rollover: boolean;
 }
 
 interface BudgetFormProps {
@@ -70,6 +71,7 @@ export function BudgetForm({
   const [limitDollars, setLimitDollars] = useState("");
   const [category, setCategory] = useState("");
   const [color, setColor] = useState(PRESET_COLORS[0]);
+  const [rollover, setRollover] = useState(false);
   const [errors, setErrors] = useState<
     Partial<Record<"name" | "limit" | "category", string>>
   >({});
@@ -101,7 +103,13 @@ export function BudgetForm({
     const limitCents = BigInt(
       Math.round(Number.parseFloat(limitDollars) * 100),
     );
-    await onSubmit({ name: name.trim(), limitCents, category, color });
+    await onSubmit({
+      name: name.trim(),
+      limitCents,
+      category,
+      color,
+      rollover,
+    });
   }
 
   return (
@@ -215,6 +223,35 @@ export function BudgetForm({
             {color}
           </span>
         </div>
+      </div>
+
+      {/* Rollover */}
+      <div className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-muted/40 border border-border/60">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground">
+            Roll over unused amount
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Next month's limit gets a boost from what's left of this one.
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={rollover}
+          aria-label="Roll over unused amount to next month"
+          onClick={() => setRollover((r) => !r)}
+          disabled={isPending}
+          className={`relative flex-shrink-0 w-10 h-6 rounded-full transition-colors duration-150 ${
+            rollover ? "bg-primary" : "bg-muted-foreground/25"
+          }`}
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-150 ${
+              rollover ? "translate-x-4" : ""
+            }`}
+          />
+        </button>
       </div>
 
       {/* Actions */}

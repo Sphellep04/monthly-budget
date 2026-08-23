@@ -38,6 +38,7 @@ export function BudgetsPage() {
         color: values.color,
         year: BigInt(year),
         month: BigInt(month),
+        rollover: values.rollover,
       });
       toast.success("Budget created", {
         description: `"${values.name}" is ready.`,

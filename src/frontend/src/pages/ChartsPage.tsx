@@ -517,7 +517,7 @@ function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
       bs.budget.name.length > 10
         ? `${bs.budget.name.slice(0, 10)}…`
         : bs.budget.name,
-    Budget: Number(bs.budget.limitCents) / 100,
+    Budget: Number(bs.budget.limitCents + bs.rolloverCents) / 100,
     Spent:
       breakdownMap.get(bs.budget.id.toString()) ??
       Number(bs.totalSpentCents) / 100,

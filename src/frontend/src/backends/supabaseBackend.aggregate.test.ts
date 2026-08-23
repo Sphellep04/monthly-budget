@@ -16,6 +16,7 @@ function budgetRow(overrides: Partial<BudgetRow> = {}): BudgetRow {
     category: "Groceries",
     year: 2026,
     month: 8,
+    rollover: false,
     created_at: "2026-08-01T00:00:00Z",
     ...overrides,
   };
@@ -63,6 +64,7 @@ describe("aggregateMonthlySummary", () => {
     expect(summary.budgets).toHaveLength(1);
     expect(summary.budgets[0].totalSpentCents).toBe(3000n);
     expect(summary.budgets[0].remainingCents).toBe(47000n);
+    expect(summary.budgets[0].rolloverCents).toBe(0n);
   });
 
   it("ignores expenses belonging to a different budget", () => {
@@ -111,5 +113,51 @@ describe("aggregateMonthlySummary", () => {
     expect(summary.totalBudgetCents).toBe(0n);
     expect(summary.totalSpentCents).toBe(0n);
     expect(summary.totalIncomeCents).toBe(0n);
+  });
+
+  it("carries over unused amount from the previous month when rollover is enabled", () => {
+    const summary = aggregateMonthlySummary(
+      2026n,
+      8n,
+      [budgetRow({ rollover: true, limit_cents: "50000" })],
+      [expenseRow({ amount_cents: "1000" })],
+      [],
+      [budgetRow({ id: 9, limit_cents: "50000" })],
+      [expenseRow({ budget_id: 9, amount_cents: "20000" })],
+    );
+
+    // previous month left 50000 - 20000 = 30000 unused
+    expect(summary.budgets[0].rolloverCents).toBe(30000n);
+    // effective limit 50000 + 30000 = 80000, minus this month's 1000 spent
+    expect(summary.budgets[0].remainingCents).toBe(79000n);
+    expect(summary.totalBudgetCents).toBe(80000n);
+  });
+
+  it("does not carry over when the previous month overspent", () => {
+    const summary = aggregateMonthlySummary(
+      2026n,
+      8n,
+      [budgetRow({ rollover: true, limit_cents: "50000" })],
+      [],
+      [],
+      [budgetRow({ id: 9, limit_cents: "50000" })],
+      [expenseRow({ budget_id: 9, amount_cents: "70000" })],
+    );
+
+    expect(summary.budgets[0].rolloverCents).toBe(0n);
+  });
+
+  it("ignores previous-month budgets with a different name", () => {
+    const summary = aggregateMonthlySummary(
+      2026n,
+      8n,
+      [budgetRow({ rollover: true, name: "Groceries", limit_cents: "50000" })],
+      [],
+      [],
+      [budgetRow({ id: 9, name: "Dining", limit_cents: "50000" })],
+      [],
+    );
+
+    expect(summary.budgets[0].rolloverCents).toBe(0n);
   });
 });

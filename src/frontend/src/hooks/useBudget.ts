@@ -83,6 +83,7 @@ export function useCreateBudget() {
         category: budget.category,
         year: budget.year,
         month: budget.month,
+        rollover: budget.rollover,
       });
     },
     onSuccess: () => {

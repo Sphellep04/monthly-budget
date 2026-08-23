@@ -110,6 +110,7 @@ export interface BudgetRow {
   category: string;
   year: number;
   month: number;
+  rollover: boolean;
   created_at: string;
 }
 
@@ -123,6 +124,7 @@ function mapBudget(row: BudgetRow): Budget {
     category: row.category,
     year: BigInt(row.year),
     month: BigInt(row.month),
+    rollover: row.rollover,
     createdAt: toEpochMs(row.created_at),
   };
 }
@@ -402,27 +404,51 @@ function mapNote(row: NoteRow): Note {
 
 // ─── Aggregation helpers ────────────────────────────────────────────────────
 
+/** Unused amount (floored at 0) from a same-named budget in the previous month. */
+function computeRolloverCents(
+  budget: Budget,
+  previousBudgetRows: BudgetRow[],
+  previousExpenseRows: ExpenseRow[],
+): bigint {
+  if (!budget.rollover) return 0n;
+  const prevRow = previousBudgetRows.find((row) => row.name === budget.name);
+  if (!prevRow) return 0n;
+  const prevSpent = previousExpenseRows
+    .filter((row) => BigInt(row.budget_id) === BigInt(prevRow.id))
+    .reduce((sum, row) => sum + BigInt(row.amount_cents), 0n);
+  const leftover = BigInt(prevRow.limit_cents) - prevSpent;
+  return leftover > 0n ? leftover : 0n;
+}
+
 export function aggregateMonthlySummary(
   year: bigint,
   month: bigint,
   budgetRows: BudgetRow[],
   expenseRows: ExpenseRow[],
   incomeRows: IncomeRow[],
+  previousBudgetRows: BudgetRow[] = [],
+  previousExpenseRows: ExpenseRow[] = [],
 ): MonthlySummary {
   const budgets = budgetRows.map(mapBudget);
   const budgetSummaries: BudgetSummary[] = budgets.map((budget) => {
     const totalSpentCents = expenseRows
       .filter((row) => BigInt(row.budget_id) === budget.id)
       .reduce((sum, row) => sum + BigInt(row.amount_cents), 0n);
+    const rolloverCents = computeRolloverCents(
+      budget,
+      previousBudgetRows,
+      previousExpenseRows,
+    );
     return {
       budget,
       totalSpentCents,
-      remainingCents: budget.limitCents - totalSpentCents,
+      remainingCents: budget.limitCents + rolloverCents - totalSpentCents,
+      rolloverCents,
     };
   });
 
   const totalBudgetCents = budgetSummaries.reduce(
-    (sum, s) => sum + s.budget.limitCents,
+    (sum, s) => sum + s.budget.limitCents + s.rolloverCents,
     0n,
   );
   const totalSpentCents = budgetSummaries.reduce(
@@ -478,12 +504,37 @@ async function computeMonthlySummary(
       .lt("date", end),
   ) as IncomeRow[];
 
+  let previousBudgetRows: BudgetRow[] = [];
+  let previousExpenseRows: ExpenseRow[] = [];
+  if (budgetRows.some((row) => row.rollover)) {
+    const prev = shiftMonth(year, month, 1);
+    const prevRange = monthRange(prev.year, prev.month);
+    previousBudgetRows = unwrap(
+      await supabase
+        .from("budgets")
+        .select("*")
+        .eq("owner", userId)
+        .eq("year", Number(prev.year))
+        .eq("month", Number(prev.month)),
+    ) as BudgetRow[];
+    previousExpenseRows = unwrap(
+      await supabase
+        .from("expenses")
+        .select("*")
+        .eq("owner", userId)
+        .gte("date", prevRange.start)
+        .lt("date", prevRange.end),
+    ) as ExpenseRow[];
+  }
+
   return aggregateMonthlySummary(
     year,
     month,
     budgetRows,
     expenseRows,
     incomeRows,
+    previousBudgetRows,
+    previousExpenseRows,
   );
 }
 
@@ -714,6 +765,7 @@ export function createSupabaseBackend(userId: string): Backend {
             category: input.category,
             year: Number(input.year),
             month: Number(input.month),
+            rollover: input.rollover,
           })
           .select()
           .single(),
@@ -1647,6 +1699,7 @@ export function createSupabaseBackend(userId: string): Backend {
           category: input.category,
           year: Number(input.year),
           month: Number(input.month),
+          rollover: input.rollover,
         })
         .eq("owner", userId)
         .eq("id", id)
