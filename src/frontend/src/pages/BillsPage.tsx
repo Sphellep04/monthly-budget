@@ -100,9 +100,7 @@ function exportBillsCSV(bills: BillItem[], year: number, month: number) {
     ],
     ...bills.map((b) => {
       const paidDate = b.payment?.paidDate
-        ? new Date(Number(b.payment.paidDate) / 1_000_000).toLocaleDateString(
-            "en-ZA",
-          )
+        ? new Date(Number(b.payment.paidDate)).toLocaleDateString("en-ZA")
         : "";
       const paidAmt =
         b.payment?.paidAmountCents != null
@@ -153,7 +151,7 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
     e.preventDefault();
     if (!bill) return;
 
-    const paidTs = BigInt(new Date(paidDate).getTime()) * BigInt(1_000_000);
+    const paidTs = BigInt(new Date(paidDate).getTime());
     const paidCents = BigInt(Math.round(Number.parseFloat(paidAmount) * 100));
 
     const input = {
@@ -271,12 +269,13 @@ function BillCard({ bill, onMarkPaid }: BillCardProps) {
                 <span className="text-border">·</span>
                 <span className="text-emerald-600 dark:text-emerald-400">
                   Paid{" "}
-                  {new Date(
-                    Number(payment.paidDate) / 1_000_000,
-                  ).toLocaleDateString("en-ZA", {
-                    day: "numeric",
-                    month: "short",
-                  })}
+                  {new Date(Number(payment.paidDate)).toLocaleDateString(
+                    "en-ZA",
+                    {
+                      day: "numeric",
+                      month: "short",
+                    },
+                  )}
                 </span>
               </>
             )}

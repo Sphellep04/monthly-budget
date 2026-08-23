@@ -34,7 +34,7 @@ function templateTotalCents(tpl: BudgetTemplate): number {
 }
 
 function formatDate(ts: bigint): string {
-  return new Date(Number(ts) / 1_000_000).toLocaleDateString("en-US", {
+  return new Date(Number(ts)).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",

@@ -28,7 +28,7 @@ import type { Note } from "../types";
 
 /* ─── Helpers ─── */
 function formatNoteDate(ts: bigint): string {
-  const ms = Number(ts) / 1_000_000;
+  const ms = Number(ts);
   return new Date(ms).toLocaleString("en-US", {
     month: "short",
     day: "numeric",
@@ -40,6 +40,24 @@ function formatNoteDate(ts: bigint): string {
 
 function truncate(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max)}…` : text;
+}
+
+const NOTE_PALETTE = [
+  "oklch(0.42 0.12 150)", // forest green
+  "oklch(0.58 0.14 35)", // terracotta
+  "oklch(0.55 0.22 300)", // violet
+  "oklch(0.62 0.20 82)", // warm yellow
+  "oklch(0.58 0.20 26)", // red-orange
+  "oklch(0.55 0.14 220)", // steel blue
+];
+
+/** Stable per-note color derived from its id, so it doesn't shift on refresh. */
+function noteColor(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  }
+  return NOTE_PALETTE[Math.abs(hash) % NOTE_PALETTE.length];
 }
 
 /* ─── Note Modal ─── */
@@ -210,9 +228,11 @@ function NoteCard({
   onEdit: (note: Note) => void;
   onDelete: (note: Note) => void;
 }) {
+  const color = noteColor(note.id);
+
   return (
     <motion.div
-      className="group relative rounded-2xl border border-border bg-card p-5 shadow-subtle card-hover space-y-3"
+      className="group relative rounded-2xl border border-border bg-card shadow-subtle card-hover overflow-hidden"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -221,43 +241,47 @@ function NoteCard({
         ease: [0.4, 0, 0.2, 1],
       }}
     >
-      {/* Action buttons */}
-      <div className="absolute top-4 right-4 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          type="button"
-          onClick={() => onEdit(note)}
-          className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors text-xs font-medium"
-          aria-label="Edit note"
-        >
-          Edit
-        </button>
-        <button
-          type="button"
-          onClick={() => onDelete(note)}
-          className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors text-xs font-medium"
-          aria-label="Delete note"
-        >
-          Delete
-        </button>
-      </div>
+      <div className="h-1 w-full" style={{ backgroundColor: color }} />
 
-      {/* Content */}
-      <div className="space-y-1.5 pr-24">
-        <h3 className="font-display text-sm font-semibold text-foreground leading-snug truncate">
-          {note.title}
-        </h3>
-        {note.content && (
-          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-            {truncate(note.content, 200)}
-          </p>
-        )}
-      </div>
+      <div className="p-5 space-y-3">
+        {/* Action buttons */}
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            type="button"
+            onClick={() => onEdit(note)}
+            className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors text-xs font-medium"
+            aria-label="Edit note"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(note)}
+            className="flex items-center justify-center h-7 px-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors text-xs font-medium"
+            aria-label="Delete note"
+          >
+            Delete
+          </button>
+        </div>
 
-      {/* Footer */}
-      <div className="pt-1 border-t border-border">
-        <span className="text-[10px] text-muted-foreground/70 truncate">
-          Updated {formatNoteDate(note.updatedAt)}
-        </span>
+        {/* Content */}
+        <div className="space-y-1.5 pr-24">
+          <h3 className="font-display text-sm font-semibold text-foreground leading-snug truncate">
+            {note.title}
+          </h3>
+          {note.content && (
+            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+              {truncate(note.content, 200)}
+            </p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="pt-1 border-t border-border">
+          <span className="text-[10px] text-muted-foreground/70 truncate">
+            Updated {formatNoteDate(note.updatedAt)}
+          </span>
+        </div>
       </div>
     </motion.div>
   );
