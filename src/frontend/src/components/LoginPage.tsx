@@ -34,12 +34,9 @@ export function LoginPage() {
       style={{ background: "oklch(0.96 0.016 85)" }}
     >
       <div className="w-full max-w-sm flex flex-col gap-7">
-        <img
-          src="/BudgetWise-Logo.png"
-          alt="BudgetWise"
-          className="h-10 w-auto object-contain"
-          draggable={false}
-        />
+        <span className="font-display text-2xl font-bold text-foreground tracking-tight">
+          BudgetWise
+        </span>
 
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">

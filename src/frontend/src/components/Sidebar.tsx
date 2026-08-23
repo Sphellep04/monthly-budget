@@ -107,13 +107,10 @@ function SidebarInner({
   return (
     <div className="flex flex-col h-full">
       {/* ── Brand ── */}
-      <div className="px-5 pt-5 pb-4">
-        <img
-          src="/BudgetWise-Logo.png"
-          alt="BudgetWise"
-          className="h-14 w-auto object-contain"
-          draggable={false}
-        />
+      <div className="px-5 pt-6 pb-4">
+        <span className="font-display text-xl font-bold text-sidebar-foreground tracking-tight">
+          BudgetWise
+        </span>
       </div>
 
       {/* ── Nav ── */}
