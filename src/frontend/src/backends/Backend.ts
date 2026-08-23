@@ -4,6 +4,7 @@ import type {
   Budget,
   BudgetTemplate,
   BudgetTemplateInput,
+  Category,
   CategoryBreakdownPoint,
   CategoryTrendPoint,
   DailySpendingPoint,
@@ -57,6 +58,7 @@ export interface Backend {
   createBillPayment(input: BillPaymentInput): Promise<BillPayment>;
   createBudget(input: BudgetInput): Promise<Budget>;
   createBudgetTemplate(input: BudgetTemplateInput): Promise<BudgetTemplate>;
+  createCategory(name: string): Promise<Category>;
   createExpense(input: ExpenseInput): Promise<Expense>;
   createIncome(input: IncomeInput): Promise<Income>;
   createNote(title: string, content: string): Promise<Note>;
@@ -69,6 +71,7 @@ export interface Backend {
   deleteBillPayment(id: string): Promise<boolean>;
   deleteBudget(id: bigint): Promise<boolean>;
   deleteBudgetTemplate(id: string): Promise<boolean>;
+  deleteCategory(id: bigint): Promise<boolean>;
   deleteExpense(id: bigint): Promise<boolean>;
   deleteIncome(id: bigint): Promise<boolean>;
   deleteNote(id: string): Promise<boolean>;
@@ -120,6 +123,7 @@ export interface Backend {
   listBillPayments(year: bigint, month: bigint): Promise<BillPayment[]>;
   listBudgets(year: bigint, month: bigint): Promise<Budget[]>;
   listBudgetTemplates(): Promise<BudgetTemplate[]>;
+  listCategories(): Promise<Category[]>;
   listExpenses(budgetId: bigint): Promise<Expense[]>;
   listExpensesWithReceipts(): Promise<Expense[]>;
   listIncome(year: bigint, month: bigint): Promise<Income[]>;

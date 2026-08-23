@@ -4,6 +4,7 @@ import type {
   BillPaymentInput,
   Budget,
   BudgetSummary,
+  Category,
   CategoryBreakdownPoint,
   CategoryTrendPoint,
   DailySpendingPoint,
@@ -399,6 +400,49 @@ export function useDeleteNote() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+}
+
+// ─── Categories ─────────────────────────────────────────────────────────────
+
+export function useCategories() {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listCategories();
+      return result as unknown as Category[];
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (name: string) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.createCategory(name);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+  });
+}
+
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.deleteCategory(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
   });
 }

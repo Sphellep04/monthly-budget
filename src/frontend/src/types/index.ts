@@ -231,6 +231,11 @@ export function getMonthName(month: number): string {
   });
 }
 
+export interface Category {
+  id: bigint;
+  name: string;
+}
+
 export const CATEGORIES: string[] = [
   "Groceries",
   "Housing",

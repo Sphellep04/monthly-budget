@@ -7,6 +7,7 @@ import type {
   BudgetTemplate,
   BudgetTemplateCategory,
   BudgetTemplateInput,
+  Category,
   CategoryBreakdownPoint,
   CategoryTrendPoint,
   DailySpendingPoint,
@@ -342,6 +343,20 @@ function mapBudgetTemplate(
     categories: categories
       .sort((a, b) => a.sort_order - b.sort_order)
       .map(mapBudgetTemplateCategory),
+  };
+}
+
+interface CategoryRow {
+  id: number | string;
+  owner: string;
+  name: string;
+  created_at: string;
+}
+
+function mapCategory(row: CategoryRow): Category {
+  return {
+    id: BigInt(row.id),
+    name: row.name,
   };
 }
 
@@ -707,6 +722,17 @@ export function createSupabaseBackend(userId: string): Backend {
       return mapBudgetTemplate(templateRow, categoryRows);
     },
 
+    async createCategory(name: string) {
+      const inserted = unwrap(
+        await supabase
+          .from("categories")
+          .insert({ owner: userId, name })
+          .select()
+          .single(),
+      ) as CategoryRow;
+      return mapCategory(inserted);
+    },
+
     async createExpense(input: ExpenseInput) {
       const inserted = unwrap(
         await supabase
@@ -839,6 +865,17 @@ export function createSupabaseBackend(userId: string): Backend {
       return (data?.length ?? 0) > 0;
     },
 
+    async deleteCategory(id) {
+      const { data, error } = await supabase
+        .from("categories")
+        .delete()
+        .eq("owner", userId)
+        .eq("id", id)
+        .select();
+      if (error) throw new Error(error.message);
+      return (data?.length ?? 0) > 0;
+    },
+
     async deleteExpense(id) {
       const existingRow = unwrapNullable(
         await supabase
@@ -936,6 +973,7 @@ export function createSupabaseBackend(userId: string): Backend {
           .select("*")
           .eq("owner", userId),
         supabase.from("notes").select("*").eq("owner", userId),
+        supabase.from("categories").select("*").eq("owner", userId),
         supabase
           .from("user_settings")
           .select("*")
@@ -959,6 +997,7 @@ export function createSupabaseBackend(userId: string): Backend {
         budgetTemplates,
         budgetTemplateCategories,
         notes,
+        categories,
         userSettings,
       ] = results;
 
@@ -975,6 +1014,7 @@ export function createSupabaseBackend(userId: string): Backend {
           budgetTemplates: budgetTemplates.data ?? [],
           budgetTemplateCategories: budgetTemplateCategories.data ?? [],
           notes: notes.data ?? [],
+          categories: categories.data ?? [],
           userSettings: userSettings.data ?? { alert_threshold_percent: 80 },
         },
         null,
@@ -1421,6 +1461,17 @@ export function createSupabaseBackend(userId: string): Backend {
           categoryRows.filter((c) => c.budget_template_id === templateRow.id),
         ),
       );
+    },
+
+    async listCategories() {
+      const rows = unwrap(
+        await supabase
+          .from("categories")
+          .select("*")
+          .eq("owner", userId)
+          .order("name"),
+      ) as CategoryRow[];
+      return rows.map(mapCategory);
     },
 
     async listExpenses(budgetId) {

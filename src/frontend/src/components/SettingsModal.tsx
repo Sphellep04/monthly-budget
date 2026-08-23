@@ -18,11 +18,15 @@ import {
   setNotificationsEnabled,
 } from "../hooks/useBillReminders";
 import {
+  useCategories,
+  useCreateCategory,
+  useDeleteCategory,
   useExportData,
   useImportData,
   useUpdateUserSettings,
   useUserSettings,
 } from "../hooks/useBudget";
+import { CATEGORIES } from "../types";
 
 interface SettingsModalProps {
   open: boolean;
@@ -43,8 +47,32 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const importData = useImportData();
   const importInputRef = useRef<HTMLInputElement>(null);
 
+  const { data: customCategories = [] } = useCategories();
+  const createCategory = useCreateCategory();
+  const deleteCategory = useDeleteCategory();
+  const [newCategory, setNewCategory] = useState("");
+
   const [threshold, setThreshold] = useState(80);
   const [notificationsEnabled, setNotificationsEnabledState] = useState(false);
+
+  async function handleAddCategory() {
+    const name = newCategory.trim();
+    if (!name) return;
+    if (
+      CATEGORIES.includes(name) ||
+      customCategories.some((c) => c.name === name)
+    ) {
+      toast.error("That category already exists");
+      return;
+    }
+    try {
+      await createCategory.mutateAsync(name);
+      setNewCategory("");
+      toast.success(`"${name}" added`);
+    } catch {
+      toast.error("Failed to add category");
+    }
+  }
 
   useEffect(() => {
     if (settings?.alertThresholdPercent !== undefined) {
@@ -298,6 +326,65 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 />
               </button>
             </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-border/60" />
+
+          {/* ── Categories ── */}
+          <div className="space-y-3">
+            <Label className="text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">
+              Custom Categories
+            </Label>
+            <p className="text-sm text-muted-foreground font-body leading-relaxed">
+              Add your own budget categories alongside the built-in ones.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddCategory();
+                  }
+                }}
+                placeholder="e.g. Pet Care"
+                className="h-9 text-sm rounded-xl"
+                disabled={createCategory.isPending}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 rounded-xl text-xs shrink-0"
+                onClick={handleAddCategory}
+                disabled={createCategory.isPending || !newCategory.trim()}
+              >
+                Add
+              </Button>
+            </div>
+            {customCategories.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {customCategories.map((cat) => (
+                  <span
+                    key={cat.id.toString()}
+                    className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-muted/60 border border-border/60 text-xs text-foreground"
+                  >
+                    {cat.name}
+                    <button
+                      type="button"
+                      onClick={() => deleteCategory.mutate(cat.id)}
+                      disabled={deleteCategory.isPending}
+                      className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-destructive/15 hover:text-destructive transition-colors"
+                      aria-label={`Remove ${cat.name}`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Divider */}

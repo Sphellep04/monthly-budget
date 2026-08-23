@@ -9,7 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useCategories } from "../hooks/useBudget";
 import { CATEGORIES } from "../types";
 
 const PRESET_COLORS = [
@@ -72,6 +73,12 @@ export function BudgetForm({
   const [errors, setErrors] = useState<
     Partial<Record<"name" | "limit" | "category", string>>
   >({});
+
+  const { data: customCategories = [] } = useCategories();
+  const categoryOptions = useMemo(() => {
+    const custom = customCategories.map((c) => c.name);
+    return [...CATEGORIES, ...custom.filter((c) => !CATEGORIES.includes(c))];
+  }, [customCategories]);
 
   function validate() {
     const errs: typeof errors = {};
@@ -163,7 +170,7 @@ export function BudgetForm({
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent className="shadow-premium">
-            {CATEGORIES.map((cat) => (
+            {categoryOptions.map((cat) => (
               <SelectItem key={cat} value={cat}>
                 {cat}
               </SelectItem>
