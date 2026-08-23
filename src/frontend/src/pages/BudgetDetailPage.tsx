@@ -342,6 +342,8 @@ export function BudgetDetailPage() {
 
       <ExpenseForm
         budgetId={budgetId}
+        year={year}
+        month={month}
         open={expenseFormOpen}
         onOpenChange={setExpenseFormOpen}
       />

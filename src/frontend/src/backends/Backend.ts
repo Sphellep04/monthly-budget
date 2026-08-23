@@ -44,6 +44,18 @@ export interface ExpenseInput {
   receiptUrl?: string;
 }
 
+export interface ExpenseSplitInput {
+  budgetId: bigint;
+  amountCents: bigint;
+}
+
+export interface SplitExpenseInput {
+  date: string;
+  notes?: string;
+  receiptUrl?: string;
+  splits: ExpenseSplitInput[];
+}
+
 /** Contract implemented by supabaseBackend.ts and consumed by useBudget.ts / useTemplates.ts. */
 export interface Backend {
   applyBudgetTemplate(
@@ -64,6 +76,7 @@ export interface Backend {
   createBudgetTemplate(input: BudgetTemplateInput): Promise<BudgetTemplate>;
   createCategory(name: string): Promise<Category>;
   createExpense(input: ExpenseInput): Promise<Expense>;
+  createSplitExpense(input: SplitExpenseInput): Promise<Expense[]>;
   createIncome(input: IncomeInput): Promise<Income>;
   createNote(title: string, content: string): Promise<Note>;
   createRecurringIncome(input: RecurringIncomeInput): Promise<RecurringIncome>;

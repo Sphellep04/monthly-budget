@@ -8,21 +8,41 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "../hooks/useAuth";
-import { useAddExpense } from "../hooks/useBudget";
+import {
+  useAddExpense,
+  useBudgets,
+  useCreateSplitExpense,
+} from "../hooks/useBudget";
 import { supabase } from "../lib/supabaseClient";
+import { formatCents } from "../types";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 
 interface ExpenseFormProps {
   budgetId: bigint;
+  year: number;
+  month: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+interface SplitRow {
+  key: number;
+  budgetId: string;
+  amountStr: string;
 }
 
 function todayISO() {
@@ -95,17 +115,58 @@ async function runOCR(imageDataUrl: string): Promise<string> {
 
 type ScanState = "idle" | "scanning" | "done" | "failed";
 
+let splitRowKey = 0;
+
 export function ExpenseForm({
   budgetId,
+  year,
+  month,
   open,
   onOpenChange,
 }: ExpenseFormProps) {
   const addExpense = useAddExpense();
+  const createSplitExpense = useCreateSplitExpense();
+  const { data: monthBudgets = [] } = useBudgets(year, month);
   const { userId } = useAuth();
   const [date, setDate] = useState(todayISO());
   const [amountStr, setAmountStr] = useState("");
   const [notes, setNotes] = useState("");
   const [amountError, setAmountError] = useState("");
+
+  // Split-across-budgets state (additional budgets beyond the primary one)
+  const [splitMode, setSplitMode] = useState(false);
+  const [splitRows, setSplitRows] = useState<SplitRow[]>([]);
+  const [splitError, setSplitError] = useState("");
+
+  const otherBudgets = monthBudgets.filter((b) => b.id !== budgetId);
+  const primaryBudget = monthBudgets.find((b) => b.id === budgetId);
+
+  const totalCents = (() => {
+    const n = Number.parseFloat(amountStr);
+    return Number.isFinite(n) && n > 0 ? Math.round(n * 100) : 0;
+  })();
+  const splitTotalCents = splitRows.reduce((sum, row) => {
+    const n = Number.parseFloat(row.amountStr);
+    return sum + (Number.isFinite(n) && n > 0 ? Math.round(n * 100) : 0);
+  }, 0);
+  const primaryRemainingCents = totalCents - splitTotalCents;
+
+  function addSplitRow() {
+    setSplitRows((rows) => [
+      ...rows,
+      { key: splitRowKey++, budgetId: "", amountStr: "" },
+    ]);
+  }
+
+  function removeSplitRow(key: number) {
+    setSplitRows((rows) => rows.filter((r) => r.key !== key));
+  }
+
+  function updateSplitRow(key: number, patch: Partial<SplitRow>) {
+    setSplitRows((rows) =>
+      rows.map((r) => (r.key === key ? { ...r, ...patch } : r)),
+    );
+  }
 
   // Receipt state
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -130,6 +191,9 @@ export function ExpenseForm({
     setIsUploading(false);
     setUploadProgress(0);
     setScanState("idle");
+    setSplitMode(false);
+    setSplitRows([]);
+    setSplitError("");
   }
 
   function handleClose(v: boolean) {
@@ -259,6 +323,22 @@ export function ExpenseForm({
 
     const amountCents = BigInt(Math.round(Number.parseFloat(amountStr) * 100));
 
+    setSplitError("");
+    if (splitMode && splitRows.length > 0) {
+      if (splitRows.some((r) => !r.budgetId)) {
+        setSplitError("Choose a budget for every split.");
+        return;
+      }
+      if (splitRows.some((r) => Number.parseFloat(r.amountStr) <= 0)) {
+        setSplitError("Enter a valid amount for every split.");
+        return;
+      }
+      if (primaryRemainingCents <= 0) {
+        setSplitError("The splits must add up to less than the total amount.");
+        return;
+      }
+    }
+
     let receiptUrl: string | undefined;
     if (receiptFile) {
       if (!userId) {
@@ -289,15 +369,34 @@ export function ExpenseForm({
       }
     }
 
+    const isSplit = splitMode && splitRows.length > 0;
+
     try {
-      await addExpense.mutateAsync({
-        budgetId,
-        date,
-        amountCents,
-        notes: notes.trim() || undefined,
-        receiptUrl,
-      });
-      toast.success("Expense added");
+      if (isSplit) {
+        await createSplitExpense.mutateAsync({
+          date,
+          notes: notes.trim() || undefined,
+          receiptUrl,
+          splits: [
+            { budgetId, amountCents: BigInt(primaryRemainingCents) },
+            ...splitRows.map((r) => ({
+              budgetId: BigInt(r.budgetId),
+              amountCents: BigInt(
+                Math.round(Number.parseFloat(r.amountStr) * 100),
+              ),
+            })),
+          ],
+        });
+      } else {
+        await addExpense.mutateAsync({
+          budgetId,
+          date,
+          amountCents,
+          notes: notes.trim() || undefined,
+          receiptUrl,
+        });
+      }
+      toast.success(isSplit ? "Split expense added" : "Expense added");
       handleClose(false);
     } catch {
       toast.error("Failed to add expense");
@@ -305,7 +404,10 @@ export function ExpenseForm({
   }
 
   const isBusy =
-    addExpense.isPending || isUploading || scanState === "scanning";
+    addExpense.isPending ||
+    createSplitExpense.isPending ||
+    isUploading ||
+    scanState === "scanning";
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -365,6 +467,115 @@ export function ExpenseForm({
               </p>
             )}
           </div>
+
+          {/* Split across budgets */}
+          {otherBudgets.length > 0 && (
+            <div>
+              {!splitMode ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSplitMode(true);
+                    if (splitRows.length === 0) addSplitRow();
+                  }}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Split across budgets
+                </button>
+              ) : (
+                <div className="space-y-2.5 rounded-xl border border-border/60 bg-muted/20 p-3">
+                  <div className="flex items-center justify-between">
+                    <FieldLabel>Split across budgets</FieldLabel>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSplitMode(false);
+                        setSplitRows([]);
+                        setSplitError("");
+                      }}
+                      className="text-[11px] text-muted-foreground hover:text-foreground"
+                    >
+                      Cancel split
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-lg bg-card border border-border/60">
+                    <span className="text-foreground truncate">
+                      {primaryBudget?.name ?? "This budget"}
+                    </span>
+                    <span
+                      className={`font-mono tabular-nums ${primaryRemainingCents <= 0 ? "text-destructive" : "text-muted-foreground"}`}
+                    >
+                      {formatCents(BigInt(Math.max(primaryRemainingCents, 0)))}
+                    </span>
+                  </div>
+
+                  {splitRows.map((row) => (
+                    <div key={row.key} className="flex items-center gap-1.5">
+                      <Select
+                        value={row.budgetId}
+                        onValueChange={(v) =>
+                          updateSplitRow(row.key, { budgetId: v })
+                        }
+                      >
+                        <SelectTrigger className="input-focus h-9 text-xs flex-1">
+                          <SelectValue placeholder="Choose a budget" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {otherBudgets.map((b) => (
+                            <SelectItem
+                              key={b.id.toString()}
+                              value={b.id.toString()}
+                            >
+                              {b.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="relative w-28 flex-shrink-0">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-xs select-none pointer-events-none">
+                          N$
+                        </span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          placeholder="0.00"
+                          value={row.amountStr}
+                          onChange={(e) =>
+                            updateSplitRow(row.key, {
+                              amountStr: e.target.value,
+                            })
+                          }
+                          className="pl-7 input-focus h-9 font-mono text-xs"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSplitRow(row.key)}
+                        className="flex items-center justify-center h-9 w-9 flex-shrink-0 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors"
+                        aria-label="Remove split"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={addSplitRow}
+                    className="text-xs font-medium text-primary hover:underline"
+                  >
+                    + Add another budget
+                  </button>
+
+                  {splitError && (
+                    <p className="text-xs text-destructive">{splitError}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Notes */}
           <div>

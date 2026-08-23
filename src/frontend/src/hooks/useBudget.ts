@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { SplitExpenseInput } from "../backends/Backend";
 import type {
   Account,
   AccountInput,
@@ -119,6 +120,35 @@ export function useAddExpense() {
       queryClient.invalidateQueries({
         queryKey: ["expenses", variables.budgetId.toString()],
       });
+      queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["monthly-trend"] });
+      queryClient.invalidateQueries({ queryKey: ["category-trend"] });
+      queryClient.invalidateQueries({ queryKey: ["daily-spending"] });
+      queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
+      queryClient.invalidateQueries({
+        queryKey: ["category-breakdown-range"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["annual-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses-in-range"] });
+      queryClient.invalidateQueries({ queryKey: ["receipt-gallery"] });
+    },
+  });
+}
+
+export function useCreateSplitExpense() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (input: SplitExpenseInput) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.createSplitExpense(input);
+    },
+    onSuccess: (_data, variables) => {
+      for (const split of variables.splits) {
+        queryClient.invalidateQueries({
+          queryKey: ["expenses", split.budgetId.toString()],
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
       queryClient.invalidateQueries({ queryKey: ["monthly-trend"] });
       queryClient.invalidateQueries({ queryKey: ["category-trend"] });

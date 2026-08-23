@@ -142,6 +142,14 @@ export function ExpenseList({
                 {expense.receiptUrl && (
                   <ReceiptBadge url={expense.receiptUrl} />
                 )}
+                {expense.splitGroupId && (
+                  <span
+                    title="Part of a split transaction"
+                    className="flex items-center px-2 py-0.5 rounded-md bg-secondary/8 border border-secondary/20 text-secondary text-[10px] font-medium shrink-0"
+                  >
+                    Split
+                  </span>
+                )}
               </div>
             </div>
 

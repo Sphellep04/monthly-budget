@@ -23,6 +23,7 @@ export interface Expense {
   notes?: string;
   receiptUrl?: string;
   recurringTemplateId?: bigint;
+  splitGroupId?: string;
   createdAt: Timestamp;
 }
 

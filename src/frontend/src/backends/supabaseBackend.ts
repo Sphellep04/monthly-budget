@@ -30,7 +30,12 @@ import type {
   UpcomingBill,
   UserSettings,
 } from "../types";
-import type { Backend, BudgetInput, ExpenseInput } from "./Backend";
+import type {
+  Backend,
+  BudgetInput,
+  ExpenseInput,
+  SplitExpenseInput,
+} from "./Backend";
 
 interface AccountRow {
   id: number | string;
@@ -234,6 +239,7 @@ export interface ExpenseRow {
   notes: string | null;
   receipt_url: string | null;
   recurring_template_id: number | string | null;
+  split_group_id: string | null;
   created_at: string;
 }
 
@@ -250,6 +256,7 @@ async function mapExpense(row: ExpenseRow): Promise<Expense> {
       row.recurring_template_id != null
         ? BigInt(row.recurring_template_id)
         : undefined,
+    splitGroupId: row.split_group_id ?? undefined,
     createdAt: toEpochMs(row.created_at),
   };
 }
@@ -271,6 +278,7 @@ async function mapExpenses(rows: ExpenseRow[]): Promise<Expense[]> {
       row.recurring_template_id != null
         ? BigInt(row.recurring_template_id)
         : undefined,
+    splitGroupId: row.split_group_id ?? undefined,
     createdAt: toEpochMs(row.created_at),
   }));
 }
@@ -881,6 +889,27 @@ export function createSupabaseBackend(userId: string): Backend {
           .single(),
       ) as ExpenseRow;
       return mapExpense(inserted);
+    },
+
+    async createSplitExpense(input: SplitExpenseInput) {
+      const splitGroupId = crypto.randomUUID();
+      const inserted = unwrap(
+        await supabase
+          .from("expenses")
+          .insert(
+            input.splits.map((split) => ({
+              owner: userId,
+              budget_id: split.budgetId,
+              date: input.date,
+              amount_cents: split.amountCents.toString(),
+              notes: input.notes ?? null,
+              receipt_url: input.receiptUrl ?? null,
+              split_group_id: splitGroupId,
+            })),
+          )
+          .select(),
+      ) as ExpenseRow[];
+      return mapExpenses(inserted);
     },
 
     async createIncome(input: IncomeInput) {
