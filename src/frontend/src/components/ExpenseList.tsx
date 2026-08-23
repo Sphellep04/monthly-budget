@@ -2,6 +2,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useDeleteExpense } from "../hooks/useBudget";
+import { useUndoableDelete } from "../hooks/useUndoableDelete";
 import { formatCents } from "../types";
 import type { Expense } from "../types";
 
@@ -64,17 +65,15 @@ export function ExpenseList({
   onAddFirst,
 }: ExpenseListProps) {
   const deleteExpense = useDeleteExpense();
+  const { requestDelete, isPending: isPendingDelete } =
+    useUndoableDelete<bigint>((id) => {
+      deleteExpense.mutate(id, {
+        onError: () => toast.error("Failed to delete expense"),
+      });
+    });
 
-  async function handleDelete(id: bigint) {
-    try {
-      await deleteExpense.mutateAsync(id);
-      toast.success("Expense removed");
-    } catch {
-      toast.error("Failed to delete expense");
-    }
-  }
-
-  const totalCents = expenses.reduce(
+  const visibleExpenses = expenses.filter((e) => !isPendingDelete(e.id));
+  const totalCents = visibleExpenses.reduce(
     (sum, e) => sum + e.amountCents,
     BigInt(0),
   );
@@ -123,7 +122,7 @@ export function ExpenseList({
 
       {/* Rows */}
       <div className="rounded-2xl border border-border overflow-hidden shadow-subtle bg-card divide-y divide-border">
-        {expenses.map((expense, _idx) => (
+        {visibleExpenses.map((expense) => (
           <div
             key={expense.id.toString()}
             className="group grid grid-cols-[1fr_auto_auto] gap-3 items-center px-4 py-3.5 hover:bg-muted/30 transition-colors-fast"
@@ -163,8 +162,7 @@ export function ExpenseList({
               variant="ghost"
               size="sm"
               className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg"
-              onClick={() => handleDelete(expense.id)}
-              disabled={deleteExpense.isPending}
+              onClick={() => requestDelete(expense.id, "Expense")}
               aria-label="Delete expense"
             >
               Delete
@@ -176,7 +174,8 @@ export function ExpenseList({
       {/* Subtotal */}
       <div className="flex items-center justify-between px-4 pt-3 pb-1">
         <span className="text-xs font-medium text-muted-foreground">
-          {expenses.length} expense{expenses.length !== 1 ? "s" : ""} total
+          {visibleExpenses.length} expense
+          {visibleExpenses.length !== 1 ? "s" : ""} total
         </span>
         <span className="font-mono text-sm font-bold text-foreground tabular-nums">
           {formatCents(totalCents)}

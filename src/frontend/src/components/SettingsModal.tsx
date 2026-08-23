@@ -26,6 +26,7 @@ import {
   useUpdateUserSettings,
   useUserSettings,
 } from "../hooks/useBudget";
+import { useUndoableDelete } from "../hooks/useUndoableDelete";
 import { CATEGORIES } from "../types";
 
 interface SettingsModalProps {
@@ -50,6 +51,12 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const { data: customCategories = [] } = useCategories();
   const createCategory = useCreateCategory();
   const deleteCategory = useDeleteCategory();
+  const { requestDelete: requestDeleteCategory, isPending: isCategoryPending } =
+    useUndoableDelete<bigint>((id) => {
+      deleteCategory.mutate(id, {
+        onError: () => toast.error("Failed to delete category"),
+      });
+    });
   const [newCategory, setNewCategory] = useState("");
 
   const [threshold, setThreshold] = useState(80);
@@ -366,23 +373,24 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
             {customCategories.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {customCategories.map((cat) => (
-                  <span
-                    key={cat.id.toString()}
-                    className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-muted/60 border border-border/60 text-xs text-foreground"
-                  >
-                    {cat.name}
-                    <button
-                      type="button"
-                      onClick={() => deleteCategory.mutate(cat.id)}
-                      disabled={deleteCategory.isPending}
-                      className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-destructive/15 hover:text-destructive transition-colors"
-                      aria-label={`Remove ${cat.name}`}
+                {customCategories
+                  .filter((cat) => !isCategoryPending(cat.id))
+                  .map((cat) => (
+                    <span
+                      key={cat.id.toString()}
+                      className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-muted/60 border border-border/60 text-xs text-foreground"
                     >
-                      ×
-                    </button>
-                  </span>
-                ))}
+                      {cat.name}
+                      <button
+                        type="button"
+                        onClick={() => requestDeleteCategory(cat.id, cat.name)}
+                        className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-destructive/15 hover:text-destructive transition-colors"
+                        aria-label={`Remove ${cat.name}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
               </div>
             )}
           </div>
