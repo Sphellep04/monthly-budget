@@ -170,7 +170,7 @@ export function ExpenseList({
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg disabled:opacity-0"
+              className="h-7 px-2 text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg disabled:opacity-0"
               onClick={() => requestDelete(expense.id, "Expense")}
               disabled={expense.id < 0n}
               aria-label="Delete expense"

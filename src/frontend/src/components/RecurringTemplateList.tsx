@@ -105,7 +105,7 @@ export function RecurringTemplateList({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground hover:bg-muted transition-smooth rounded-lg"
+                className="h-7 px-2 text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground hover:bg-muted transition-smooth rounded-lg"
                 onClick={() => onEdit(t.id)}
                 aria-label={`Edit ${t.name}`}
               >
@@ -114,7 +114,7 @@ export function RecurringTemplateList({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg"
+                className="h-7 px-2 text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg"
                 onClick={() => setDeleteId(t.id)}
                 aria-label={`Delete ${t.name}`}
               >

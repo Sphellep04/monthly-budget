@@ -105,7 +105,7 @@ function BudgetRow({ budget }: BudgetRowProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 px-2.5 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-primary"
+              className="h-8 px-2.5 text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-primary"
               aria-label={`View ${budget.name}`}
             >
               View
@@ -115,7 +115,7 @@ function BudgetRow({ budget }: BudgetRowProps) {
             variant="ghost"
             size="sm"
             onClick={() => setConfirmOpen(true)}
-            className="h-8 px-2.5 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-destructive hover:bg-destructive/8"
+            className="h-8 px-2.5 text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-destructive hover:bg-destructive/8"
             aria-label={`Delete ${budget.name}`}
           >
             Delete

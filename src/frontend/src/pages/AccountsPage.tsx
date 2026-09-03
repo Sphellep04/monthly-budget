@@ -364,7 +364,7 @@ function AccountRow({
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 px-2.5 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-primary"
+          className="h-8 px-2.5 text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-primary"
           onClick={() => onEdit(account)}
         >
           Edit
@@ -372,7 +372,7 @@ function AccountRow({
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 px-2.5 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-destructive"
+          className="h-8 px-2.5 text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-smooth text-muted-foreground hover:text-destructive"
           onClick={() => onDelete(account)}
         >
           Delete

@@ -239,7 +239,7 @@ function IncomeRow({
       <span className="font-bold text-sm font-display tabular-nums text-emerald-600 dark:text-emerald-400 flex-shrink-0">
         +{formatCents(income.amountCents)}
       </span>
-      <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1 flex-shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
         <Button
           variant="ghost"
           size="sm"

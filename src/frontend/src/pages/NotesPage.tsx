@@ -245,7 +245,7 @@ function NoteCard({
 
       <div className="p-5 space-y-3">
         {/* Action buttons */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           <button
             type="button"
             onClick={() => onEdit(note)}
