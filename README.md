@@ -31,6 +31,8 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 - **Dark / light / system theme** - toggle in Settings
 - **PWA support** - install to your phone or desktop home screen for a native app feel
 - **Offline support** - your last synced data renders instantly with no connection; new expenses queue on-device and sync automatically once you're back online
+- **Password reset** - "Forgot password?" on the sign-in screen sends a reset link
+- **Account deletion** - permanently delete your account and every budget, expense, and other record tied to it, from Settings
 
 ---
 
@@ -53,11 +55,41 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 
 ---
 
+## Getting Started
+
+Requires Node >=22.13 and pnpm >=11 (both pinned in `package.json`'s
+`engines` field) - pnpm itself won't run on an older Node.
+
+```bash
+pnpm install
+cp src/frontend/.env.example src/frontend/.env.local   # fill in your Supabase project's URL/anon key
+pnpm dev
+```
+
+Other scripts (run from the repo root, or inside `src/frontend`):
+`pnpm build`, `pnpm typecheck`, `pnpm check` (lint + format), `pnpm test`.
+
+Against a fresh Supabase project, apply everything in
+`supabase/migrations/` before running the app - see Deployment notes below.
+
+---
+
 ## Deployment notes
 
-Account deletion (`supabase/functions/delete-account`) is a Supabase Edge
-Function - it needs the service-role key, which must never ship to the
-browser, so it can't run client-side. Deploy it separately:
+**Database migrations.** Nothing runs these automatically - apply everything
+in `supabase/migrations/`, in filename order, against your Supabase project:
+
+```bash
+supabase link --project-ref <your-project-ref>
+supabase db push
+```
+
+No CLI/local link handy? Paste each file's contents into the Supabase
+Dashboard's SQL Editor instead, in the same filename order.
+
+**Account deletion Edge Function.** `supabase/functions/delete-account` needs
+the service-role key, which must never ship to the browser, so it can't run
+client-side. Deploy it separately:
 
 ```bash
 supabase functions deploy delete-account
