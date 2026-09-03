@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  CaretRightIcon,
-  CheckIcon,
-  CircleIcon,
-} from "@phosphor-icons/react";
+import { CaretRightIcon, CheckIcon, CircleIcon } from "@phosphor-icons/react";
 import * as MenubarPrimitive from "@radix-ui/react-menubar";
 import type * as React from "react";
 

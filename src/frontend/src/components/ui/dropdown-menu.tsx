@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  CaretRightIcon,
-  CheckIcon,
-  CircleIcon,
-} from "@phosphor-icons/react";
+import { CaretRightIcon, CheckIcon, CircleIcon } from "@phosphor-icons/react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import type * as React from "react";
 

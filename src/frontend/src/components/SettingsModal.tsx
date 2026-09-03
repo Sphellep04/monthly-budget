@@ -430,8 +430,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               Learned Categories
             </Label>
             <p className="text-sm text-muted-foreground font-body leading-relaxed">
-              Quick Add remembers which category you pick for a merchant.
-              Remove a rule if it's suggesting the wrong one.
+              Quick Add remembers which category you pick for a merchant. Remove
+              a rule if it's suggesting the wrong one.
             </p>
             {categoryRules.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
@@ -448,9 +448,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                       </span>
                       <button
                         type="button"
-                        onClick={() =>
-                          requestDeleteRule(rule.id, rule.keyword)
-                        }
+                        onClick={() => requestDeleteRule(rule.id, rule.keyword)}
                         className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-destructive/15 hover:text-destructive transition-colors"
                         aria-label={`Remove rule for ${rule.keyword}`}
                       >

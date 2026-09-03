@@ -148,10 +148,7 @@ function Calendar({
 
           if (orientation === "right") {
             return (
-              <CaretRightIcon
-                className={cn("size-4", className)}
-                {...props}
-              />
+              <CaretRightIcon className={cn("size-4", className)} {...props} />
             );
           }
 

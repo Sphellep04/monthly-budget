@@ -25,8 +25,8 @@ import {
   useBudgets,
   useCreateSplitExpense,
 } from "../hooks/useBudget";
-import { supabase } from "../lib/supabaseClient";
 import { computeSplitTotals, validateSplitExpense } from "../lib/splitExpense";
+import { supabase } from "../lib/supabaseClient";
 import { formatCents } from "../types";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];

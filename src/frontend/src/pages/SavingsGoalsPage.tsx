@@ -563,9 +563,7 @@ function EditGoalDialog({
           </div>
 
           {error && (
-            <p className="text-xs text-destructive leading-relaxed">
-              {error}
-            </p>
+            <p className="text-xs text-destructive leading-relaxed">{error}</p>
           )}
 
           <div className="flex justify-end gap-3 pt-1">
@@ -590,12 +588,7 @@ function EditGoalDialog({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export function SavingsGoalsPage() {
-  const {
-    data: goals = [],
-    isLoading,
-    isError,
-    refetch,
-  } = useSavingsGoals();
+  const { data: goals = [], isLoading, isError, refetch } = useSavingsGoals();
   const deleteGoal = useDeleteSavingsGoal();
   const [newGoalOpen, setNewGoalOpen] = useState(false);
   const [contributing, setContributing] = useState<SavingsGoal | null>(null);
