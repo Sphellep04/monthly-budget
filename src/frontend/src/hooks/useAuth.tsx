@@ -14,9 +14,20 @@ interface AuthContextValue {
   userId: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
+  /** True while the session comes from a password-recovery email link, before a new password is set. */
+  isPasswordRecovery: boolean;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ error: string | null }>;
+  signUp: (
+    email: string,
+    password: string,
+  ) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
+  deleteAccount: () => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -24,6 +35,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -32,8 +44,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
+      (event, nextSession) => {
         setSession(nextSession);
+        // Supabase signs the user into a temporary session when they follow
+        // a password-reset email link. Track that distinctly so the app can
+        // route them to "set a new password" instead of straight into data
+        // they didn't intend to unlock this session for.
+        if (event === "PASSWORD_RECOVERY") {
+          setIsPasswordRecovery(true);
+        } else if (event === "SIGNED_OUT") {
+          setIsPasswordRecovery(false);
+        }
       },
     );
 
@@ -46,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       userId: session?.user.id ?? null,
       isAuthenticated: !!session,
       isLoading: isInitializing,
+      isPasswordRecovery,
       signIn: async (email, password) => {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -60,8 +82,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut: async () => {
         await supabase.auth.signOut();
       },
+      requestPasswordReset: async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        return { error: error?.message ?? null };
+      },
+      updatePassword: async (newPassword) => {
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+        if (!error) setIsPasswordRecovery(false);
+        return { error: error?.message ?? null };
+      },
+      deleteAccount: async () => {
+        // Runs server-side (supabase/functions/delete-account) because
+        // deleting the auth user requires the service-role key, which must
+        // never be shipped to the browser. Row deletion cascades from that.
+        const { error } = await supabase.functions.invoke("delete-account");
+        if (!error) await supabase.auth.signOut();
+        return { error: error?.message ?? null };
+      },
     }),
-    [session, isInitializing],
+    [session, isInitializing, isPasswordRecovery],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

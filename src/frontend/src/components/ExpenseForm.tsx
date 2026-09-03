@@ -387,16 +387,23 @@ export function ExpenseForm({
             })),
           ],
         });
+        toast.success("Split expense added");
       } else {
-        await addExpense.mutateAsync({
+        const result = await addExpense.mutateAsync({
           budgetId,
           date,
           amountCents,
           notes: notes.trim() || undefined,
           receiptUrl,
         });
+        if (result.id < 0n) {
+          toast.success("Expense saved", {
+            description: "You're offline — it'll sync once you're back on.",
+          });
+        } else {
+          toast.success("Expense added");
+        }
       }
-      toast.success(isSplit ? "Split expense added" : "Expense added");
       handleClose(false);
     } catch {
       toast.error("Failed to add expense");

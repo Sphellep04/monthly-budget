@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { DeleteAccountDialog } from "../components/DeleteAccountDialog";
+import { useAuth } from "../hooks/useAuth";
 import {
   getNotificationPermission,
   getNotificationsEnabled,
@@ -41,6 +43,8 @@ const THEMES = [
 ] as const;
 
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
+  const { deleteAccount } = useAuth();
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const { data: settings } = useUserSettings();
   const updateSettings = useUpdateUserSettings();
   const { theme, setTheme } = useTheme();
@@ -151,6 +155,17 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
         "Failed to import data. Make sure it's a valid BudgetWise backup file.",
       );
     }
+  }
+
+  async function handleDeleteAccount() {
+    const { error } = await deleteAccount();
+    if (error) {
+      toast.error("Failed to delete account", { description: error });
+      return;
+    }
+    setDeleteAccountOpen(false);
+    onClose();
+    toast.success("Account deleted");
   }
 
   const handleSave = async () => {
@@ -404,8 +419,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               Backup & Restore
             </Label>
             <p className="text-sm text-muted-foreground font-body leading-relaxed">
-              Your data lives only in this browser. Export a backup file
-              regularly so you don't lose it.
+              Your data is synced to your account, but it's still a good idea to
+              keep your own copy. Export a backup file, or import one to restore
+              it.
             </p>
             <div className="grid grid-cols-2 gap-2">
               <Button
@@ -437,6 +453,28 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               onChange={handleImportFile}
             />
           </div>
+
+          {/* Divider */}
+          <div className="border-t border-border/60" />
+
+          {/* ── Danger Zone ── */}
+          <div className="space-y-3">
+            <Label className="text-xs font-bold text-destructive/70 uppercase tracking-[0.14em]">
+              Danger Zone
+            </Label>
+            <p className="text-sm text-muted-foreground font-body leading-relaxed">
+              Permanently delete your account and all of its data.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-xl text-xs border-destructive/30 text-destructive hover:bg-destructive/8 hover:text-destructive"
+              onClick={() => setDeleteAccountOpen(true)}
+            >
+              Delete Account
+            </Button>
+          </div>
         </div>
 
         {/* Footer */}
@@ -459,6 +497,12 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           </Button>
         </div>
       </DialogContent>
+
+      <DeleteAccountDialog
+        open={deleteAccountOpen}
+        onOpenChange={setDeleteAccountOpen}
+        onConfirm={handleDeleteAccount}
+      />
     </Dialog>
   );
 }

@@ -149,6 +149,14 @@ export function ExpenseList({
                     Split
                   </span>
                 )}
+                {expense.id < 0n && (
+                  <span
+                    title="Saved on this device - will sync once you're back online"
+                    className="flex items-center px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-[10px] font-medium shrink-0"
+                  >
+                    Pending sync
+                  </span>
+                )}
               </div>
             </div>
 
@@ -157,12 +165,14 @@ export function ExpenseList({
               {formatCents(expense.amountCents)}
             </span>
 
-            {/* Delete - text label, appears on hover */}
+            {/* Delete - text label, appears on hover. Disabled while pending
+                sync since there's no server record to delete yet. */}
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg"
+              className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-smooth rounded-lg disabled:opacity-0"
               onClick={() => requestDelete(expense.id, "Expense")}
+              disabled={expense.id < 0n}
               aria-label="Delete expense"
             >
               Delete

@@ -8,7 +8,14 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     sourcemap: false,
-    minify: false,
+    minify: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          charts: ["recharts"],
+        },
+      },
+    },
   },
   css: {
     postcss: "./postcss.config.js",
@@ -51,23 +58,22 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
           {
+            // Data requests must always hit the network live - a stale cached
+            // response here would show the wrong balance. Query persistence
+            // (see src/lib/queryPersister.ts) is what makes reads work offline;
+            // this rule intentionally does not cache.
             urlPattern: /^https:\/\/[^/]+\.supabase\.co\/.*/i,
             handler: "NetworkOnly",
           },
           {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            // Tesseract.js fetches its OCR engine (wasm core) and trained
+            // language data from a CDN at runtime - several MB on first scan.
+            // Cache them so repeat scans, including offline ones, don't re-fetch.
+            urlPattern:
+              /^https:\/\/(cdn\.jsdelivr\.net\/npm\/tesseract\.js-core|tessdata\.projectnaptha\.com)\/.*/i,
             handler: "CacheFirst",
             options: {
-              cacheName: "google-fonts-cache",
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "gstatic-fonts-cache",
+              cacheName: "tesseract-ocr-cache",
               expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
               cacheableResponse: { statuses: [0, 200] },
             },

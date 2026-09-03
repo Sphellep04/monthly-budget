@@ -275,9 +275,19 @@ export function getBudgetStatus(
   return "on-track";
 }
 
+// en-ZA gives Namibian/South African-style grouping (space-separated
+// thousands, comma decimal) without depending on ICU currency-symbol
+// data for NAD, which isn't reliably available across browsers.
+const centsFormatter = new Intl.NumberFormat("en-ZA", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 export function formatCents(cents: bigint | number): string {
   const value = typeof cents === "bigint" ? Number(cents) : cents;
-  return `N$${(value / 100).toFixed(2)}`;
+  const dollars = value / 100;
+  const sign = dollars < 0 ? "-" : "";
+  return `${sign}N$${centsFormatter.format(Math.abs(dollars))}`;
 }
 
 export function getMonthName(month: number): string {

@@ -12,7 +12,8 @@
     "build": "pnpm -r --if-present run build",
     "typecheck": "pnpm -r --if-present run typecheck",
     "check": "pnpm -r --if-present run check",
-    "fix": "pnpm -r --if-present run fix"
+    "fix": "pnpm -r --if-present run fix",
+    "test": "pnpm -r --if-present run test"
   },
   "devDependencies": {
     "sharp": "^0.35.3"

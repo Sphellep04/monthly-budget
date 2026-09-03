@@ -13,16 +13,36 @@ const SAMPLE_BUDGETS = [
 ];
 
 export function LoginPage() {
-  const { signIn, signUp, isLoading } = useAuth();
-  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const { signIn, signUp, isLoading, requestPasswordReset } = useAuth();
+  const [mode, setMode] = useState<"sign-in" | "sign-up" | "forgot">("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  function switchMode(next: "sign-in" | "sign-up" | "forgot") {
+    setMode(next);
+    setError(null);
+    setResetSent(false);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (mode === "forgot") {
+      setSubmitting(true);
+      const { error: resetError } = await requestPasswordReset(email);
+      setSubmitting(false);
+      if (resetError) {
+        setError(resetError);
+      } else {
+        setResetSent(true);
+      }
+      return;
+    }
+
     setSubmitting(true);
     const { error: authError } =
       mode === "sign-in"
@@ -106,85 +126,131 @@ export function LoginPage() {
           </span>
 
           <h2 className="font-display text-lg font-bold text-foreground">
-            {mode === "sign-in" ? "Sign in" : "Create your account"}
+            {mode === "sign-in"
+              ? "Sign in"
+              : mode === "sign-up"
+                ? "Create your account"
+                : "Reset your password"}
           </h2>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email" className="text-xs font-medium">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password" className="text-xs font-medium">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete={
-                  mode === "sign-in" ? "current-password" : "new-password"
-                }
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-            </div>
-
-            {error && (
-              <p
-                role="alert"
-                className="text-xs text-destructive leading-relaxed"
-              >
-                {error}
+          {mode === "forgot" && resetSent ? (
+            <div className="flex flex-col gap-4">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                If an account exists for <strong>{email}</strong>, a reset link
+                is on its way. Check your inbox (and spam folder).
               </p>
-            )}
+              <button
+                type="button"
+                onClick={() => switchMode("sign-in")}
+                className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors text-left"
+              >
+                Back to sign in
+              </button>
+            </div>
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="email" className="text-xs font-medium">
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                  />
+                </div>
+                {mode !== "forgot" && (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password" className="text-xs font-medium">
+                        Password
+                      </Label>
+                      {mode === "sign-in" && (
+                        <button
+                          type="button"
+                          onClick={() => switchMode("forgot")}
+                          className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          Forgot password?
+                        </button>
+                      )}
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      autoComplete={
+                        mode === "sign-in" ? "current-password" : "new-password"
+                      }
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                )}
 
-            <Button
-              type="submit"
-              size="lg"
-              className={cn(
-                "w-full font-semibold text-[0.9375rem] h-12 rounded-md mt-1",
-                "bg-primary hover:bg-primary/90 text-primary-foreground",
-              )}
-              disabled={isLoading || submitting}
-            >
-              {submitting ? (
-                <>
-                  <Spinner className="w-4 h-4 flex-shrink-0" />
-                  <span>
-                    {mode === "sign-in" ? "Signing in…" : "Signing up…"}
-                  </span>
-                </>
-              ) : (
-                <span>{mode === "sign-in" ? "Sign in" : "Create account"}</span>
-              )}
-            </Button>
-          </form>
+                {error && (
+                  <p
+                    role="alert"
+                    className="text-xs text-destructive leading-relaxed"
+                  >
+                    {error}
+                  </p>
+                )}
 
-          <button
-            type="button"
-            onClick={() => {
-              setMode(mode === "sign-in" ? "sign-up" : "sign-in");
-              setError(null);
-            }}
-            className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors text-left"
-          >
-            {mode === "sign-in"
-              ? "New here? Create an account"
-              : "Already have an account? Sign in"}
-          </button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  className={cn(
+                    "w-full font-semibold text-[0.9375rem] h-12 rounded-md mt-1",
+                    "bg-primary hover:bg-primary/90 text-primary-foreground",
+                  )}
+                  disabled={isLoading || submitting}
+                >
+                  {submitting ? (
+                    <>
+                      <Spinner className="w-4 h-4 flex-shrink-0" />
+                      <span>
+                        {mode === "sign-in"
+                          ? "Signing in…"
+                          : mode === "sign-up"
+                            ? "Signing up…"
+                            : "Sending…"}
+                      </span>
+                    </>
+                  ) : (
+                    <span>
+                      {mode === "sign-in"
+                        ? "Sign in"
+                        : mode === "sign-up"
+                          ? "Create account"
+                          : "Send reset link"}
+                    </span>
+                  )}
+                </Button>
+              </form>
+
+              <button
+                type="button"
+                onClick={() =>
+                  switchMode(mode === "sign-up" ? "sign-in" : "sign-up")
+                }
+                className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors text-left"
+              >
+                {mode === "sign-up"
+                  ? "Already have an account? Sign in"
+                  : mode === "forgot"
+                    ? "Back to sign in"
+                    : "New here? Create an account"}
+              </button>
+            </>
+          )}
 
           <p className="text-xs text-muted-foreground/40 md:hidden">
             © {new Date().getFullYear()} BudgetWise

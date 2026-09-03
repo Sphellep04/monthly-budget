@@ -4,6 +4,15 @@ export interface ParsedExpenseRow {
   notes?: string;
 }
 
+/**
+ * Which field comes first in an ambiguous D/M/Y-style numeric date. Most
+ * Namibian and southern African bank exports (FNB, Bank Windhoek, Standard
+ * Bank, Nedbank) use day-first dates; some imported/US-formatted files use
+ * month-first. There's no reliable way to detect this from the data alone
+ * (03/04/2026 is valid either way), so the caller picks.
+ */
+export type DateFormat = "day-first" | "month-first";
+
 export interface CsvParseResult {
   rows: ParsedExpenseRow[];
   errors: string[];
@@ -52,10 +61,28 @@ export function splitCsvLine(line: string): string[] {
   return fields;
 }
 
-/** Accepts ISO YYYY-MM-DD directly, otherwise falls back to native Date parsing. */
-function parseDate(raw: string): string | null {
+/**
+ * Accepts ISO YYYY-MM-DD directly. Numeric D/M/Y-style dates (03/04/2026,
+ * 03-04-2026) are ambiguous, so they're parsed explicitly according to
+ * `dateFormat` rather than handed to the native Date constructor, which
+ * always assumes US month/day/year ordering and would silently misfile a
+ * day-first date into the wrong month. Everything else (e.g. "4 March
+ * 2026") falls back to native parsing since it isn't ambiguous that way.
+ */
+function parseDate(raw: string, dateFormat: DateFormat): string | null {
   const trimmed = raw.trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+
+  const numeric = trimmed.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$/);
+  if (numeric) {
+    const [, first, second, yearRaw] = numeric;
+    const day = Number(dateFormat === "day-first" ? first : second);
+    const month = Number(dateFormat === "day-first" ? second : first);
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    const year = yearRaw.length === 2 ? `20${yearRaw}` : yearRaw;
+    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  }
+
   const parsed = new Date(trimmed);
   if (Number.isNaN(parsed.getTime())) return null;
   const y = parsed.getFullYear();
@@ -86,8 +113,13 @@ function findColumn(header: string[], candidates: string[]): number {
  * Parses a CSV with a header row into expense rows. Recognizes common column
  * name variants (Date/Transaction Date, Amount/Debit, Notes/Description/Memo)
  * in any order/casing. Amount sign is ignored -- every row becomes an expense.
+ * `dateFormat` (default "day-first") controls how ambiguous numeric dates
+ * like 03/04/2026 are read -- see parseDate above.
  */
-export function parseExpensesCsv(csvText: string): CsvParseResult {
+export function parseExpensesCsv(
+  csvText: string,
+  dateFormat: DateFormat = "day-first",
+): CsvParseResult {
   const lines = csvText
     .split(/\r\n|\r|\n/)
     .filter((line) => line.trim().length > 0);
@@ -124,7 +156,7 @@ export function parseExpensesCsv(csvText: string): CsvParseResult {
       continue;
     }
 
-    const date = parseDate(dateRaw);
+    const date = parseDate(dateRaw, dateFormat);
     if (!date) {
       errors.push(`Row ${lineNumber}: couldn't understand date "${dateRaw}".`);
       continue;

@@ -28,6 +28,7 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 - **Charts** - visualise spending trends over time
 - **Dark / light / system theme** - toggle in Settings
 - **PWA support** - install to your phone or desktop home screen for a native app feel
+- **Offline support** - your last synced data renders instantly with no connection; new expenses queue on-device and sync automatically once you're back online
 
 ---
 
@@ -39,10 +40,23 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 | Routing               | TanStack Router                                            |
 | State / data fetching | TanStack Query                                             |
 | Styling               | Tailwind CSS v3 (oklch color space), shadcn/ui             |
-| Fonts                 | Fraunces (display), Source Sans 3 (body), IBM Plex Mono    |
+| Fonts                 | Bricolage Grotesque (display), DM Sans (body), Geist Mono  |
 | Backend               | Supabase (Postgres, Row Level Security)                    |
 | Auth                  | Supabase Auth (email/password)                             |
 | File storage          | Supabase Storage (receipt photos)                          |
 | Testing               | Vitest                                                     |
 | Hosting               | Cloudflare Workers (static assets)                         |
 | PWA                   | vite-plugin-pwa + Workbox                                  |
+| Offline persistence   | TanStack Query persist client + IndexedDB (idb-keyval)     |
+
+---
+
+## Deployment notes
+
+Account deletion (`supabase/functions/delete-account`) is a Supabase Edge
+Function - it needs the service-role key, which must never ship to the
+browser, so it can't run client-side. Deploy it separately:
+
+```bash
+supabase functions deploy delete-account
+```

@@ -87,4 +87,31 @@ describe("parseExpensesCsv", () => {
     expect(result.rows).toEqual([]);
     expect(result.errors).toEqual(["The file is empty."]);
   });
+
+  it("reads ambiguous numeric dates as day-first by default", () => {
+    const csv = ["Date,Amount", "03/04/2026,10.00"].join("\n");
+    const result = parseExpensesCsv(csv);
+    expect(result.rows[0].date).toBe("2026-04-03");
+  });
+
+  it("reads ambiguous numeric dates as month-first when requested", () => {
+    const csv = ["Date,Amount", "03/04/2026,10.00"].join("\n");
+    const result = parseExpensesCsv(csv, "month-first");
+    expect(result.rows[0].date).toBe("2026-03-04");
+  });
+
+  it("handles dash-separated dates and 2-digit years under both formats", () => {
+    const csv = ["Date,Amount", "03-04-26,10.00"].join("\n");
+    expect(parseExpensesCsv(csv, "day-first").rows[0].date).toBe("2026-04-03");
+    expect(parseExpensesCsv(csv, "month-first").rows[0].date).toBe(
+      "2026-03-04",
+    );
+  });
+
+  it("rejects numeric dates with an out-of-range month", () => {
+    const csv = ["Date,Amount", "13/13/2026,10.00"].join("\n");
+    const result = parseExpensesCsv(csv, "day-first");
+    expect(result.rows).toEqual([]);
+    expect(result.errors).toHaveLength(1);
+  });
 });

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import type {
   BulkCreateExpensesInput,
   SplitExpenseInput,
@@ -29,7 +30,19 @@ import type {
   UpcomingBill,
   UserSettings,
 } from "../types";
+import {
+  enqueuePendingExpense,
+  listPendingExpenses,
+  makeTempExpenseId,
+  removePendingExpense,
+} from "../lib/expenseOutbox";
 import { useActorOrMock } from "./useActorOrMock";
+
+/** True for a fetch/network failure as opposed to a server-side rejection. */
+function isLikelyOffline(err: unknown): boolean {
+  if (!navigator.onLine) return true;
+  return err instanceof TypeError && /fetch/i.test(err.message);
+}
 
 export function useMonthlySummary(
   year: number,
@@ -135,42 +148,138 @@ export function useCreateBudget() {
   });
 }
 
+type NewExpense = Omit<
+  Expense,
+  "id" | "owner" | "createdAt" | "recurringTemplateId"
+>;
+
+function invalidateExpenseQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  budgetId: bigint,
+) {
+  queryClient.invalidateQueries({
+    queryKey: ["expenses", budgetId.toString()],
+  });
+  queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
+  queryClient.invalidateQueries({ queryKey: ["monthly-trend"] });
+  queryClient.invalidateQueries({ queryKey: ["category-trend"] });
+  queryClient.invalidateQueries({ queryKey: ["daily-spending"] });
+  queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
+  queryClient.invalidateQueries({ queryKey: ["category-breakdown-range"] });
+  queryClient.invalidateQueries({ queryKey: ["annual-summary"] });
+  queryClient.invalidateQueries({ queryKey: ["expenses-in-range"] });
+  queryClient.invalidateQueries({ queryKey: ["receipt-gallery"] });
+}
+
+/**
+ * Adding an expense is the one action that must never fail outright:
+ * it shows immediately (optimistic update) and, if the network is down or
+ * drops mid-request, is queued in IndexedDB instead of erroring - see
+ * useFlushExpenseOutbox, which retries queued expenses once connectivity
+ * returns. A queued expense is recognizable by a negative `id` until it
+ * syncs and gets its real server-assigned one.
+ */
 export function useAddExpense() {
   const queryClient = useQueryClient();
   const { actor } = useActorOrMock();
   return useMutation({
-    mutationFn: async (
-      expense: Omit<
-        Expense,
-        "id" | "owner" | "createdAt" | "recurringTemplateId"
-      >,
-    ) => {
+    mutationFn: async (expense: NewExpense) => {
       if (!actor) throw new Error("Actor not ready");
-      return actor.createExpense({
+      const input = {
         budgetId: expense.budgetId,
         date: expense.date,
         amountCents: expense.amountCents,
         notes: expense.notes,
         receiptUrl: expense.receiptUrl,
-      });
+      };
+      if (!navigator.onLine) {
+        const tempId = makeTempExpenseId();
+        await enqueuePendingExpense(tempId, input);
+        return {
+          ...expense,
+          id: tempId,
+          owner: "",
+          createdAt: BigInt(Date.now()),
+        };
+      }
+      try {
+        return await actor.createExpense(input);
+      } catch (err) {
+        if (!isLikelyOffline(err)) throw err;
+        const tempId = makeTempExpenseId();
+        await enqueuePendingExpense(tempId, input);
+        return {
+          ...expense,
+          id: tempId,
+          owner: "",
+          createdAt: BigInt(Date.now()),
+        };
+      }
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["expenses", variables.budgetId.toString()],
-      });
-      queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
-      queryClient.invalidateQueries({ queryKey: ["monthly-trend"] });
-      queryClient.invalidateQueries({ queryKey: ["category-trend"] });
-      queryClient.invalidateQueries({ queryKey: ["daily-spending"] });
-      queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
-      queryClient.invalidateQueries({
-        queryKey: ["category-breakdown-range"],
-      });
-      queryClient.invalidateQueries({ queryKey: ["annual-summary"] });
-      queryClient.invalidateQueries({ queryKey: ["expenses-in-range"] });
-      queryClient.invalidateQueries({ queryKey: ["receipt-gallery"] });
+    onMutate: async (expense) => {
+      const key = ["expenses", expense.budgetId.toString()];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Expense[]>(key);
+      const optimisticId = makeTempExpenseId();
+      const optimistic: Expense = {
+        ...expense,
+        id: optimisticId,
+        owner: "",
+        createdAt: BigInt(Date.now()),
+      };
+      queryClient.setQueryData<Expense[]>(key, (old) => [
+        optimistic,
+        ...(old ?? []),
+      ]);
+      return { previous, optimisticId };
+    },
+    onError: (_err, expense, context) => {
+      if (context) {
+        queryClient.setQueryData(
+          ["expenses", expense.budgetId.toString()],
+          context.previous,
+        );
+      }
+    },
+    onSuccess: (data, variables, context) => {
+      const key = ["expenses", variables.budgetId.toString()];
+      queryClient.setQueryData<Expense[]>(key, (old) =>
+        old?.map((e) => (e.id === context?.optimisticId ? data : e)),
+      );
+      invalidateExpenseQueries(queryClient, variables.budgetId);
     },
   });
+}
+
+/**
+ * Retries expenses that were queued offline (see useAddExpense above).
+ * Call once near the app root so it fires on the `online` event and once
+ * on mount, in case items were queued in a previous session.
+ */
+export function useFlushExpenseOutbox() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+
+  return useCallback(async () => {
+    if (!actor || !navigator.onLine) return;
+    const pending = await listPendingExpenses();
+    for (const item of pending) {
+      try {
+        const created = await actor.createExpense(item.input);
+        await removePendingExpense(item.tempId);
+        const key = ["expenses", item.input.budgetId.toString()];
+        queryClient.setQueryData<Expense[]>(key, (old) =>
+          old?.map((e) => (e.id === item.tempId ? created : e)),
+        );
+        invalidateExpenseQueries(queryClient, item.input.budgetId);
+      } catch (err) {
+        // Still offline, or the request failed again - leave it queued and
+        // stop for now rather than hammering a connection that just came
+        // back. The next online event (or app load) retries the rest.
+        if (isLikelyOffline(err)) break;
+      }
+    }
+  }, [actor, queryClient]);
 }
 
 export function useBulkCreateExpenses() {

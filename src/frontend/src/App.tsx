@@ -9,14 +9,18 @@ import {
 } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect } from "react";
 import { toast } from "sonner";
+import { ErrorFallback } from "./components/ErrorFallback";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
+import { ResetPasswordPage } from "./components/ResetPasswordPage";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { useBillReminders } from "./hooks/useBillReminders";
 import {
   useApplyRecurringIncome,
   useApplyRecurringTemplates,
+  useFlushExpenseOutbox,
 } from "./hooks/useBudget";
+import { useOnlineStatus } from "./hooks/useOnlineStatus";
 
 const DashboardPage = lazy(() =>
   import("./pages/DashboardPage").then((m) => ({ default: m.DashboardPage })),
@@ -130,6 +134,29 @@ function BillReminderNotifier() {
   return null;
 }
 
+/** Retries expenses queued while offline, on load and whenever connectivity returns */
+function OfflineOutboxFlusher() {
+  const flush = useFlushExpenseOutbox();
+  useEffect(() => {
+    flush();
+    window.addEventListener("online", flush);
+    return () => window.removeEventListener("online", flush);
+  }, [flush]);
+  return null;
+}
+
+/** Slim banner across the top of the shell while the browser is offline */
+function OfflineBanner() {
+  const isOnline = useOnlineStatus();
+  if (isOnline) return null;
+  return (
+    <div className="bg-amber-500/15 border-b border-amber-500/25 px-4 py-1.5 text-center text-xs font-medium text-amber-700 dark:text-amber-400">
+      You're offline. Showing your last synced data — new expenses will sync
+      once you're back online.
+    </div>
+  );
+}
+
 function AuthGuard() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -150,9 +177,11 @@ function AuthGuard() {
 
   return (
     <>
+      <OfflineBanner />
       <RecurringTemplateApplier />
       <RecurringIncomeApplier />
       <BillReminderNotifier />
+      <OfflineOutboxFlusher />
       <Outlet />
     </>
   );
@@ -165,6 +194,7 @@ const rootRoute = createRootRoute({
       <Toaster richColors position="top-right" />
     </>
   ),
+  errorComponent: ErrorFallback,
 });
 
 const authRoute = createRoute({
@@ -173,10 +203,22 @@ const authRoute = createRoute({
   component: AuthGuard,
 });
 
+// Sibling of authRoute (not a child) so it renders on its own regardless of
+// normal sign-in state - the recovery link puts the user in a temporary
+// session, not the "actually signed in" state AuthGuard checks for.
+const resetPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reset-password",
+  component: ResetPasswordPage,
+});
+
 const layoutRoute = createRoute({
   getParentRoute: () => authRoute,
   id: "layout",
   component: Layout,
+  // Isolates page crashes to the content area - sidebar/nav stay usable
+  // instead of the whole shell going down with one broken chart.
+  errorComponent: ErrorFallback,
 });
 
 const dashboardRoute = createRoute({
@@ -330,6 +372,7 @@ const accountsRoute = createRoute({
 });
 
 const routeTree = rootRoute.addChildren([
+  resetPasswordRoute,
   authRoute.addChildren([
     layoutRoute.addChildren([
       dashboardRoute,

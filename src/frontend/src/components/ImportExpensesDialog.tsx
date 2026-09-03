@@ -9,7 +9,11 @@ import {
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useBulkCreateExpenses } from "../hooks/useBudget";
-import { type CsvParseResult, parseExpensesCsv } from "../lib/csvImport";
+import {
+  type CsvParseResult,
+  type DateFormat,
+  parseExpensesCsv,
+} from "../lib/csvImport";
 import { formatCents, getMonthName } from "../types";
 
 interface Props {
@@ -30,6 +34,8 @@ export function ImportExpensesDialog({
   const bulkCreate = useBulkCreateExpenses();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
+  const [fileText, setFileText] = useState("");
+  const [dateFormat, setDateFormat] = useState<DateFormat>("day-first");
   const [parseResult, setParseResult] = useState<CsvParseResult | null>(null);
 
   const outOfRangeCount = useMemo(() => {
@@ -41,6 +47,8 @@ export function ImportExpensesDialog({
 
   function reset() {
     setFileName("");
+    setFileText("");
+    setDateFormat("day-first");
     setParseResult(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -55,7 +63,13 @@ export function ImportExpensesDialog({
     if (!file) return;
     setFileName(file.name);
     const text = await file.text();
-    setParseResult(parseExpensesCsv(text));
+    setFileText(text);
+    setParseResult(parseExpensesCsv(text, dateFormat));
+  }
+
+  function handleDateFormatChange(next: DateFormat) {
+    setDateFormat(next);
+    if (fileText) setParseResult(parseExpensesCsv(fileText, next));
   }
 
   async function handleImport() {
@@ -102,6 +116,38 @@ export function ImportExpensesDialog({
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground truncate">
                 {fileName}
+              </p>
+
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/20 px-3 py-2">
+                <span className="text-xs font-medium text-foreground shrink-0">
+                  Dates in this file are
+                </span>
+                <div className="flex gap-1.5">
+                  {(
+                    [
+                      { value: "day-first", label: "Day/Month/Year" },
+                      { value: "month-first", label: "Month/Day/Year" },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => handleDateFormatChange(opt.value)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+                        dateFormat === opt.value
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-background border border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground -mt-1.5">
+                Only affects ambiguous dates like 03/04/2026 — ISO dates
+                (2026-04-03) are always read correctly. Most Namibian and
+                southern African bank statements are Day/Month/Year.
               </p>
 
               {parseResult.rows.length > 0 && (
