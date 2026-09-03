@@ -34,7 +34,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "icons/*.png"],
       manifest: {
-        name: "BudgetWise — Monthly Budget Tracker",
+        name: "BudgetWise | Your Monthly Budget Tracker",
         short_name: "BudgetWise",
         description: "Track your monthly budgets and expenses with clarity.",
         theme_color: "#4b60c4",
@@ -64,6 +64,28 @@ export default defineConfig({
             // this rule intentionally does not cache.
             urlPattern: /^https:\/\/[^/]+\.supabase\.co\/.*/i,
             handler: "NetworkOnly",
+          },
+          {
+            // Fonts are loaded live from Google Fonts (see the @import at the
+            // top of index.css) rather than self-hosted, so this is what
+            // makes them available offline instead of falling back to a
+            // system font every time there's no connection.
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-cache",
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "gstatic-fonts-cache",
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
           {
             // Tesseract.js fetches its OCR engine (wasm core) and trained

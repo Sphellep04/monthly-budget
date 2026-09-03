@@ -42,7 +42,7 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 | Routing               | TanStack Router                                            |
 | State / data fetching | TanStack Query                                             |
 | Styling               | Tailwind CSS v3 (oklch color space), shadcn/ui             |
-| Fonts                 | Bricolage Grotesque (display), DM Sans (body), Geist Mono  |
+| Fonts                 | Fraunces (display), Source Sans 3 (body), IBM Plex Mono    |
 | Backend               | Supabase (Postgres, Row Level Security)                    |
 | Auth                  | Supabase Auth (email/password)                             |
 | File storage          | Supabase Storage (receipt photos)                          |

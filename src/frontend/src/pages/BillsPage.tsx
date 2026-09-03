@@ -16,6 +16,7 @@ import { MonthSelector } from "../components/MonthSelector";
 import { QueryErrorState } from "../components/QueryErrorState";
 import {
   useCreateBillPayment,
+  useDeleteBillPayment,
   useListBillPayments,
   useListBudgets,
   useRecurringTemplates,
@@ -237,9 +238,10 @@ function MarkPaidDialog({ bill, year, month, onClose }: MarkPaidDialogProps) {
 interface BillCardProps {
   bill: BillItem;
   onMarkPaid: (bill: BillItem) => void;
+  onUnmarkPaid: (bill: BillItem) => void;
 }
 
-function BillCard({ bill, onMarkPaid }: BillCardProps) {
+function BillCard({ bill, onMarkPaid, onUnmarkPaid }: BillCardProps) {
   const { template, payment, status } = bill;
   const cfg = STATUS_CONFIG[status];
   const isPaid = status === "paid";
@@ -296,12 +298,23 @@ function BillCard({ bill, onMarkPaid }: BillCardProps) {
             >
               Mark Paid
             </Button>
-          ) : payment?.paidAmountCents != null &&
-            payment.paidAmountCents !== template.amountCents ? (
-            <span className="text-[10px] text-muted-foreground tabular-nums">
-              Paid {formatCents(payment.paidAmountCents)}
-            </span>
-          ) : null}
+          ) : (
+            <div className="flex items-center gap-2">
+              {payment?.paidAmountCents != null &&
+                payment.paidAmountCents !== template.amountCents && (
+                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                    Paid {formatCents(payment.paidAmountCents)}
+                  </span>
+                )}
+              <button
+                type="button"
+                onClick={() => onUnmarkPaid(bill)}
+                className="text-[10px] font-medium text-muted-foreground hover:text-destructive transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+              >
+                Undo
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -337,6 +350,21 @@ export function BillsPage() {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
   const [markPaidBill, setMarkPaidBill] = useState<BillItem | null>(null);
+  const deleteBillPayment = useDeleteBillPayment();
+
+  async function handleUnmarkPaid(bill: BillItem) {
+    if (!bill.payment) return;
+    try {
+      await deleteBillPayment.mutateAsync({
+        id: bill.payment.id,
+        year: Number(bill.payment.year),
+        month: Number(bill.payment.month),
+      });
+      toast.success("Marked as unpaid");
+    } catch {
+      toast.error("Failed to undo");
+    }
+  }
 
   const {
     budgets,
@@ -534,6 +562,7 @@ export function BillsPage() {
               key={bill.template.id.toString()}
               bill={bill}
               onMarkPaid={(b) => setMarkPaidBill(b)}
+              onUnmarkPaid={handleUnmarkPaid}
             />
           ))}
         </div>

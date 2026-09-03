@@ -21,8 +21,10 @@ import {
 } from "../hooks/useBillReminders";
 import {
   useCategories,
+  useCategoryRules,
   useCreateCategory,
   useDeleteCategory,
+  useDeleteCategoryRule,
   useExportData,
   useImportData,
   useUpdateUserSettings,
@@ -62,6 +64,15 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       });
     });
   const [newCategory, setNewCategory] = useState("");
+
+  const { data: categoryRules = [] } = useCategoryRules();
+  const deleteCategoryRule = useDeleteCategoryRule();
+  const { requestDelete: requestDeleteRule, isPending: isRulePending } =
+    useUndoableDelete<bigint>((id) => {
+      deleteCategoryRule.mutate(id, {
+        onError: () => toast.error("Failed to remove rule"),
+      });
+    });
 
   const [threshold, setThreshold] = useState(80);
   const [notificationsEnabled, setNotificationsEnabledState] = useState(false);
@@ -407,6 +418,52 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     </span>
                   ))}
               </div>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-border/60" />
+
+          {/* ── Learned Categories ── */}
+          <div className="space-y-3">
+            <Label className="text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">
+              Learned Categories
+            </Label>
+            <p className="text-sm text-muted-foreground font-body leading-relaxed">
+              Quick Add remembers which category you pick for a merchant.
+              Remove a rule if it's suggesting the wrong one.
+            </p>
+            {categoryRules.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {categoryRules
+                  .filter((rule) => !isRulePending(rule.id))
+                  .map((rule) => (
+                    <span
+                      key={rule.id.toString()}
+                      className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-muted/60 border border-border/60 text-xs text-foreground"
+                    >
+                      <span className="font-medium">{rule.keyword}</span>
+                      <span className="text-muted-foreground">
+                        → {rule.category}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          requestDeleteRule(rule.id, rule.keyword)
+                        }
+                        className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-destructive/15 hover:text-destructive transition-colors"
+                        aria-label={`Remove rule for ${rule.keyword}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground/70">
+                Nothing learned yet — use Quick Add and pick a category to
+                start.
+              </p>
             )}
           </div>
 

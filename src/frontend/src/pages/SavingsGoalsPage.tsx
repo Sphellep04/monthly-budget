@@ -17,6 +17,7 @@ import {
   useCreateSavingsGoal,
   useDeleteSavingsGoal,
   useSavingsGoals,
+  useUpdateSavingsGoal,
 } from "../hooks/useBudget";
 import type { SavingsGoal } from "../types";
 import { formatCents } from "../types";
@@ -321,10 +322,12 @@ function GoalProgressBar({ pct, color }: { pct: number; color: string }) {
 function GoalCard({
   goal,
   onContribute,
+  onEdit,
   onDelete,
 }: {
   goal: SavingsGoal;
   onContribute: (goal: SavingsGoal) => void;
+  onEdit: (goal: SavingsGoal) => void;
   onDelete: (goal: SavingsGoal) => void;
 }) {
   const target = Number(goal.targetCents);
@@ -390,6 +393,15 @@ function GoalCard({
           <Button
             size="sm"
             variant="ghost"
+            className="h-8 px-2.5 text-xs rounded-lg"
+            onClick={() => onEdit(goal)}
+            aria-label="Edit goal"
+          >
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
             className="h-8 px-2.5 text-xs rounded-lg hover:text-destructive"
             onClick={() => onDelete(goal)}
             aria-label="Delete goal"
@@ -399,6 +411,179 @@ function GoalCard({
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Edit Goal Dialog ─────────────────────────────────────────────────────────
+
+function EditGoalDialog({
+  goal,
+  onClose,
+}: {
+  goal: SavingsGoal | null;
+  onClose: () => void;
+}) {
+  const updateGoal = useUpdateSavingsGoal();
+  const [name, setName] = useState("");
+  const [targetStr, setTargetStr] = useState("");
+  const [targetDate, setTargetDate] = useState("");
+  const [color, setColor] = useState(PRESET_COLORS[0]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (goal) {
+      setName(goal.name);
+      setTargetStr((Number(goal.targetCents) / 100).toFixed(2));
+      setTargetDate(goal.targetDate ?? "");
+      setColor(goal.color);
+      setError("");
+    }
+  }, [goal]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!goal) return;
+    const target = Number.parseFloat(targetStr);
+    if (!name.trim()) {
+      setError("Please give your goal a name.");
+      return;
+    }
+    if (!targetStr || !Number.isFinite(target) || target <= 0) {
+      setError("Please enter a valid target amount greater than N$0.00");
+      return;
+    }
+    setError("");
+
+    try {
+      await updateGoal.mutateAsync({
+        id: goal.id,
+        input: {
+          name: name.trim(),
+          targetCents: BigInt(Math.round(target * 100)),
+          targetDate: targetDate || undefined,
+          color,
+        },
+      });
+      toast.success("Savings goal updated");
+      onClose();
+    } catch {
+      toast.error("Failed to update savings goal");
+    }
+  }
+
+  return (
+    <Dialog open={!!goal} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="sm:max-w-md bg-card border-border shadow-premium">
+        <DialogHeader>
+          <DialogTitle className="font-display text-xl font-bold text-foreground">
+            Edit Savings Goal
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-5 pt-1">
+          <div>
+            <Label
+              htmlFor="edit-goal-name"
+              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+            >
+              Goal Name
+            </Label>
+            <Input
+              id="edit-goal-name"
+              placeholder="e.g. New Laptop, Emergency Fund"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="input-focus h-10 text-sm"
+            />
+          </div>
+
+          <div>
+            <Label
+              htmlFor="edit-goal-target"
+              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+            >
+              Target Amount
+            </Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm select-none pointer-events-none">
+                N$
+              </span>
+              <Input
+                id="edit-goal-target"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0.00"
+                value={targetStr}
+                onChange={(e) => setTargetStr(e.target.value)}
+                className="pl-9 input-focus h-10 font-mono text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label
+              htmlFor="edit-goal-date"
+              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+            >
+              Target Date{" "}
+              <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
+                (optional)
+              </span>
+            </Label>
+            <Input
+              id="edit-goal-date"
+              type="date"
+              value={targetDate}
+              onChange={(e) => setTargetDate(e.target.value)}
+              className="input-focus h-10 font-mono text-sm"
+            />
+          </div>
+
+          <div>
+            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+              Color
+            </Label>
+            <div className="flex flex-wrap gap-2.5">
+              {PRESET_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  aria-pressed={color === c}
+                  onClick={() => setColor(c)}
+                  className={`w-8 h-8 rounded-full transition-spring ${
+                    color === c
+                      ? "ring-2 ring-offset-2 ring-foreground/60 scale-110"
+                      : "hover:scale-110"
+                  }`}
+                  style={{ backgroundColor: c }}
+                  aria-label={`Color ${c}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <p className="text-xs text-destructive leading-relaxed">
+              {error}
+            </p>
+          )}
+
+          <div className="flex justify-end gap-3 pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={updateGoal.isPending}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={updateGoal.isPending}>
+              {updateGoal.isPending ? "Saving…" : "Save Changes"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -414,6 +599,7 @@ export function SavingsGoalsPage() {
   const deleteGoal = useDeleteSavingsGoal();
   const [newGoalOpen, setNewGoalOpen] = useState(false);
   const [contributing, setContributing] = useState<SavingsGoal | null>(null);
+  const [editing, setEditing] = useState<SavingsGoal | null>(null);
   const [deleting, setDeleting] = useState<SavingsGoal | null>(null);
 
   async function handleDelete() {
@@ -477,6 +663,7 @@ export function SavingsGoalsPage() {
               key={goal.id}
               goal={goal}
               onContribute={setContributing}
+              onEdit={setEditing}
               onDelete={setDeleting}
             />
           ))}
@@ -488,6 +675,7 @@ export function SavingsGoalsPage() {
         goal={contributing}
         onClose={() => setContributing(null)}
       />
+      <EditGoalDialog goal={editing} onClose={() => setEditing(null)} />
       <DeleteConfirmDialog
         open={!!deleting}
         onOpenChange={(v) => !v && setDeleting(null)}
