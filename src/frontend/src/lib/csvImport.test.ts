@@ -114,4 +114,42 @@ describe("parseExpensesCsv", () => {
     expect(result.rows).toEqual([]);
     expect(result.errors).toHaveLength(1);
   });
+
+  it("skips preamble rows before the real header, like real bank exports have", () => {
+    const csv = [
+      "Account Number: 123456789",
+      "Statement Period: 01 Aug 2026 - 31 Aug 2026",
+      "",
+      "Date,Amount,Description",
+      "2026-08-01,12.50,Groceries",
+    ].join("\n");
+    const result = parseExpensesCsv(csv);
+    expect(result.errors).toEqual([]);
+    expect(result.rows).toEqual([
+      { date: "2026-08-01", amountCents: 1250n, notes: "Groceries" },
+    ]);
+  });
+
+  it("reads separate Debit/Credit columns, treating a debit as an expense", () => {
+    const csv = [
+      "Date,Description,Debit,Credit",
+      "2026-08-01,Shoprite,45.00,",
+      "2026-08-02,Salary,,15000.00",
+    ].join("\n");
+    const result = parseExpensesCsv(csv);
+    expect(result.errors).toEqual([]);
+    expect(result.rows).toEqual([
+      { date: "2026-08-01", amountCents: 4500n, notes: "Shoprite" },
+    ]);
+  });
+
+  it("silently skips a credit-only row rather than reporting it as an error", () => {
+    const csv = [
+      "Date,Description,Debit,Credit",
+      "2026-08-02,Salary,,15000.00",
+    ].join("\n");
+    const result = parseExpensesCsv(csv);
+    expect(result.rows).toEqual([]);
+    expect(result.errors).toEqual([]);
+  });
 });

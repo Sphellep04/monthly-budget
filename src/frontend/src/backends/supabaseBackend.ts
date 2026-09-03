@@ -12,6 +12,7 @@ import type {
   BudgetTemplateInput,
   Category,
   CategoryBreakdownPoint,
+  CategoryRule,
   CategoryTrendPoint,
   DailySpendingPoint,
   Expense,
@@ -220,7 +221,7 @@ function mapRecurringIncome(row: RecurringIncomeRow): RecurringIncome {
 }
 
 /** Whether a recurring item with this frequency/anchor should generate an occurrence in `month`. */
-function recurringAppliesInMonth(
+export function recurringAppliesInMonth(
   frequency: RecurringFrequency,
   anchorMonth: number | null,
   month: number,
@@ -419,6 +420,22 @@ function mapCategory(row: CategoryRow): Category {
   return {
     id: BigInt(row.id),
     name: row.name,
+  };
+}
+
+interface CategoryRuleRow {
+  id: number | string;
+  owner: string;
+  keyword: string;
+  category: string;
+  created_at: string;
+}
+
+function mapCategoryRule(row: CategoryRuleRow): CategoryRule {
+  return {
+    id: BigInt(row.id),
+    keyword: row.keyword,
+    category: row.category,
   };
 }
 
@@ -1033,6 +1050,32 @@ export function createSupabaseBackend(userId: string): Backend {
       return mapSavingsGoal(inserted);
     },
 
+    async learnCategoryRule(keyword: string, category: string) {
+      const normalized = keyword.trim().toLowerCase();
+      const upserted = unwrap(
+        await supabase
+          .from("category_rules")
+          .upsert(
+            { owner: userId, keyword: normalized, category },
+            { onConflict: "owner,keyword" },
+          )
+          .select()
+          .single(),
+      ) as CategoryRuleRow;
+      return mapCategoryRule(upserted);
+    },
+
+    async deleteCategoryRule(id) {
+      const { data, error } = await supabase
+        .from("category_rules")
+        .delete()
+        .eq("owner", userId)
+        .eq("id", id)
+        .select();
+      if (error) throw new Error(error.message);
+      return (data?.length ?? 0) > 0;
+    },
+
     async deleteAccount(id) {
       const { data, error } = await supabase
         .from("accounts")
@@ -1187,6 +1230,7 @@ export function createSupabaseBackend(userId: string): Backend {
         supabase.from("notes").select("*").eq("owner", userId),
         supabase.from("categories").select("*").eq("owner", userId),
         supabase.from("accounts").select("*").eq("owner", userId),
+        supabase.from("category_rules").select("*").eq("owner", userId),
         supabase
           .from("user_settings")
           .select("*")
@@ -1212,12 +1256,13 @@ export function createSupabaseBackend(userId: string): Backend {
         notes,
         categories,
         accounts,
+        categoryRules,
         userSettings,
       ] = results;
 
       return JSON.stringify(
         {
-          version: 3,
+          version: 4,
           budgets: budgets.data ?? [],
           expenses: expenses.data ?? [],
           recurringTemplates: recurringTemplates.data ?? [],
@@ -1230,6 +1275,7 @@ export function createSupabaseBackend(userId: string): Backend {
           notes: notes.data ?? [],
           categories: categories.data ?? [],
           accounts: accounts.data ?? [],
+          categoryRules: categoryRules.data ?? [],
           userSettings: userSettings.data ?? { alert_threshold_percent: 80 },
         },
         null,
@@ -1698,6 +1744,17 @@ export function createSupabaseBackend(userId: string): Backend {
           .order("name"),
       ) as CategoryRow[];
       return rows.map(mapCategory);
+    },
+
+    async listCategoryRules() {
+      const rows = unwrap(
+        await supabase
+          .from("category_rules")
+          .select("*")
+          .eq("owner", userId)
+          .order("keyword"),
+      ) as CategoryRuleRow[];
+      return rows.map(mapCategoryRule);
     },
 
     async listExpenses(budgetId) {

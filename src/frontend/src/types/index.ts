@@ -301,6 +301,14 @@ export interface Category {
   name: string;
 }
 
+/** A learned merchant-keyword -> category mapping, used to auto-suggest a
+ * category for future expenses that mention the same keyword. */
+export interface CategoryRule {
+  id: bigint;
+  keyword: string;
+  category: string;
+}
+
 export const CATEGORIES: string[] = [
   "Groceries",
   "Housing",

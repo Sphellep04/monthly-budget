@@ -13,6 +13,7 @@ import type {
   BudgetSummary,
   Category,
   CategoryBreakdownPoint,
+  CategoryRule,
   CategoryTrendPoint,
   DailySpendingPoint,
   Expense,
@@ -345,6 +346,23 @@ export function useDeleteExpense() {
       if (!actor) throw new Error("Actor not ready");
       return actor.deleteExpense(id);
     },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["expenses"] });
+      const previous = queryClient.getQueriesData<Expense[]>({
+        queryKey: ["expenses"],
+      });
+      queryClient.setQueriesData<Expense[]>({ queryKey: ["expenses"] }, (old) =>
+        old?.filter((e) => e.id !== id),
+      );
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        for (const [key, data] of context.previous) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
@@ -369,6 +387,28 @@ export function useDeleteBudget() {
     mutationFn: async (id: bigint) => {
       if (!actor) throw new Error("Actor not ready");
       return actor.deleteBudget(id);
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["monthly-summary"] });
+      const previous = queryClient.getQueriesData<MonthlySummary>({
+        queryKey: ["monthly-summary"],
+      });
+      queryClient.setQueriesData<MonthlySummary>(
+        { queryKey: ["monthly-summary"] },
+        (old) =>
+          old && {
+            ...old,
+            budgets: old.budgets.filter((b) => b.budget.id !== id),
+          },
+      );
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        for (const [key, data] of context.previous) {
+          queryClient.setQueryData(key, data);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
@@ -448,6 +488,21 @@ export function useDeleteRecurringTemplate() {
     }) => {
       if (!actor) throw new Error("Actor not ready");
       return actor.deleteRecurringTemplate(id);
+    },
+    onMutate: async ({ id, budgetId }) => {
+      const key = ["recurring-templates", budgetId.toString()];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<RecurringTemplate[]>(key);
+      queryClient.setQueryData<RecurringTemplate[]>(key, (old) =>
+        old?.filter((t) => t.id !== id),
+      );
+      return { previous };
+    },
+    onError: (_err, variables, context) => {
+      queryClient.setQueryData(
+        ["recurring-templates", variables.budgetId.toString()],
+        context?.previous,
+      );
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
@@ -604,6 +659,17 @@ export function useDeleteNote() {
       if (!actor) throw new Error("Actor not ready");
       return actor.deleteNote(id);
     },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["notes"] });
+      const previous = queryClient.getQueryData<Note[]>(["notes"]);
+      queryClient.setQueryData<Note[]>(["notes"], (old) =>
+        old?.filter((n) => n.id !== id),
+      );
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      queryClient.setQueryData(["notes"], context?.previous);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
     },
@@ -649,6 +715,53 @@ export function useDeleteCategory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+  });
+}
+
+// ─── Category rules (auto-categorization) ────────────────────────────────────
+
+export function useCategoryRules() {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<CategoryRule[]>({
+    queryKey: ["category-rules"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not ready");
+      const result = await actor.listCategoryRules();
+      return result as unknown as CategoryRule[];
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useLearnCategoryRule() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async ({
+      keyword,
+      category,
+    }: { keyword: string; category: string }) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.learnCategoryRule(keyword, category);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["category-rules"] });
+    },
+  });
+}
+
+export function useDeleteCategoryRule() {
+  const queryClient = useQueryClient();
+  const { actor } = useActorOrMock();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("Actor not ready");
+      return actor.deleteCategoryRule(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["category-rules"] });
     },
   });
 }
@@ -888,6 +1001,23 @@ export function useDeleteIncome() {
       if (!actor) throw new Error("Actor not ready");
       return actor.deleteIncome(id);
     },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["income"] });
+      const previous = queryClient.getQueriesData<Income[]>({
+        queryKey: ["income"],
+      });
+      queryClient.setQueriesData<Income[]>({ queryKey: ["income"] }, (old) =>
+        old?.filter((i) => i.id !== id),
+      );
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        for (const [key, data] of context.previous) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["income"] });
       queryClient.invalidateQueries({ queryKey: ["monthly-summary"] });
@@ -1029,6 +1159,19 @@ export function useDeleteSavingsGoal() {
     mutationFn: async (id: string) => {
       if (!actor) throw new Error("Actor not ready");
       return actor.deleteSavingsGoal(id);
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["savings-goals"] });
+      const previous = queryClient.getQueryData<SavingsGoal[]>([
+        "savings-goals",
+      ]);
+      queryClient.setQueryData<SavingsGoal[]>(["savings-goals"], (old) =>
+        old?.filter((g) => g.id !== id),
+      );
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      queryClient.setQueryData(["savings-goals"], context?.previous);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savings-goals"] });

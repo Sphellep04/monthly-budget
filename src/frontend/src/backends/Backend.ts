@@ -8,6 +8,7 @@ import type {
   BudgetTemplateInput,
   Category,
   CategoryBreakdownPoint,
+  CategoryRule,
   CategoryTrendPoint,
   DailySpendingPoint,
   Expense,
@@ -97,6 +98,10 @@ export interface Backend {
   ): Promise<RecurringTemplate>;
   createSavingsGoal(input: SavingsGoalInput): Promise<SavingsGoal>;
 
+  /** Upserts a keyword -> category mapping; re-learning an existing keyword overwrites its category. */
+  learnCategoryRule(keyword: string, category: string): Promise<CategoryRule>;
+  deleteCategoryRule(id: bigint): Promise<boolean>;
+
   deleteAccount(id: bigint): Promise<boolean>;
   deleteBillPayment(id: string): Promise<boolean>;
   deleteBudget(id: bigint): Promise<boolean>;
@@ -155,6 +160,7 @@ export interface Backend {
   listBudgets(year: bigint, month: bigint): Promise<Budget[]>;
   listBudgetTemplates(): Promise<BudgetTemplate[]>;
   listCategories(): Promise<Category[]>;
+  listCategoryRules(): Promise<CategoryRule[]>;
   listExpenses(budgetId: bigint): Promise<Expense[]>;
   listExpensesWithReceipts(): Promise<Expense[]>;
   listIncome(year: bigint, month: bigint): Promise<Income[]>;

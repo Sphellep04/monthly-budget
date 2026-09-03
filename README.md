@@ -21,7 +21,9 @@ A personal finance app for tracking monthly budgets and expenses. Built with a R
 - **Net savings** - real income-minus-expenses figure on the Dashboard, alongside budget utilization
 - **Bill reminders** - optional browser notifications for bills due within 3 days
 - **Backup & restore** - export/import all your data as a JSON file
-- **CSV import & export** - bulk-add expenses from a bank statement or another app, or download a month's breakdown
+- **Bank statement import** - bulk-add expenses from CSV (handles a few header rows before the real columns, and separate Debit/Credit columns) or OFX/QFX, or download a month's breakdown as CSV
+- **Quick Add** - paste a bank SMS/push notification (or a screenshot of one) and the amount, date, and merchant are pulled out automatically for you to check before saving; nothing about the image itself is stored, only the extracted text
+- **Auto-categorization** - expenses get a suggested budget from the merchant name, learning from the categories you actually pick so it gets better with use
 - **Undo on delete** - deleting an expense or category shows a brief Undo toast instead of deleting instantly
 - **Spending insights** - progress bars, status indicators (On Track / Near Limit / Over Budget), and alerts
 - **Annual summary** - year-over-year view of all categories

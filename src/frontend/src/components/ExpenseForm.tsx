@@ -26,6 +26,7 @@ import {
   useCreateSplitExpense,
 } from "../hooks/useBudget";
 import { supabase } from "../lib/supabaseClient";
+import { computeSplitTotals, validateSplitExpense } from "../lib/splitExpense";
 import { formatCents } from "../types";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -145,11 +146,7 @@ export function ExpenseForm({
     const n = Number.parseFloat(amountStr);
     return Number.isFinite(n) && n > 0 ? Math.round(n * 100) : 0;
   })();
-  const splitTotalCents = splitRows.reduce((sum, row) => {
-    const n = Number.parseFloat(row.amountStr);
-    return sum + (Number.isFinite(n) && n > 0 ? Math.round(n * 100) : 0);
-  }, 0);
-  const primaryRemainingCents = totalCents - splitTotalCents;
+  const { primaryRemainingCents } = computeSplitTotals(totalCents, splitRows);
 
   function addSplitRow() {
     setSplitRows((rows) => [
@@ -325,16 +322,9 @@ export function ExpenseForm({
 
     setSplitError("");
     if (splitMode && splitRows.length > 0) {
-      if (splitRows.some((r) => !r.budgetId)) {
-        setSplitError("Choose a budget for every split.");
-        return;
-      }
-      if (splitRows.some((r) => Number.parseFloat(r.amountStr) <= 0)) {
-        setSplitError("Enter a valid amount for every split.");
-        return;
-      }
-      if (primaryRemainingCents <= 0) {
-        setSplitError("The splits must add up to less than the total amount.");
+      const error = validateSplitExpense(splitRows, primaryRemainingCents);
+      if (error) {
+        setSplitError(error);
         return;
       }
     }

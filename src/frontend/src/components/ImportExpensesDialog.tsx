@@ -14,7 +14,12 @@ import {
   type DateFormat,
   parseExpensesCsv,
 } from "../lib/csvImport";
+import { parseExpensesOfx } from "../lib/ofxImport";
 import { formatCents, getMonthName } from "../types";
+
+function isOfxFile(fileName: string): boolean {
+  return /\.(ofx|qfx)$/i.test(fileName);
+}
 
 interface Props {
   budgetId: bigint;
@@ -64,7 +69,11 @@ export function ImportExpensesDialog({
     setFileName(file.name);
     const text = await file.text();
     setFileText(text);
-    setParseResult(parseExpensesCsv(text, dateFormat));
+    setParseResult(
+      isOfxFile(file.name)
+        ? parseExpensesOfx(text)
+        : parseExpensesCsv(text, dateFormat),
+    );
   }
 
   function handleDateFormatChange(next: DateFormat) {
@@ -90,11 +99,12 @@ export function ImportExpensesDialog({
       <DialogContent className="sm:max-w-lg shadow-premium">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-bold">
-            Import Expenses from CSV
+            Import Expenses
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Upload a CSV with Date and Amount columns (Notes/Description is
-            optional) — a bank statement export works too.
+            Upload a bank statement — CSV (with Date and Amount, or separate
+            Debit/Credit columns) or OFX/QFX. A few header rows before the real
+            column headers are handled automatically.
           </DialogDescription>
         </DialogHeader>
 
@@ -106,10 +116,10 @@ export function ImportExpensesDialog({
               className="w-full rounded-xl border border-dashed border-border bg-muted/20 hover:bg-muted/40 hover:border-primary/40 transition-colors px-4 py-8 flex flex-col items-center gap-1.5"
             >
               <span className="text-sm font-medium text-foreground">
-                Click to choose a CSV file
+                Click to choose a statement file
               </span>
               <span className="text-xs text-muted-foreground">
-                .csv up to a few thousand rows
+                .csv, .ofx or .qfx — up to a few thousand rows
               </span>
             </button>
           ) : (
@@ -118,37 +128,41 @@ export function ImportExpensesDialog({
                 {fileName}
               </p>
 
-              <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/20 px-3 py-2">
-                <span className="text-xs font-medium text-foreground shrink-0">
-                  Dates in this file are
-                </span>
-                <div className="flex gap-1.5">
-                  {(
-                    [
-                      { value: "day-first", label: "Day/Month/Year" },
-                      { value: "month-first", label: "Month/Day/Year" },
-                    ] as const
-                  ).map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => handleDateFormatChange(opt.value)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
-                        dateFormat === opt.value
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-background border border-border text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <p className="text-[11px] text-muted-foreground -mt-1.5">
-                Only affects ambiguous dates like 03/04/2026 — ISO dates
-                (2026-04-03) are always read correctly. Most Namibian and
-                southern African bank statements are Day/Month/Year.
-              </p>
+              {!isOfxFile(fileName) && (
+                <>
+                  <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/20 px-3 py-2">
+                    <span className="text-xs font-medium text-foreground shrink-0">
+                      Dates in this file are
+                    </span>
+                    <div className="flex gap-1.5">
+                      {(
+                        [
+                          { value: "day-first", label: "Day/Month/Year" },
+                          { value: "month-first", label: "Month/Day/Year" },
+                        ] as const
+                      ).map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => handleDateFormatChange(opt.value)}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+                            dateFormat === opt.value
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-background border border-border text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground -mt-1.5">
+                    Only affects ambiguous dates like 03/04/2026 — ISO dates
+                    (2026-04-03) are always read correctly. Most Namibian and
+                    southern African bank statements are Day/Month/Year.
+                  </p>
+                </>
+              )}
 
               {parseResult.rows.length > 0 && (
                 <div className="max-h-56 overflow-y-auto rounded-xl border border-border divide-y divide-border">
@@ -223,7 +237,7 @@ export function ImportExpensesDialog({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv,text/csv"
+            accept=".csv,.ofx,.qfx,text/csv"
             className="hidden"
             onChange={handleFileChange}
           />

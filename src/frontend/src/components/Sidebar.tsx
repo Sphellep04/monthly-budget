@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { QuickAddDialog } from "./QuickAddDialog";
 import { SettingsModal } from "./SettingsModal";
 
 interface NavItem {
@@ -97,9 +98,11 @@ function NavSection({
 function SidebarInner({
   onNavClick,
   onSettingsOpen,
+  onQuickAddOpen,
 }: {
   onNavClick?: () => void;
   onSettingsOpen: () => void;
+  onQuickAddOpen: () => void;
 }) {
   const { signOut } = useAuth();
   const routerState = useRouterState();
@@ -112,6 +115,16 @@ function SidebarInner({
         <span className="font-display text-xl font-bold text-sidebar-foreground tracking-tight">
           BudgetWise
         </span>
+      </div>
+
+      {/* ── Quick Add ── */}
+      <div className="px-3 pb-4">
+        <Button
+          onClick={onQuickAddOpen}
+          className="w-full justify-center text-[0.8125rem] font-semibold rounded-xl h-10 shadow-elevated button-hover"
+        >
+          Quick Add
+        </Button>
       </div>
 
       {/* ── Nav ── */}
@@ -158,6 +171,7 @@ function SidebarInner({
 export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   return (
     <>
@@ -184,19 +198,27 @@ export function Sidebar() {
               setMobileOpen(false);
               setSettingsOpen(true);
             }}
+            onQuickAddOpen={() => {
+              setMobileOpen(false);
+              setQuickAddOpen(true);
+            }}
           />
         </SheetContent>
       </Sheet>
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-[220px] flex-shrink-0 h-screen bg-sidebar border-r border-sidebar-border/70 flex-col sticky top-0">
-        <SidebarInner onSettingsOpen={() => setSettingsOpen(true)} />
+        <SidebarInner
+          onSettingsOpen={() => setSettingsOpen(true)}
+          onQuickAddOpen={() => setQuickAddOpen(true)}
+        />
       </aside>
 
       <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
       />
+      <QuickAddDialog open={quickAddOpen} onOpenChange={setQuickAddOpen} />
     </>
   );
 }
