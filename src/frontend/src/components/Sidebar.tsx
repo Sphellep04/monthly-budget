@@ -111,8 +111,9 @@ function SidebarInner({
   return (
     <div className="flex flex-col h-full">
       {/* ── Brand ── */}
-      {/* Top padding clears the status bar/notch in standalone PWA mode (no-op on desktop, where env() is 0) */}
-      <div className="px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-4">
+      {/* 3rem clears a typical status bar on its own; env() grows it further
+          for devices that actually report a safe-area inset (notches, etc). */}
+      <div className="px-5 pt-[max(3rem,env(safe-area-inset-top,0px))] pb-4">
         <span className="font-display text-xl font-bold text-sidebar-foreground tracking-tight">
           BudgetWise
         </span>
@@ -148,7 +149,7 @@ function SidebarInner({
 
       {/* ── Bottom ── */}
       {/* Bottom padding clears the home indicator in standalone PWA mode */}
-      <div className="px-3 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-sidebar-border/50 space-y-0.5">
+      <div className="px-3 pt-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] border-t border-sidebar-border/50 space-y-0.5">
         <Button
           variant="ghost"
           size="sm"
@@ -177,10 +178,11 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile toggle - offset clears the status bar/notch in standalone PWA mode */}
+      {/* Mobile toggle - 1rem clears typical chrome on its own; env() grows it
+          further on devices that report a real safe-area inset */}
       <button
         type="button"
-        className="fixed top-[max(1rem,env(safe-area-inset-top))] left-[max(1rem,env(safe-area-inset-left))] z-50 md:hidden flex items-center justify-center h-9 px-3.5 rounded-xl bg-card border border-border shadow-elevated hover:bg-muted active:scale-95 transition-spring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 text-[0.8125rem] font-medium"
+        className="fixed top-[max(1rem,env(safe-area-inset-top,0px))] left-[max(1rem,env(safe-area-inset-left,0px))] z-50 md:hidden flex items-center justify-center h-9 px-3.5 rounded-xl bg-card border border-border shadow-elevated hover:bg-muted active:scale-95 transition-spring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 text-[0.8125rem] font-medium"
         onClick={() => setMobileOpen(true)}
         aria-label="Open sidebar"
       >

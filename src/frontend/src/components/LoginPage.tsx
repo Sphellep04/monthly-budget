@@ -119,7 +119,7 @@ export function LoginPage() {
       </div>
 
       {/* ── Sign-in form ── */}
-      <div className="flex-1 flex items-center justify-center px-6 pt-[max(3rem,env(safe-area-inset-top))] pb-[max(3rem,env(safe-area-inset-bottom))] bg-background">
+      <div className="flex-1 flex items-center justify-center px-6 pt-[max(3rem,env(safe-area-inset-top,0px))] pb-[max(3rem,env(safe-area-inset-bottom,0px))] bg-background">
         <div className="w-full max-w-sm flex flex-col gap-6">
           <span className="md:hidden font-display text-2xl font-bold text-foreground tracking-tight">
             BudgetWise

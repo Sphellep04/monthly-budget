@@ -38,7 +38,7 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] bg-background">
+    <div className="min-h-screen flex items-center justify-center p-6 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-background">
       <div className="w-full max-w-sm bg-card border border-border/80 rounded-2xl shadow-premium p-7">
         {isLoading ? (
           <div className="flex justify-center py-6">
