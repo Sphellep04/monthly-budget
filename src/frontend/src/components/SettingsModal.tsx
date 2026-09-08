@@ -75,6 +75,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     });
 
   const [threshold, setThreshold] = useState(80);
+  const [floorStr, setFloorStr] = useState("");
   const [notificationsEnabled, setNotificationsEnabledState] = useState(false);
 
   async function handleAddCategory() {
@@ -101,6 +102,16 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       setThreshold(settings.alertThresholdPercent);
     }
   }, [settings?.alertThresholdPercent]);
+
+  useEffect(() => {
+    if (settings?.savingsFloorCents !== undefined) {
+      setFloorStr(
+        settings.savingsFloorCents > 0n
+          ? (Number(settings.savingsFloorCents) / 100).toFixed(2)
+          : "",
+      );
+    }
+  }, [settings?.savingsFloorCents]);
 
   useEffect(() => {
     if (open) {
@@ -180,7 +191,15 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   }
 
   const handleSave = async () => {
-    await updateSettings.mutateAsync({ alertThresholdPercent: threshold });
+    const floor = Number.parseFloat(floorStr);
+    const savingsFloorCents =
+      floorStr && Number.isFinite(floor) && floor > 0
+        ? BigInt(Math.round(floor * 100))
+        : 0n;
+    await updateSettings.mutateAsync({
+      alertThresholdPercent: threshold,
+      savingsFloorCents,
+    });
     toast.success("Settings saved", {
       description: `Alert threshold set to ${threshold}%.`,
     });
@@ -317,6 +336,35 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-border/60" />
+
+          {/* ── Savings Floor ── */}
+          <div className="space-y-3">
+            <Label className="text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">
+              Savings Floor
+            </Label>
+            <p className="text-sm text-muted-foreground font-body leading-relaxed">
+              A minimum you always want left over each month, separate from any
+              budget. The Dashboard shows whether you're still protecting it.
+              Leave blank to turn this off.
+            </p>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm select-none pointer-events-none">
+                N$
+              </span>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="e.g. 5000.00"
+                value={floorStr}
+                onChange={(e) => setFloorStr(e.target.value)}
+                className="pl-9 h-9 font-mono text-sm rounded-xl"
+              />
+            </div>
           </div>
 
           {/* Divider */}

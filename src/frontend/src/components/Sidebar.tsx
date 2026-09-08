@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { NotificationInbox } from "./NotificationInbox";
 import { QuickAddDialog } from "./QuickAddDialog";
 import { SettingsModal } from "./SettingsModal";
 
@@ -150,6 +151,7 @@ function SidebarInner({
       {/* ── Bottom ── */}
       {/* Bottom padding clears the home indicator in standalone PWA mode */}
       <div className="px-3 pt-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] border-t border-sidebar-border/50 space-y-0.5">
+        <NotificationInbox />
         <Button
           variant="ghost"
           size="sm"

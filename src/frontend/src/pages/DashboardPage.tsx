@@ -6,9 +6,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AlertsPanel } from "../components/AlertsPanel";
 import { BudgetCard } from "../components/BudgetCard";
+import { GapComparisonCard } from "../components/GapComparisonCard";
 import { MonthSelector } from "../components/MonthSelector";
 import { MonthlySummaryHeader } from "../components/MonthlySummaryHeader";
 import { QueryErrorState } from "../components/QueryErrorState";
+import { RecentTransactions } from "../components/RecentTransactions";
+import { SavingsFloorCard } from "../components/SavingsFloorCard";
+import { TopInsightBanner } from "../components/TopInsightBanner";
 import { useActorOrMock } from "../hooks/useActorOrMock";
 import { useMonthlySummary, useUserSettings } from "../hooks/useBudget";
 import type { Expense } from "../types";
@@ -228,9 +232,34 @@ export function DashboardPage() {
       {/* ── Monthly summary ── */}
       <MonthlySummaryHeader summary={summary} isLoading={isLoading} />
 
+      {/* ── Gap comparison + savings floor + top insight ── */}
+      {/* SavingsFloorCard doesn't depend on budgets being set up, so it
+          renders on its own when there's nothing else to pair it with. */}
+      {hasBudgets ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <GapComparisonCard year={year} month={month} />
+            <SavingsFloorCard year={year} month={month} />
+          </div>
+          <TopInsightBanner year={year} month={month} />
+        </div>
+      ) : (
+        <SavingsFloorCard year={year} month={month} />
+      )}
+
       {/* ── Alerts panel ── */}
       {hasBudgets && (
         <AlertsPanel summaries={budgets} alertThreshold={alertThreshold} />
+      )}
+
+      {/* ── Recent transactions ── */}
+      {hasBudgets && (
+        <div>
+          <h2 className="font-display text-lg font-semibold text-foreground leading-none mb-4">
+            Recent
+          </h2>
+          <RecentTransactions year={year} month={month} budgets={budgets} />
+        </div>
       )}
 
       {/* ── Budget grid ── */}

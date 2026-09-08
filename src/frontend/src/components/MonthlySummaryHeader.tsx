@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useRef, useState } from "react";
+import { computeDailyPace } from "../lib/pacing";
 import { formatCents } from "../types";
 import type { MonthlySummary } from "../types";
 
@@ -70,6 +71,12 @@ export function MonthlySummaryHeader({
     : isNearLimit
       ? "Approaching limit"
       : "You're doing great";
+
+  const pace = computeDailyPace(
+    Number(summary.year),
+    Number(summary.month),
+    remaining,
+  );
 
   const totalIncome = Number(summary.totalIncomeCents);
   const netSavings = totalIncome - totalSpent;
@@ -156,6 +163,18 @@ export function MonthlySummaryHeader({
             </span>
           ))}
         </div>
+        {pace && (
+          <p className="text-[11px] text-muted-foreground mt-2.5 pt-2.5 border-t border-border/40">
+            <span className="font-semibold text-foreground">
+              {pace.daysLeft} day{pace.daysLeft === 1 ? "" : "s"} left
+            </span>{" "}
+            · safe to spend{" "}
+            <span className="font-mono font-semibold text-foreground tabular-nums">
+              {formatCents(Math.round(pace.perDayCents))}
+            </span>
+            /day
+          </p>
+        )}
       </div>
     </div>
   );

@@ -35,7 +35,7 @@ import {
 } from "../hooks/useBudget";
 import { extractKeyword, suggestCategory } from "../lib/autoCategorize";
 import { parseTransactionText } from "../lib/transactionParser";
-import { CATEGORIES } from "../types";
+import { CATEGORIES, UNPLANNED_CATEGORY } from "../types";
 
 interface Props {
   open: boolean;
@@ -188,17 +188,21 @@ export function QuickAddDialog({ open, onOpenChange }: Props) {
       let budgetId = matchingBudget?.id;
 
       if (!budgetId) {
-        const limit = Number.parseFloat(newBudgetLimitStr);
-        if (!newBudgetLimitStr || Number.isNaN(limit) || limit <= 0) {
-          toast.error(
-            `No ${category} budget for this month yet - enter a limit to create one.`,
-          );
-          setSubmitting(false);
-          return;
+        let limitCents = 0n;
+        if (category !== UNPLANNED_CATEGORY) {
+          const limit = Number.parseFloat(newBudgetLimitStr);
+          if (!newBudgetLimitStr || Number.isNaN(limit) || limit <= 0) {
+            toast.error(
+              `No ${category} budget for this month yet - enter a limit to create one.`,
+            );
+            setSubmitting(false);
+            return;
+          }
+          limitCents = BigInt(Math.round(limit * 100));
         }
         const created = await createBudget.mutateAsync({
           name: category,
-          limitCents: BigInt(Math.round(limit * 100)),
+          limitCents,
           color: PRESET_COLORS[monthBudgets.length % PRESET_COLORS.length],
           category,
           year: BigInt(targetYear),
@@ -216,7 +220,7 @@ export function QuickAddDialog({ open, onOpenChange }: Props) {
       });
 
       const keyword = extractKeyword(merchant || rawText);
-      if (keyword) {
+      if (keyword && category !== UNPLANNED_CATEGORY) {
         learnRule.mutate({ keyword, category });
       }
 
@@ -232,6 +236,7 @@ export function QuickAddDialog({ open, onOpenChange }: Props) {
   }
 
   const hasParsedSomething = amountStr || merchant || category;
+  const canSubmit = amountStr.trim() !== "" && category !== "";
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -309,105 +314,120 @@ export function QuickAddDialog({ open, onOpenChange }: Props) {
           <p className="text-xs text-destructive -mt-2">{ocrError}</p>
         )}
 
-        {hasParsedSomething && (
-          <div className="space-y-3 pt-1 border-t border-border/60">
-            <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] pt-3">
-              Review before saving
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="qa-amount" className="text-xs font-medium">
-                  Amount
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-mono pointer-events-none">
-                    N$
-                  </span>
-                  <Input
-                    id="qa-amount"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={amountStr}
-                    onChange={(e) => setAmountStr(e.target.value)}
-                    className="pl-9 font-mono"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="qa-date" className="text-xs font-medium">
-                  Date
-                </Label>
+        <div className="space-y-3 pt-1 border-t border-border/60">
+          <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] pt-3">
+            {hasParsedSomething ? "Review before saving" : "Expense details"}
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="qa-amount" className="text-xs font-medium">
+                Amount
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-mono pointer-events-none">
+                  N$
+                </span>
                 <Input
-                  id="qa-date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="font-mono"
+                  id="qa-amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={amountStr}
+                  onChange={(e) => setAmountStr(e.target.value)}
+                  className="pl-9 font-mono"
                 />
               </div>
             </div>
-
             <div className="space-y-1.5">
-              <Label htmlFor="qa-merchant" className="text-xs font-medium">
-                Merchant / notes
+              <Label htmlFor="qa-date" className="text-xs font-medium">
+                Date
               </Label>
               <Input
-                id="qa-merchant"
-                value={merchant}
-                onChange={(e) => setMerchant(e.target.value)}
-                placeholder="e.g. Shoprite Windhoek"
+                id="qa-date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="font-mono"
               />
             </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Category</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {allCategories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {category &&
-              (matchingBudget ? (
-                <p className="text-xs text-muted-foreground">
-                  Will be added to your{" "}
-                  <span className="font-semibold text-foreground">
-                    {matchingBudget.name}
-                  </span>{" "}
-                  budget.
-                </p>
-              ) : (
-                <div className="space-y-1.5 rounded-lg bg-amber-500/8 border border-amber-500/20 px-3 py-2.5">
-                  <Label
-                    htmlFor="qa-new-limit"
-                    className="text-xs font-medium text-amber-700 dark:text-amber-400"
-                  >
-                    No {category} budget yet this month - set a limit to create
-                    one
-                  </Label>
-                  <Input
-                    id="qa-new-limit"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="Monthly limit, e.g. 1500.00"
-                    value={newBudgetLimitStr}
-                    onChange={(e) => setNewBudgetLimitStr(e.target.value)}
-                    className="font-mono h-9"
-                  />
-                </div>
-              ))}
           </div>
-        )}
+
+          <div className="space-y-1.5">
+            <Label htmlFor="qa-merchant" className="text-xs font-medium">
+              Merchant / notes
+            </Label>
+            <Input
+              id="qa-merchant"
+              value={merchant}
+              onChange={(e) => setMerchant(e.target.value)}
+              placeholder="e.g. Shoprite Windhoek"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-medium">Category</Label>
+              {category !== UNPLANNED_CATEGORY && (
+                <button
+                  type="button"
+                  onClick={() => setCategory(UNPLANNED_CATEGORY)}
+                  className="text-[11px] text-primary hover:underline -m-2 p-2"
+                >
+                  Not sure? Log as unplanned
+                </button>
+              )}
+            </div>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={UNPLANNED_CATEGORY}>Unplanned</SelectItem>
+                {allCategories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {category &&
+            (matchingBudget ? (
+              <p className="text-xs text-muted-foreground">
+                Will be added to your{" "}
+                <span className="font-semibold text-foreground">
+                  {matchingBudget.name}
+                </span>{" "}
+                budget.
+              </p>
+            ) : category === UNPLANNED_CATEGORY ? (
+              <p className="text-xs text-muted-foreground">
+                Logged without a specific category, so it's recorded now without
+                slowing you down.
+              </p>
+            ) : (
+              <div className="space-y-1.5 rounded-lg bg-amber-500/8 border border-amber-500/20 px-3 py-2.5">
+                <Label
+                  htmlFor="qa-new-limit"
+                  className="text-xs font-medium text-amber-700 dark:text-amber-400"
+                >
+                  No {category} budget yet this month - set a limit to create
+                  one
+                </Label>
+                <Input
+                  id="qa-new-limit"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="Monthly limit, e.g. 1500.00"
+                  value={newBudgetLimitStr}
+                  onChange={(e) => setNewBudgetLimitStr(e.target.value)}
+                  className="font-mono h-9"
+                />
+              </div>
+            ))}
+        </div>
 
         <div className="flex gap-3 pt-1">
           <Button
@@ -423,7 +443,7 @@ export function QuickAddDialog({ open, onOpenChange }: Props) {
             type="button"
             className="flex-1 button-hover shadow-elevated"
             onClick={handleSubmit}
-            disabled={!hasParsedSomething || submitting}
+            disabled={!canSubmit || submitting}
           >
             {submitting ? (
               <>

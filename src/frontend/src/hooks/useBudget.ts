@@ -923,6 +923,7 @@ export function useUserSettings() {
       const result = await actor.getUserSettings();
       return {
         alertThresholdPercent: Number(result.alertThresholdPercent),
+        savingsFloorCents: BigInt(result.savingsFloorCents),
       };
     },
     enabled: !!actor && !isFetching,
@@ -938,6 +939,7 @@ export function useUpdateUserSettings() {
       if (!actor) throw new Error("Actor not ready");
       return actor.updateUserSettings({
         alertThresholdPercent: settings.alertThresholdPercent,
+        savingsFloorCents: settings.savingsFloorCents,
       });
     },
     onSuccess: () => {

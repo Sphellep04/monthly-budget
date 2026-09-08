@@ -128,6 +128,8 @@ export type BudgetStatus = "on-track" | "warning" | "over-budget";
 
 export interface UserSettings {
   alertThresholdPercent: number;
+  /** A standing minimum to protect each month; 0 means the feature is off. */
+  savingsFloorCents: bigint;
 }
 
 export interface BudgetTemplateCategory {
@@ -308,6 +310,10 @@ export interface CategoryRule {
   keyword: string;
   category: string;
 }
+
+/** Special category for expenses logged without picking a real category yet -
+ * lets you record the spend now and sort it out later. */
+export const UNPLANNED_CATEGORY = "Unplanned";
 
 export const CATEGORIES: string[] = [
   "Groceries",

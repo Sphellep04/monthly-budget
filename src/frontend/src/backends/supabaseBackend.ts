@@ -1276,7 +1276,10 @@ export function createSupabaseBackend(userId: string): Backend {
           categories: categories.data ?? [],
           accounts: accounts.data ?? [],
           categoryRules: categoryRules.data ?? [],
-          userSettings: userSettings.data ?? { alert_threshold_percent: 80 },
+          userSettings: userSettings.data ?? {
+            alert_threshold_percent: 80,
+            savings_floor_cents: 0,
+          },
         },
         null,
         2,
@@ -1656,9 +1659,13 @@ export function createSupabaseBackend(userId: string): Backend {
           .select("*")
           .eq("owner", userId)
           .maybeSingle(),
-      ) as { alert_threshold_percent: number } | null;
+      ) as {
+        alert_threshold_percent: number;
+        savings_floor_cents: string | number;
+      } | null;
       return {
         alertThresholdPercent: row?.alert_threshold_percent ?? 80,
+        savingsFloorCents: BigInt(row?.savings_floor_cents ?? 0),
       } satisfies UserSettings;
     },
 
@@ -2074,6 +2081,7 @@ export function createSupabaseBackend(userId: string): Backend {
       const { error } = await supabase.from("user_settings").upsert({
         owner: userId,
         alert_threshold_percent: settings.alertThresholdPercent,
+        savings_floor_cents: settings.savingsFloorCents.toString(),
       });
       if (error) throw new Error(error.message);
       return settings;
