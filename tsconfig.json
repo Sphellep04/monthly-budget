@@ -10,5 +10,7 @@
     "allowJs": true,
     "rootDir": "./src/frontend",
     "noEmit": true
-  }
+  },
+  "include": ["src/frontend/**/*"],
+  "exclude": ["node_modules", "supabase"]
 }
