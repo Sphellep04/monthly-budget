@@ -454,7 +454,7 @@ export function SearchPage() {
                             >
                               <Badge
                                 variant="secondary"
-                                className="text-[10px] px-1.5 py-0.5 cursor-pointer hover:bg-primary/10 transition-colors"
+                                className="text-[11px] px-1.5 py-0.5 cursor-pointer hover:bg-primary/10 transition-colors"
                               >
                                 View
                               </Badge>

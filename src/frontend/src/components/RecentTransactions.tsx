@@ -82,7 +82,7 @@ export function RecentTransactions({
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
                 {isUnplanned ? (
-                  <span className="px-1.5 py-0 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-[10px] font-medium">
+                  <span className="px-1.5 py-0 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-[11px] font-medium">
                     Unplanned
                   </span>
                 ) : (

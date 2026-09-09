@@ -15,6 +15,14 @@ export default {
       },
     },
     extend: {
+      // Raises the app's baseline readability without touching individual
+      // className strings: text-xs/text-sm are used as the primary reading
+      // size across most cards and lists, and read as cramped at Tailwind's
+      // stock 12px/14px - especially for a finance app people check daily.
+      fontSize: {
+        xs: ["0.8125rem", { lineHeight: "1.25rem" }],
+        sm: ["0.9375rem", { lineHeight: "1.5rem" }],
+      },
       colors: {
         border: "oklch(var(--border))",
         input: "oklch(var(--input))",

@@ -23,14 +23,14 @@ export function SavingsFloorCard({
 
   return (
     <div className="bg-card border border-border rounded-2xl p-4 shadow-subtle">
-      <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
+      <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
         Floor this month
       </p>
       <p className="font-display text-2xl font-bold tabular-nums leading-none text-foreground">
         {formatCents(settings.savingsFloorCents)}
       </p>
       <p
-        className={`text-[11px] mt-1 font-semibold ${met ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`}
+        className={`text-[12px] mt-1 font-semibold ${met ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`}
       >
         {met ? "Met" : "Not met"}
       </p>

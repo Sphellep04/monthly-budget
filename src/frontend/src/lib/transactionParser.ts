@@ -52,9 +52,11 @@ function extractAmountCents(text: string): bigint | null {
   }
 
   // Fall back to a number near a transaction verb, e.g. "Amt: 150.00" or
-  // "debited 150.00".
+  // "debited 150.00". Covers common banking-SMS vocabulary broadly rather
+  // than one bank's exact wording, since templates vary bank to bank and
+  // aren't publicly documented.
   const contextMatch = text.match(
-    /(?:amt|amount|debit(?:ed)?|purchase|spent|paid)\D{0,10}?(\d{1,3}(?:[,.\s]\d{3})*\.\d{2})/i,
+    /(?:amt|amount|debit(?:ed)?|purchase|spent|paid|withdr(?:aw|ew|awal)|pos|swiped)\D{0,10}?(\d{1,3}(?:[,.\s]\d{3})*\.\d{2})/i,
   );
   if (contextMatch) {
     return toCents(contextMatch[1]);

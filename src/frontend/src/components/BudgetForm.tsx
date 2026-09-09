@@ -55,7 +55,7 @@ function FieldLabel({
   return (
     <Label
       htmlFor={htmlFor}
-      className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+      className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
     >
       {children}
     </Label>
@@ -219,7 +219,7 @@ export function BudgetForm({
             className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
             style={{ backgroundColor: color }}
           />
-          <span className="text-[11px] text-muted-foreground font-mono">
+          <span className="text-[12px] text-muted-foreground font-mono">
             {color}
           </span>
         </div>

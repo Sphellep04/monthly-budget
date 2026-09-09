@@ -278,7 +278,7 @@ function NoteCard({
 
         {/* Footer */}
         <div className="pt-1 border-t border-border">
-          <span className="text-[10px] text-muted-foreground/70 truncate">
+          <span className="text-[11px] text-muted-foreground/70 truncate">
             Updated {formatNoteDate(note.updatedAt)}
           </span>
         </div>

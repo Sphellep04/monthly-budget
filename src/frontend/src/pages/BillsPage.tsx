@@ -257,7 +257,7 @@ function BillCard({ bill, onMarkPaid, onUnmarkPaid }: BillCardProps) {
             </span>
             <Badge
               variant="outline"
-              className={`text-[10px] font-semibold py-0 px-1.5 h-5 ${cfg.badgeClass}`}
+              className={`text-[11px] font-semibold py-0 px-1.5 h-5 ${cfg.badgeClass}`}
             >
               {cfg.label}
             </Badge>
@@ -302,14 +302,14 @@ function BillCard({ bill, onMarkPaid, onUnmarkPaid }: BillCardProps) {
             <div className="flex items-center gap-2">
               {payment?.paidAmountCents != null &&
                 payment.paidAmountCents !== template.amountCents && (
-                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                  <span className="text-[11px] text-muted-foreground tabular-nums">
                     Paid {formatCents(payment.paidAmountCents)}
                   </span>
                 )}
               <button
                 type="button"
                 onClick={() => onUnmarkPaid(bill)}
-                className="text-[10px] font-medium text-muted-foreground hover:text-destructive transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                className="text-[11px] font-medium text-muted-foreground hover:text-destructive transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
               >
                 Undo
               </button>
@@ -513,7 +513,7 @@ export function BillsPage() {
               {tab.label}
               {tab.count > 0 && (
                 <span
-                  className={`text-[10px] font-bold px-1.5 py-0 rounded-full leading-5 ${
+                  className={`text-[11px] font-bold px-1.5 py-0 rounded-full leading-5 ${
                     activeFilter === tab.key
                       ? "bg-primary/15 text-primary"
                       : "bg-muted text-muted-foreground"

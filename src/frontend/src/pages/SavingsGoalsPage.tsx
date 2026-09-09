@@ -96,7 +96,7 @@ function NewGoalDialog({
           <div>
             <Label
               htmlFor="goal-name"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Goal Name
             </Label>
@@ -112,7 +112,7 @@ function NewGoalDialog({
           <div>
             <Label
               htmlFor="goal-target"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Target Amount
             </Label>
@@ -136,7 +136,7 @@ function NewGoalDialog({
           <div>
             <Label
               htmlFor="goal-date"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Target Date{" "}
               <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
@@ -153,7 +153,7 @@ function NewGoalDialog({
           </div>
 
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Color
             </Label>
             <div className="flex flex-wrap gap-2.5 p-3 rounded-xl bg-muted/40 border border-border">
@@ -345,7 +345,7 @@ function GoalCard({
               {goal.name}
             </h3>
             {goal.targetDate && (
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <p className="text-[12px] text-muted-foreground mt-0.5">
                 Target:{" "}
                 {new Date(goal.targetDate).toLocaleDateString("en-ZA", {
                   day: "numeric",
@@ -356,7 +356,7 @@ function GoalCard({
             )}
           </div>
           {isComplete && (
-            <div className="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold flex-shrink-0">
+            <div className="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold flex-shrink-0">
               Complete
             </div>
           )}
@@ -372,7 +372,7 @@ function GoalCard({
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-[12px]">
             <span className="font-display text-muted-foreground tabular-nums">
               {Math.min(pct, 100).toFixed(0)}%
             </span>
@@ -483,7 +483,7 @@ function EditGoalDialog({
           <div>
             <Label
               htmlFor="edit-goal-name"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Goal Name
             </Label>
@@ -499,7 +499,7 @@ function EditGoalDialog({
           <div>
             <Label
               htmlFor="edit-goal-target"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Target Amount
             </Label>
@@ -523,7 +523,7 @@ function EditGoalDialog({
           <div>
             <Label
               htmlFor="edit-goal-date"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Target Date{" "}
               <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
@@ -540,7 +540,7 @@ function EditGoalDialog({
           </div>
 
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Color
             </Label>
             <div className="flex flex-wrap gap-2.5">

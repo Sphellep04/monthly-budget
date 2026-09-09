@@ -36,7 +36,7 @@ export function GapComparisonCard({
 
   return (
     <div className="bg-card border border-border rounded-2xl p-4 shadow-subtle">
-      <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
+      <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
         Last gap · {gap.label}
       </p>
       <p
@@ -46,7 +46,7 @@ export function GapComparisonCard({
         {formatCents(Math.abs(gap.gapCents))}
       </p>
       {gap.deltaCents !== 0 && (
-        <p className="text-[11px] text-muted-foreground mt-1">
+        <p className="text-[12px] text-muted-foreground mt-1">
           <span
             className={
               gap.better

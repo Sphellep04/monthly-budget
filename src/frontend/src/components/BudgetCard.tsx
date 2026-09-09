@@ -95,14 +95,14 @@ export function BudgetCard({
               <h3 className="font-display font-semibold text-[0.875rem] text-foreground truncate leading-tight">
                 {budget.name}
               </h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+              <p className="text-[12px] text-muted-foreground mt-0.5 truncate">
                 {budget.category}
               </p>
             </div>
             {/* Status pill */}
             <div
               className={cn(
-                "flex items-center gap-1.5 flex-shrink-0 px-2 py-1 rounded-full bg-muted/60 text-[10px] font-semibold",
+                "flex items-center gap-1.5 flex-shrink-0 px-2 py-1 rounded-full bg-muted/60 text-[11px] font-semibold",
                 cfg.labelClass,
               )}
             >
@@ -118,7 +118,7 @@ export function BudgetCard({
 
           {/* Hero number: remaining / over */}
           <div className="flex-1">
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] mb-1.5">
+            <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] mb-1.5">
               {remaining >= 0 ? "Remaining" : "Over budget"}
             </p>
             <p
@@ -135,7 +135,7 @@ export function BudgetCard({
 
           {/* Progress + stats */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-[11px]">
+            <div className="flex items-center justify-between text-[12px]">
               <span className="font-display text-muted-foreground tabular-nums">
                 {formatCents(totalSpentCents)}
                 <span className="text-muted-foreground/40 mx-1">/</span>
@@ -165,7 +165,7 @@ export function BudgetCard({
 
         {/* Footer CTA */}
         <div className="px-5 py-3 border-t border-border/40 bg-muted/20">
-          <span className="flex items-center justify-end text-[11px] font-medium text-muted-foreground group-hover:text-primary transition-colors duration-150">
+          <span className="flex items-center justify-end text-[12px] font-medium text-muted-foreground group-hover:text-primary transition-colors duration-150">
             View details
           </span>
         </div>

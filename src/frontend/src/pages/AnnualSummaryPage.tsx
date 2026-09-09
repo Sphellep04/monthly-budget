@@ -298,7 +298,7 @@ function MonthTable({
         {["Month", "Budgeted", "Spent", "Remaining", "Status"].map((h) => (
           <span
             key={h}
-            className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.1em]"
+            className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.1em]"
           >
             {h}
           </span>
@@ -353,16 +353,16 @@ function MonthTable({
                 {isFuture ? (
                   <Badge
                     variant="outline"
-                    className="text-[10px] font-medium text-muted-foreground/60 border-border/50"
+                    className="text-[11px] font-medium text-muted-foreground/60 border-border/50"
                   >
                     No Data
                   </Badge>
                 ) : row.isOverBudget ? (
-                  <Badge className="text-[10px] font-semibold bg-destructive/15 text-destructive border-destructive/20 hover:bg-destructive/20">
+                  <Badge className="text-[11px] font-semibold bg-destructive/15 text-destructive border-destructive/20 hover:bg-destructive/20">
                     Over Budget
                   </Badge>
                 ) : (
-                  <Badge className="text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/15 dark:text-emerald-400">
+                  <Badge className="text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/15 dark:text-emerald-400">
                     On Track
                   </Badge>
                 )}

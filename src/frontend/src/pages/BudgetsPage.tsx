@@ -89,7 +89,7 @@ export function BudgetsPage() {
         <div className="grid grid-cols-2 gap-4 slide-up">
           <div className="rounded-2xl bg-card border border-border px-5 py-4 shadow-subtle relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-            <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mb-2">
+            <p className="text-[12px] text-muted-foreground uppercase tracking-widest font-semibold mb-2">
               Total Budgets
             </p>
             <p className="font-display text-3xl font-bold text-foreground tabular-nums">
@@ -98,7 +98,7 @@ export function BudgetsPage() {
           </div>
           <div className="rounded-2xl bg-card border border-border px-5 py-4 shadow-subtle relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
-            <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mb-2">
+            <p className="text-[12px] text-muted-foreground uppercase tracking-widest font-semibold mb-2">
               Combined Limit
             </p>
             <p className="font-display text-3xl font-bold text-foreground tabular-nums">

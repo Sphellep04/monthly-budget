@@ -228,7 +228,7 @@ export function BudgetDetailPage() {
               },
             ].map(({ label, value, className }) => (
               <div key={label} className="bg-card px-4 py-3 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-1">
+                <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mb-1">
                   {label}
                 </p>
                 <p
@@ -321,7 +321,7 @@ export function BudgetDetailPage() {
             </h2>
             <Badge
               variant="outline"
-              className="text-[10px] px-2 py-0 bg-secondary/8 text-secondary border-secondary/20"
+              className="text-[11px] px-2 py-0 bg-secondary/8 text-secondary border-secondary/20"
             >
               Auto-monthly
             </Badge>

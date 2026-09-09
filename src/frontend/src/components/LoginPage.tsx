@@ -94,7 +94,7 @@ export function LoginPage() {
                   {b.label}
                 </span>
                 <span
-                  className="text-[11px] font-mono tabular-nums"
+                  className="text-[12px] font-mono tabular-nums"
                   style={{ color: "oklch(0.6 0.015 150)" }}
                 >
                   {b.pct}%
@@ -113,7 +113,7 @@ export function LoginPage() {
           ))}
         </div>
 
-        <p className="text-[11px]" style={{ color: "oklch(0.48 0.015 150)" }}>
+        <p className="text-[12px]" style={{ color: "oklch(0.48 0.015 150)" }}>
           © {new Date().getFullYear()} BudgetWise
         </p>
       </div>
@@ -174,7 +174,7 @@ export function LoginPage() {
                         <button
                           type="button"
                           onClick={() => switchMode("forgot")}
-                          className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors"
+                          className="text-[12px] font-medium text-muted-foreground hover:text-primary transition-colors"
                         >
                           Forgot password?
                         </button>

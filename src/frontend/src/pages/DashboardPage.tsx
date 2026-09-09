@@ -192,7 +192,7 @@ export function DashboardPage() {
       {/* ── Page hero header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-1">
         <div>
-          <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1.5">
+          <p className="text-[12px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1.5">
             {getGreeting()}
           </p>
           <div className="flex items-baseline gap-2 mb-1">

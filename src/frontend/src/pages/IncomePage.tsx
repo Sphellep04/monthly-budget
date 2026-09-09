@@ -108,7 +108,7 @@ function IncomeForm({ editing, open, onOpenChange }: IncomeFormProps) {
           <div>
             <Label
               htmlFor="income-source"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Source
             </Label>
@@ -125,7 +125,7 @@ function IncomeForm({ editing, open, onOpenChange }: IncomeFormProps) {
           <div>
             <Label
               htmlFor="income-amount"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Amount
             </Label>
@@ -152,7 +152,7 @@ function IncomeForm({ editing, open, onOpenChange }: IncomeFormProps) {
           <div>
             <Label
               htmlFor="income-date"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Date
             </Label>
@@ -169,7 +169,7 @@ function IncomeForm({ editing, open, onOpenChange }: IncomeFormProps) {
           <div>
             <Label
               htmlFor="income-notes"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Notes{" "}
               <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
@@ -333,7 +333,7 @@ export function IncomePage() {
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-5 shadow-subtle">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
+        <p className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
           Total Income
         </p>
         <p className="font-display text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
@@ -349,7 +349,7 @@ export function IncomePage() {
             </h2>
             <Badge
               variant="outline"
-              className="text-[10px] px-2 py-0 bg-secondary/8 text-secondary border-secondary/20"
+              className="text-[11px] px-2 py-0 bg-secondary/8 text-secondary border-secondary/20"
             >
               Auto-monthly
             </Badge>

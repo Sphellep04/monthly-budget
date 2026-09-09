@@ -53,7 +53,7 @@ function InsightCard({
         {insight.direction && insight.direction !== "neutral" && (
           <Badge
             variant="outline"
-            className={`text-[10px] font-bold flex-shrink-0 ${insight.direction === "up" ? "border-destructive/40 text-destructive bg-destructive/8" : "border-[oklch(0.6_0.18_142_/_0.4)] text-[oklch(0.45_0.18_142)] bg-[oklch(0.6_0.18_142_/_0.08)]"}`}
+            className={`text-[11px] font-bold flex-shrink-0 ${insight.direction === "up" ? "border-destructive/40 text-destructive bg-destructive/8" : "border-[oklch(0.6_0.18_142_/_0.4)] text-[oklch(0.45_0.18_142)] bg-[oklch(0.6_0.18_142_/_0.08)]"}`}
           >
             {insight.direction === "up" ? "Rising" : "Falling"}
           </Badge>
@@ -216,7 +216,7 @@ export function InsightsPage() {
               </span>
               <Badge
                 variant="outline"
-                className="text-[10px] border-primary/30 text-primary bg-primary/8"
+                className="text-[11px] border-primary/30 text-primary bg-primary/8"
               >
                 Updated now
               </Badge>

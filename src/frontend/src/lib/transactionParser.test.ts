@@ -32,6 +32,16 @@ describe("parseTransactionText", () => {
     expect(result.amountCents).toBe(32000n);
   });
 
+  it("recognises a withdrawal amount without a currency symbol", () => {
+    const result = parseTransactionText("Withdrawal of 500.00 at ATM");
+    expect(result.amountCents).toBe(50000n);
+  });
+
+  it("recognises a POS amount without a currency symbol", () => {
+    const result = parseTransactionText("POS purchase 99.90 approved");
+    expect(result.amountCents).toBe(9990n);
+  });
+
   it("extracts a worded date", () => {
     const result = parseTransactionText(
       "Purchase of N$45.00 at SPAR on 03 Sep 2026",

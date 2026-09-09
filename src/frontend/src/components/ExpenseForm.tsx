@@ -57,7 +57,7 @@ function FieldLabel({
   return (
     <Label
       htmlFor={htmlFor}
-      className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+      className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
     >
       {children}
     </Label>
@@ -490,7 +490,7 @@ export function ExpenseForm({
                         setSplitRows([]);
                         setSplitError("");
                       }}
-                      className="text-[11px] text-muted-foreground hover:text-foreground"
+                      className="text-[12px] text-muted-foreground hover:text-foreground"
                     >
                       Cancel split
                     </button>
@@ -616,7 +616,7 @@ export function ExpenseForm({
                     <p className="text-xs font-medium text-foreground">
                       Scanning receipt…
                     </p>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-[11px] text-muted-foreground">
                       Extracting amount with OCR
                     </p>
                   </div>
@@ -625,18 +625,18 @@ export function ExpenseForm({
                   type="button"
                   onClick={removeReceipt}
                   disabled={scanState === "scanning"}
-                  className="absolute top-2 right-2 h-6 px-2 rounded-full bg-card/90 border border-border shadow-subtle flex items-center justify-center text-[10px] font-medium text-foreground hover:bg-destructive/10 hover:border-destructive/40 transition-colors disabled:opacity-40"
+                  className="absolute top-2 right-2 h-6 px-2 rounded-full bg-card/90 border border-border shadow-subtle flex items-center justify-center text-[11px] font-medium text-foreground hover:bg-destructive/10 hover:border-destructive/40 transition-colors disabled:opacity-40"
                   aria-label="Remove receipt"
                 >
                   Remove
                 </button>
                 {receiptFile && scanState !== "scanning" && (
                   <div className="px-3 py-1.5 bg-muted/40 border-t border-border flex items-center gap-2">
-                    <p className="text-[11px] text-muted-foreground truncate flex-1 min-w-0">
+                    <p className="text-[12px] text-muted-foreground truncate flex-1 min-w-0">
                       {receiptFile.name}
                     </p>
                     {scanState === "done" && (
-                      <span className="text-[10px] text-primary font-medium shrink-0">
+                      <span className="text-[11px] text-primary font-medium shrink-0">
                         Scanned
                       </span>
                     )}
@@ -655,7 +655,7 @@ export function ExpenseForm({
                   <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                     Click to attach a receipt photo
                   </span>
-                  <span className="text-[10px] text-muted-foreground/60">
+                  <span className="text-[11px] text-muted-foreground/60">
                     JPG, PNG, GIF or WEBP · max 5 MB
                   </span>
                 </button>
@@ -670,7 +670,7 @@ export function ExpenseForm({
                     <p className="text-xs font-semibold text-primary leading-tight">
                       Scan Receipt
                     </p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">
+                    <p className="text-[11px] text-muted-foreground leading-tight">
                       Use camera to auto-fill amount
                     </p>
                   </div>
@@ -706,11 +706,11 @@ export function ExpenseForm({
             {isUploading && (
               <div className="mt-2 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                  <span className="text-[12px] text-muted-foreground flex items-center gap-1.5">
                     <Spinner className="w-3 h-3" />
                     Processing receipt…
                   </span>
-                  <span className="text-[11px] font-mono text-muted-foreground">
+                  <span className="text-[12px] font-mono text-muted-foreground">
                     {uploadProgress}%
                   </span>
                 </div>

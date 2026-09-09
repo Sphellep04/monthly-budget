@@ -39,7 +39,7 @@ export function AlertsPanel({
         </h3>
         <Badge
           variant="outline"
-          className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full border bg-warning/10 text-warning border-warning/30 font-mono"
+          className="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full border bg-warning/10 text-warning border-warning/30 font-mono"
         >
           {alerts.length}
         </Badge>
@@ -82,7 +82,7 @@ export function AlertsPanel({
                   </span>
                   <Badge
                     variant="outline"
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border font-body ${
+                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border font-body ${
                       isOver
                         ? "bg-destructive/10 text-destructive border-destructive/30"
                         : "bg-warning/10 text-warning border-warning/30"

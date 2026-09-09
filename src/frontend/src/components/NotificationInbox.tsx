@@ -34,7 +34,7 @@ export function NotificationInbox({
           {notifications.length > 0 && (
             <Badge
               variant="outline"
-              className="text-[10px] font-bold px-1.5 py-0 rounded-full border bg-warning/10 text-warning border-warning/30 font-mono"
+              className="text-[11px] font-bold px-1.5 py-0 rounded-full border bg-warning/10 text-warning border-warning/30 font-mono"
             >
               {notifications.length}
             </Badge>
@@ -53,7 +53,7 @@ export function NotificationInbox({
             <button
               type="button"
               onClick={dismissAll}
-              className="text-[11px] text-primary hover:underline -m-2 p-2"
+              className="text-[12px] text-primary hover:underline -m-2 p-2"
             >
               Dismiss all
             </button>
@@ -78,12 +78,12 @@ export function NotificationInbox({
                     <button
                       type="button"
                       onClick={() => dismiss(n.id)}
-                      className="text-[10px] text-muted-foreground hover:text-foreground flex-shrink-0 -m-1.5 p-1.5"
+                      className="text-[11px] text-muted-foreground hover:text-foreground flex-shrink-0 -m-1.5 p-1.5"
                     >
                       Dismiss
                     </button>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                  <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">
                     {n.body}
                   </p>
                 </div>

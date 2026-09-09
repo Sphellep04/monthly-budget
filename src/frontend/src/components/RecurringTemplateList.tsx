@@ -77,14 +77,14 @@ export function RecurringTemplateList({
                   </p>
                   <Badge
                     variant="outline"
-                    className="text-[10px] px-1.5 py-0 bg-secondary/8 text-secondary border-secondary/20"
+                    className="text-[11px] px-1.5 py-0 bg-secondary/8 text-secondary border-secondary/20"
                   >
                     {ordinal(Number(t.dayOfMonth))} of month
                   </Badge>
                   {frequencyLabel(t) && (
                     <Badge
                       variant="outline"
-                      className="text-[10px] px-1.5 py-0 bg-accent/8 text-accent border-accent/20"
+                      className="text-[11px] px-1.5 py-0 bg-accent/8 text-accent border-accent/20"
                     >
                       {frequencyLabel(t)}
                     </Badge>

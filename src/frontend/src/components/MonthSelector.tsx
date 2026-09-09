@@ -60,12 +60,12 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
             <span className="text-sm font-semibold text-foreground font-display tracking-tight">
               {getMonthName(month)}
             </span>
-            <span className="text-[10px] text-muted-foreground font-mono tabular-nums mt-0.5">
+            <span className="text-[11px] text-muted-foreground font-mono tabular-nums mt-0.5">
               {year}
             </span>
           </div>
           {isCurrentMonth && (
-            <span className="text-[9px] font-bold bg-primary text-primary-foreground rounded-md px-1.5 py-0.5 leading-none uppercase tracking-wide shadow-subtle">
+            <span className="text-[10px] font-bold bg-primary text-primary-foreground rounded-md px-1.5 py-0.5 leading-none uppercase tracking-wide shadow-subtle">
               Now
             </span>
           )}

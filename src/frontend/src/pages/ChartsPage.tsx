@@ -445,7 +445,7 @@ function MonthlyPieChart({ year, month }: { year: number; month: number }) {
         </ResponsiveContainer>
         {/* Center label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+          <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
             Total
           </span>
           <span className="font-display text-base font-bold text-foreground leading-tight">
@@ -466,7 +466,7 @@ function MonthlyPieChart({ year, month }: { year: number; month: number }) {
             <span className="text-xs font-semibold text-foreground tabular-nums shrink-0">
               {formatCents(Math.round(entry.value * 100))}
             </span>
-            <span className="text-[11px] text-muted-foreground tabular-nums shrink-0 w-10 text-right">
+            <span className="text-[12px] text-muted-foreground tabular-nums shrink-0 w-10 text-right">
               {total > 0
                 ? `${((entry.value / total) * 100).toFixed(0)}%`
                 : "0%"}
@@ -852,7 +852,7 @@ export function ChartsPage() {
                   <h3 className="font-display text-sm font-semibold text-foreground truncate min-w-0">
                     {bs.budget.name}
                   </h3>
-                  <span className="text-[11px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-full ml-auto shrink-0 capitalize">
+                  <span className="text-[12px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-full ml-auto shrink-0 capitalize">
                     {bs.budget.category}
                   </span>
                 </div>

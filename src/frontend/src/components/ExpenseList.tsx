@@ -52,7 +52,7 @@ function ReceiptBadge({ url }: { url: string }) {
       type="button"
       onClick={() => openReceiptInTab(url)}
       title="View receipt"
-      className="flex items-center px-2 py-0.5 rounded-md bg-primary/8 border border-primary/20 text-primary hover:bg-primary/15 transition-colors text-[10px] font-medium shrink-0"
+      className="flex items-center px-2 py-0.5 rounded-md bg-primary/8 border border-primary/20 text-primary hover:bg-primary/15 transition-colors text-[11px] font-medium shrink-0"
     >
       Receipt
     </button>
@@ -114,7 +114,7 @@ export function ExpenseList({
   return (
     <div className="space-y-1">
       {/* Column headers */}
-      <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 pb-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+      <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 pb-1 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
         <span>Date &amp; Notes</span>
         <span className="text-right pr-1">Amount</span>
         <span className="w-8" />
@@ -144,7 +144,7 @@ export function ExpenseList({
                 {expense.splitGroupId && (
                   <span
                     title="Part of a split transaction"
-                    className="flex items-center px-2 py-0.5 rounded-md bg-secondary/8 border border-secondary/20 text-secondary text-[10px] font-medium shrink-0"
+                    className="flex items-center px-2 py-0.5 rounded-md bg-secondary/8 border border-secondary/20 text-secondary text-[11px] font-medium shrink-0"
                   >
                     Split
                   </span>
@@ -152,7 +152,7 @@ export function ExpenseList({
                 {expense.id < 0n && (
                   <span
                     title="Saved on this device - will sync once you're back online"
-                    className="flex items-center px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-[10px] font-medium shrink-0"
+                    className="flex items-center px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-[11px] font-medium shrink-0"
                   >
                     Pending sync
                   </span>

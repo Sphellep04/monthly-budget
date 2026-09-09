@@ -125,16 +125,16 @@ export function MonthlySummaryHeader({
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border/60">
         {stats.map(({ label, value, sub, valueClass }) => (
           <div key={label} className="px-5 py-4">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
+            <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] mb-1">
               {label}
             </p>
             <p
-              className={`font-display text-[1.75rem] font-bold tabular-nums leading-none ${valueClass}`}
+              className={`font-display text-[2rem] font-bold tabular-nums leading-none ${valueClass}`}
             >
               {value}
             </p>
             {sub && (
-              <p className="text-[11px] text-muted-foreground mt-1">{sub}</p>
+              <p className="text-[12px] text-muted-foreground mt-1">{sub}</p>
             )}
           </div>
         ))}
@@ -143,7 +143,7 @@ export function MonthlySummaryHeader({
       {/* Integrated progress strip */}
       <div className="border-t border-border/60 px-5 py-3 bg-muted/20">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em]">
+          <span className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em]">
             Monthly Progress
           </span>
           <span
@@ -157,14 +157,14 @@ export function MonthlySummaryHeader({
           {[0, 25, 50, 75, 100].map((m) => (
             <span
               key={m}
-              className={`text-[9px] font-mono tabular-nums ${pct >= m ? "text-muted-foreground" : "text-muted-foreground/35"}`}
+              className={`text-[10px] font-mono tabular-nums ${pct >= m ? "text-muted-foreground" : "text-muted-foreground/35"}`}
             >
               {m}%
             </span>
           ))}
         </div>
         {pace && (
-          <p className="text-[11px] text-muted-foreground mt-2.5 pt-2.5 border-t border-border/40">
+          <p className="text-[12px] text-muted-foreground mt-2.5 pt-2.5 border-t border-border/40">
             <span className="font-semibold text-foreground">
               {pace.daysLeft} day{pace.daysLeft === 1 ? "" : "s"} left
             </span>{" "}

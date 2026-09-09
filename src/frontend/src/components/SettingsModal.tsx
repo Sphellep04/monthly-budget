@@ -241,7 +241,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     aria-pressed={active}
                     onClick={() => setTheme(value)}
                     className={cn(
-                      "px-3 py-2.5 rounded-xl border text-[11px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+                      "px-3 py-2.5 rounded-xl border text-[12px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
                       active
                         ? "bg-primary text-primary-foreground border-primary shadow-elevated"
                         : "bg-muted/40 text-muted-foreground border-border/60 hover:bg-muted/70 hover:text-foreground",
@@ -301,7 +301,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 />
               </div>
 
-              <div className="flex justify-between text-[10px] text-muted-foreground/60 font-mono tabular-nums px-0.5">
+              <div className="flex justify-between text-[11px] text-muted-foreground/60 font-mono tabular-nums px-0.5">
                 {[50, 60, 70, 80, 90, 100].map((v) => (
                   <span key={v}>{v}%</span>
                 ))}

@@ -73,7 +73,7 @@ function BudgetRow({ budget }: BudgetRowProps) {
             {budget.rollover && (
               <Badge
                 variant="outline"
-                className="text-[9px] px-1.5 py-0 h-4 bg-accent/8 text-accent border-accent/20"
+                className="text-[10px] px-1.5 py-0 h-4 bg-accent/8 text-accent border-accent/20"
               >
                 Rollover
               </Badge>
@@ -84,7 +84,7 @@ function BudgetRow({ budget }: BudgetRowProps) {
         {/* Category badge */}
         <Badge
           variant="secondary"
-          className="hidden sm:flex items-center text-[11px] flex-shrink-0 font-medium"
+          className="hidden sm:flex items-center text-[12px] flex-shrink-0 font-medium"
         >
           {budget.category}
         </Badge>
@@ -94,7 +94,7 @@ function BudgetRow({ budget }: BudgetRowProps) {
           <p className="font-mono text-sm font-bold text-foreground tabular-nums">
             {formatCents(budget.limitCents)}
           </p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide">
             / month
           </p>
         </div>

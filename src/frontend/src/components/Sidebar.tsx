@@ -76,7 +76,7 @@ function NavSection({
 }) {
   return (
     <div className="space-y-0.5">
-      <p className="px-3 mb-2 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">
+      <p className="px-3 mb-2 text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">
         {label}
       </p>
       {items.map((item, i) => {

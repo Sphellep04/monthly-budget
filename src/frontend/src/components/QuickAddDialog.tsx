@@ -294,7 +294,7 @@ export function QuickAddDialog({ open, onOpenChange }: Props) {
                     choose a file
                   </button>
                 </p>
-                <p className="text-[11px] text-muted-foreground/70 max-w-xs">
+                <p className="text-[12px] text-muted-foreground/70 max-w-xs">
                   Read on this device only - the image itself is never saved or
                   uploaded, only the extracted text.
                 </p>
@@ -315,7 +315,7 @@ export function QuickAddDialog({ open, onOpenChange }: Props) {
         )}
 
         <div className="space-y-3 pt-1 border-t border-border/60">
-          <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] pt-3">
+          <p className="text-[12px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] pt-3">
             {hasParsedSomething ? "Review before saving" : "Expense details"}
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -371,7 +371,7 @@ export function QuickAddDialog({ open, onOpenChange }: Props) {
                 <button
                   type="button"
                   onClick={() => setCategory(UNPLANNED_CATEGORY)}
-                  className="text-[11px] text-primary hover:underline -m-2 p-2"
+                  className="text-[12px] text-primary hover:underline -m-2 p-2"
                 >
                   Not sure? Log as unplanned
                 </button>

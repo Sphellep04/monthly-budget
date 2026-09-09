@@ -167,7 +167,7 @@ function AccountDialog({
           <div>
             <Label
               htmlFor="account-name"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Account Name
             </Label>
@@ -182,7 +182,7 @@ function AccountDialog({
           </div>
 
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Type
             </Label>
             <Select
@@ -205,7 +205,7 @@ function AccountDialog({
           <div>
             <Label
               htmlFor="account-balance"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               {isLiabilityAccountType(type) ? "Amount Owed" : "Balance"}
             </Label>
@@ -237,7 +237,7 @@ function AccountDialog({
               <div className="flex-1">
                 <Label
                   htmlFor="account-rate"
-                  className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+                  className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
                 >
                   Interest Rate{" "}
                   <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
@@ -263,7 +263,7 @@ function AccountDialog({
               <div className="flex-1">
                 <Label
                   htmlFor="account-min-payment"
-                  className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+                  className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
                 >
                   Min Payment{" "}
                   <span className="text-muted-foreground/60 normal-case font-normal tracking-normal">
@@ -355,7 +355,7 @@ function AccountRow({
           {isLiability ? "-" : ""}
           {formatCents(account.balanceCents)}
         </p>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+        <p className="text-[11px] text-muted-foreground uppercase tracking-wide">
           {isLiability ? "owed" : "balance"}
         </p>
       </div>
@@ -484,7 +484,7 @@ function DebtPayoffPlan({ accounts }: { accounts: Account[] }) {
       <div className="max-w-[200px]">
         <Label
           htmlFor="debt-extra"
-          className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+          className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
         >
           Extra monthly payment
         </Label>
@@ -590,27 +590,27 @@ export function AccountsPage() {
       {!isLoading && !isError && accounts.length > 0 && (
         <div className="grid grid-cols-3 gap-px bg-border rounded-2xl overflow-hidden shadow-inner-subtle">
           <div className="bg-card px-4 py-4 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-1.5">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mb-1.5">
               Assets
             </p>
-            <p className="font-mono text-lg font-bold tabular-nums text-primary">
+            <p className="font-mono text-xl font-bold tabular-nums text-primary">
               {formatCents(assetsCents)}
             </p>
           </div>
           <div className="bg-card px-4 py-4 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-1.5">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mb-1.5">
               Liabilities
             </p>
-            <p className="font-mono text-lg font-bold tabular-nums text-destructive">
+            <p className="font-mono text-xl font-bold tabular-nums text-destructive">
               {formatCents(liabilitiesCents)}
             </p>
           </div>
           <div className="bg-card px-4 py-4 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-1.5">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mb-1.5">
               Net Worth
             </p>
             <p
-              className={`font-mono text-lg font-bold tabular-nums ${
+              className={`font-mono text-xl font-bold tabular-nums ${
                 netWorthCents < 0n ? "text-destructive" : "text-foreground"
               }`}
             >

@@ -145,7 +145,7 @@ export function ImportExpensesDialog({
                           key={opt.value}
                           type="button"
                           onClick={() => handleDateFormatChange(opt.value)}
-                          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+                          className={`px-2.5 py-1 rounded-lg text-[12px] font-semibold transition-colors ${
                             dateFormat === opt.value
                               ? "bg-primary text-primary-foreground"
                               : "bg-background border border-border text-muted-foreground hover:text-foreground"
@@ -156,7 +156,7 @@ export function ImportExpensesDialog({
                       ))}
                     </div>
                   </div>
-                  <p className="text-[11px] text-muted-foreground -mt-1.5">
+                  <p className="text-[12px] text-muted-foreground -mt-1.5">
                     Only affects ambiguous dates like 03/04/2026 — ISO dates
                     (2026-04-03) are always read correctly. Most Namibian and
                     southern African bank statements are Day/Month/Year.

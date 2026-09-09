@@ -33,10 +33,10 @@ function ReceiptThumbnail({
         className="w-full h-full object-cover"
       />
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent p-2.5 text-left">
-        <p className="text-[11px] font-semibold text-white truncate">
+        <p className="text-[12px] font-semibold text-white truncate">
           {formatCents(expense.amountCents)}
         </p>
-        <p className="text-[10px] text-white/75 truncate">{budgetName}</p>
+        <p className="text-[11px] text-white/75 truncate">{budgetName}</p>
       </div>
     </button>
   );
@@ -70,7 +70,7 @@ function ReceiptDetailDialog({
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
+                <p className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
                   Amount
                 </p>
                 <p className="font-display font-bold text-foreground tabular-nums">
@@ -78,7 +78,7 @@ function ReceiptDetailDialog({
                 </p>
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
+                <p className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
                   Date
                 </p>
                 <p className="font-medium text-foreground">
@@ -90,14 +90,14 @@ function ReceiptDetailDialog({
                 </p>
               </div>
               <div className="col-span-2">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
+                <p className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
                   Budget
                 </p>
                 <p className="font-medium text-foreground">{budgetName}</p>
               </div>
               {expense.notes && (
                 <div className="col-span-2">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
+                  <p className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">
                     Notes
                   </p>
                   <p className="text-sm text-foreground">{expense.notes}</p>
