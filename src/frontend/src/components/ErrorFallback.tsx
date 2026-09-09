@@ -1,14 +1,51 @@
 import { Button } from "@/components/ui/button";
 import type { ErrorComponentProps } from "@tanstack/react-router";
+import { useEffect } from "react";
+
+const CHUNK_ERROR_PATTERN =
+  /dynamically imported module|importing a module script failed|failed to fetch|loading chunk/i;
+
+// The service worker auto-updates in the background (registerType:
+// "autoUpdate") without reloading an already-open tab, so a page opened
+// before a deploy can still be holding JS chunk URLs that no longer exist
+// on the server once it navigates somewhere new. One silent reload picks up
+// the fresh bundle; the guard stops a genuinely broken deploy from looping.
+const RELOAD_GUARD_KEY = "budgetwise-chunk-reload-guard";
+
+function isChunkLoadError(error: Error): boolean {
+  return CHUNK_ERROR_PATTERN.test(error.message);
+}
 
 /**
- * Route-level crash screen. A standalone PWA has no address bar and no
- * browser refresh button, so an uncaught render error would otherwise leave
- * the user stuck on a blank screen with no way out except force-closing the
- * app. `reset` re-runs the failed route's loader/component; the full reload
- * is a fallback for errors reset can't clear (e.g. broken module state).
+ * Crash screen for both the route-level errorComponent and PageErrorBoundary.
+ * A standalone PWA has no address bar and no browser refresh button, so an
+ * uncaught render error would otherwise leave the user stuck with no way out
+ * except force-closing the app. `reset` re-runs the failed route/boundary;
+ * the full reload is a fallback for errors reset can't clear.
  */
 export function ErrorFallback({ error, reset }: ErrorComponentProps) {
+  const isStaleChunk = isChunkLoadError(error);
+
+  useEffect(() => {
+    if (!isStaleChunk) return;
+    if (sessionStorage.getItem(RELOAD_GUARD_KEY)) return;
+    sessionStorage.setItem(RELOAD_GUARD_KEY, "1");
+    window.location.reload();
+  }, [isStaleChunk]);
+
+  if (isStaleChunk) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 py-16 text-center">
+        <h2 className="font-display text-xl font-bold text-foreground mb-2">
+          Updating to the latest version…
+        </h2>
+        <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+          This only takes a second.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 py-16 text-center">
       <h2 className="font-display text-xl font-bold text-foreground mb-2">

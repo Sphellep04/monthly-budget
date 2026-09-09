@@ -1,4 +1,5 @@
 ﻿import { Outlet } from "@tanstack/react-router";
+import { PageErrorBoundary } from "./PageErrorBoundary";
 import { Sidebar } from "./Sidebar";
 
 export function Layout() {
@@ -13,7 +14,9 @@ export function Layout() {
             the button's own height and offset. */}
         <main className="flex-1 overflow-auto animate-page-enter pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] md:pt-0">
           <div className="page-enter">
-            <Outlet />
+            <PageErrorBoundary>
+              <Outlet />
+            </PageErrorBoundary>
           </div>
         </main>
         <footer className="bg-card border-t border-border/60 px-6 pt-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom,0px))] flex items-center justify-center">
