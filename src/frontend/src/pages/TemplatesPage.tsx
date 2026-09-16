@@ -462,7 +462,7 @@ export function TemplatesPage() {
   }
 
   return (
-    <div className="min-h-full bg-background">
+    <div>
       {/* Page header */}
       <div className="bg-card border-b border-border/60 px-6 py-5">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

@@ -119,6 +119,37 @@ const axisTickStyle = {
   fontFamily: "var(--font-body)",
 };
 
+/**
+ * Recharts' built-in tick truncates long labels based on the horizontal gap
+ * between ticks, even when angled -- so it doesn't credit the extra room the
+ * angle itself buys. Rendering raw SVG text bypasses that and shows the full
+ * label along the angled baseline instead.
+ */
+function AngledAxisTick({
+  x,
+  y,
+  payload,
+}: {
+  x?: number;
+  y?: number;
+  payload?: { value: string };
+}) {
+  return (
+    <text
+      x={x}
+      y={y}
+      dy={10}
+      textAnchor="end"
+      transform={`rotate(-30, ${x}, ${y})`}
+      fontSize={axisTickStyle.fontSize}
+      fill={axisTickStyle.fill}
+      fontFamily={axisTickStyle.fontFamily}
+    >
+      {payload?.value}
+    </text>
+  );
+}
+
 /* ─── Custom Line Dot ─── */
 function CustomLineDot(props: { cx?: number; cy?: number }) {
   const { cx = 0, cy = 0 } = props;
@@ -185,15 +216,23 @@ function SpendingTrendChart() {
     );
   }
 
-  const chartData = (trend ?? [])
-    .sort((a, b) => {
-      if (a.year !== b.year) return Number(a.year) - Number(b.year);
-      return Number(a.month) - Number(b.month);
-    })
-    .map((p) => ({
-      month: formatMonthLabel(p.year, p.month),
-      total: Number(p.totalSpentCents) / 100,
-    }));
+  const sortedPoints = (trend ?? []).sort((a, b) => {
+    if (a.year !== b.year) return Number(a.year) - Number(b.year);
+    return Number(a.month) - Number(b.month);
+  });
+
+  const firstSpendIndex = sortedPoints.findIndex(
+    (p) => Number(p.totalSpentCents) > 0,
+  );
+  // Trim leading months with no spending at all -- a brand-new account
+  // otherwise shows 11 empty months before the one real data point.
+  const trimmedPoints =
+    firstSpendIndex === -1 ? sortedPoints : sortedPoints.slice(firstSpendIndex);
+
+  const chartData = trimmedPoints.map((p) => ({
+    month: formatMonthLabel(p.year, p.month),
+    total: Number(p.totalSpentCents) / 100,
+  }));
 
   const hasSpending = chartData.some((d) => d.total > 0);
 
@@ -303,16 +342,21 @@ function CategoryBreakdownChart({
     return <Skeleton className="h-[180px] w-full rounded-xl" />;
   }
 
-  const chartData = (trend ?? [])
-    .sort((a, b) => {
-      if (a.year !== b.year) return Number(a.year) - Number(b.year);
-      return Number(a.month) - Number(b.month);
-    })
-    .map((p) => ({
-      month: formatMonthLabel(p.year, p.month),
-      spent: Number(p.spentCents) / 100,
-      limit: Number(p.limitCents) / 100,
-    }));
+  const sortedPoints = (trend ?? []).sort((a, b) => {
+    if (a.year !== b.year) return Number(a.year) - Number(b.year);
+    return Number(a.month) - Number(b.month);
+  });
+  const firstSpendIndex = sortedPoints.findIndex(
+    (p) => Number(p.spentCents) > 0,
+  );
+  const trimmedPoints =
+    firstSpendIndex === -1 ? sortedPoints : sortedPoints.slice(firstSpendIndex);
+
+  const chartData = trimmedPoints.map((p) => ({
+    month: formatMonthLabel(p.year, p.month),
+    spent: Number(p.spentCents) / 100,
+    limit: Number(p.limitCents) / 100,
+  }));
 
   if (chartData.length === 0) {
     return (
@@ -515,10 +559,7 @@ function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
   );
 
   const chartData = summaries.map((bs) => ({
-    name:
-      bs.budget.name.length > 10
-        ? `${bs.budget.name.slice(0, 10)}…`
-        : bs.budget.name,
+    name: bs.budget.name,
     Budget: Number(bs.budget.limitCents + bs.rolloverCents) / 100,
     Spent:
       breakdownMap.get(bs.budget.id.toString()) ??
@@ -543,7 +584,7 @@ function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
     <ResponsiveContainer width="100%" height={260}>
       <BarChart
         data={chartData}
-        margin={{ top: 8, right: 16, left: 0, bottom: 4 }}
+        margin={{ top: 8, right: 16, left: 0, bottom: 24 }}
         barGap={4}
       >
         <CartesianGrid
@@ -554,10 +595,11 @@ function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
         />
         <XAxis
           dataKey="name"
-          tick={axisTickStyle}
+          tick={<AngledAxisTick />}
           tickLine={false}
           axisLine={false}
-          dy={6}
+          interval={0}
+          height={50}
         />
         <YAxis
           tickFormatter={formatCurrency}
@@ -573,6 +615,8 @@ function BudgetVsActualChart({ year, month }: { year: number; month: number }) {
           cursor={{ fill: "oklch(var(--muted) / 0.25)", radius: 6 }}
         />
         <Legend
+          verticalAlign="top"
+          align="right"
           wrapperStyle={{
             fontSize: 11,
             color: "oklch(var(--muted-foreground))",

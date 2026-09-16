@@ -445,7 +445,9 @@ export function BillsPage() {
           upcoming: 2,
           paid: 3,
         };
-        return order[a.status] - order[b.status];
+        const statusDiff = order[a.status] - order[b.status];
+        if (statusDiff !== 0) return statusDiff;
+        return Number(a.template.dayOfMonth) - Number(b.template.dayOfMonth);
       });
   }, [allTemplates, payments, year, month]);
 

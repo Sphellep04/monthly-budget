@@ -265,14 +265,23 @@ export function BudgetDetailPage() {
         >
           <div>
             <p className="text-sm font-semibold text-destructive">
-              Over budget
+              {remainingCents < 0n ? "Over budget" : "At your limit"}
             </p>
             <p className="text-xs text-destructive/80 mt-0.5">
-              You've exceeded the {formatCents(limitCents)} limit by{" "}
-              <span className="font-mono font-semibold">
-                {formatCents(-remainingCents)}
-              </span>
-              . Consider adjusting your spending or increasing this budget.
+              {remainingCents < 0n ? (
+                <>
+                  You've exceeded the {formatCents(limitCents)} limit by{" "}
+                  <span className="font-mono font-semibold">
+                    {formatCents(-remainingCents)}
+                  </span>
+                  . Consider adjusting your spending or increasing this budget.
+                </>
+              ) : (
+                <>
+                  You've spent the full {formatCents(limitCents)} limit for this
+                  budget. Anything more this month will put you over.
+                </>
+              )}
             </p>
           </div>
         </div>

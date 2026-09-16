@@ -182,7 +182,7 @@ export function InsightsPage() {
       : [];
 
   return (
-    <div className="min-h-full bg-background">
+    <div>
       {/* Page header */}
       <div className="bg-card border-b border-border px-6 py-5">
         <motion.div
