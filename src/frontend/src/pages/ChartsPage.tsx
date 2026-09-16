@@ -195,7 +195,9 @@ function SpendingTrendChart() {
       total: Number(p.totalSpentCents) / 100,
     }));
 
-  if (chartData.length === 0) {
+  const hasSpending = chartData.some((d) => d.total > 0);
+
+  if (chartData.length === 0 || !hasSpending) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <p className="font-display text-sm font-semibold text-foreground mb-1">
