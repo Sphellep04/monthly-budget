@@ -38,10 +38,7 @@ export function useInstallPrompt() {
       setInstallEvent(null);
     }
 
-    window.addEventListener(
-      "beforeinstallprompt",
-      handleBeforeInstallPrompt,
-    );
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
     return () => {
       window.removeEventListener(
