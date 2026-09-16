@@ -11,7 +11,7 @@
     --font-mono: "IBM Plex Mono";
     --radius: 0.4rem;
 
-    --background: 0.98 0 0;
+    --background: 0.97 0.014 85;
     --foreground: 0.18 0 0;
     --card: 1.0 0 0;
     --card-foreground: 0.15 0 0;
@@ -58,7 +58,7 @@
   /* Forces light-mode tokens on a subtree regardless of the active theme —
      for surfaces (like the login page) that intentionally never go dark. */
   .theme-light {
-    --background: 0.98 0 0;
+    --background: 0.97 0.014 85;
     --foreground: 0.18 0 0;
     --card: 1.0 0 0;
     --card-foreground: 0.15 0 0;
