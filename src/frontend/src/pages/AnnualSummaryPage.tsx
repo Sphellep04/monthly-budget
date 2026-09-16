@@ -173,30 +173,6 @@ function AnnualBarChart({
         margin={{ top: 8, right: 16, left: 0, bottom: 4 }}
         barGap={4}
       >
-        <defs>
-          {data.map((entry) => {
-            const ratio = entry.spentRatio;
-            const color =
-              ratio > 1
-                ? "oklch(0.58 0.20 26)"
-                : ratio > 0.75
-                  ? "oklch(0.62 0.20 82)"
-                  : "oklch(0.42 0.12 150)";
-            return (
-              <linearGradient
-                key={`grad-${entry.month}`}
-                id={`bar-grad-${entry.month}`}
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop offset="0%" stopColor={color} stopOpacity={0.95} />
-                <stop offset="100%" stopColor={color} stopOpacity={0.7} />
-              </linearGradient>
-            );
-          })}
-        </defs>
         <CartesianGrid
           strokeDasharray="3 6"
           stroke="oklch(var(--border))"
@@ -222,12 +198,18 @@ function AnnualBarChart({
           cursor={{ fill: "oklch(var(--muted) / 0.25)", radius: 6 }}
         />
         <Bar dataKey="spent" radius={[5, 5, 0, 0]} maxBarSize={40} name="spent">
-          {data.map((entry) => (
-            <Cell
-              key={`bar-${entry.month}`}
-              fill={`url(#bar-grad-${entry.month})`}
-            />
-          ))}
+          {data.map((entry) => {
+            const ratio = entry.spentRatio;
+            const color =
+              ratio > 1
+                ? "oklch(0.58 0.20 26)"
+                : ratio > 0.75
+                  ? "oklch(0.62 0.20 82)"
+                  : "oklch(0.42 0.12 150)";
+            return (
+              <Cell key={`bar-${entry.month}`} fill={color} opacity={0.9} />
+            );
+          })}
         </Bar>
       </BarChart>
     </ResponsiveContainer>
