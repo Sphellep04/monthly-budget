@@ -1408,21 +1408,45 @@ export function createSupabaseBackend(userId: string): Backend {
       const budget = mapBudget(budgetRow);
 
       const monthList = buildMonthList(currentYear, currentMonth, months);
+
+      // Budgets are recreated as a fresh row each month (their own id, own
+      // limit), so trending "this budget" across months means matching by
+      // owner+name, not just the one budgetId the caller passed in -- that
+      // id only ever identifies the current month's row.
+      const sameNameRows = unwrap(
+        await supabase
+          .from("budgets")
+          .select("id, year, month")
+          .eq("owner", userId)
+          .eq("name", budget.name),
+      ) as { id: number | string; year: number; month: number }[];
+      const idByMonthKey = new Map(
+        sameNameRows.map((b) => [`${b.year}-${pad(b.month)}`, b.id]),
+      );
+      const relevantIds = monthList
+        .map(({ year, month }) =>
+          idByMonthKey.get(`${Number(year)}-${pad(Number(month))}`),
+        )
+        .filter((id): id is number | string => id != null);
+
       const { start } = monthRange(monthList[0].year, monthList[0].month);
       const { end } = monthRange(
         monthList[monthList.length - 1].year,
         monthList[monthList.length - 1].month,
       );
 
-      const expenseRows = unwrap(
-        await supabase
-          .from("expenses")
-          .select("date, amount_cents")
-          .eq("owner", userId)
-          .eq("budget_id", budgetId)
-          .gte("date", start)
-          .lt("date", end),
-      ) as { date: string; amount_cents: string }[];
+      const expenseRows =
+        relevantIds.length > 0
+          ? (unwrap(
+              await supabase
+                .from("expenses")
+                .select("date, amount_cents")
+                .eq("owner", userId)
+                .in("budget_id", relevantIds)
+                .gte("date", start)
+                .lt("date", end),
+            ) as { date: string; amount_cents: string }[])
+          : [];
 
       return monthList.map(({ year, month }): CategoryTrendPoint => {
         const key = `${Number(year)}-${pad(Number(month))}`;
