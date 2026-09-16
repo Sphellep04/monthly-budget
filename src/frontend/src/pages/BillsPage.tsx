@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MonthSelector } from "../components/MonthSelector";
 import { QueryErrorState } from "../components/QueryErrorState";
@@ -388,7 +388,36 @@ export function BillsPage() {
     }[]
   >([]);
 
-  const isLoading = budgetsLoading || paymentsLoading;
+  // Tracks which budgets' recurring-template queries are still in flight, so
+  // the page doesn't briefly flash "no bills" before every loader has
+  // reported in. Keyed on a value-stable string (not the `budgets` array
+  // itself, which is a fresh reference every render) to avoid re-seeding on
+  // every render.
+  const budgetIdsKey = budgets
+    .map((b) => b.id.toString())
+    .sort()
+    .join(",");
+  const [loadingBudgetIds, setLoadingBudgetIds] = useState<Set<string>>(
+    new Set(),
+  );
+  useEffect(() => {
+    setLoadingBudgetIds(new Set(budgetIdsKey ? budgetIdsKey.split(",") : []));
+  }, [budgetIdsKey]);
+  const handleBudgetLoadingChange = useCallback(
+    (budgetId: string, loading: boolean) => {
+      setLoadingBudgetIds((prev) => {
+        if (loading === prev.has(budgetId)) return prev;
+        const next = new Set(prev);
+        if (loading) next.add(budgetId);
+        else next.delete(budgetId);
+        return next;
+      });
+    },
+    [],
+  );
+
+  const isLoading =
+    budgetsLoading || paymentsLoading || loadingBudgetIds.size > 0;
   const isError = budgetsError || paymentsError;
   const retry = () => {
     refetchBudgets();
@@ -483,6 +512,7 @@ export function BillsPage() {
           budgetId={budget.id}
           budgetName={budget.name}
           budgetCategory={budget.category}
+          onLoadingChange={handleBudgetLoadingChange}
           onTemplatesLoaded={(items) => {
             setAllTemplates((prev) => {
               const withoutThis = prev.filter(
@@ -594,17 +624,27 @@ interface BudgetTemplateLoaderProps {
       budgetCategory: string;
     }[],
   ) => void;
+  onLoadingChange: (budgetId: string, loading: boolean) => void;
 }
 
 function BudgetTemplateLoader({
   budgetId,
   budgetName,
   budgetCategory,
+  onLoadingChange,
   onTemplatesLoaded,
 }: BudgetTemplateLoaderProps) {
-  const { data: templates = [] } = useRecurringTemplates(budgetId);
+  const { data: templates = [], isLoading } = useRecurringTemplates(budgetId);
   const onTemplatesLoadedRef = useRef(onTemplatesLoaded);
   onTemplatesLoadedRef.current = onTemplatesLoaded;
+  const onLoadingChangeRef = useRef(onLoadingChange);
+  onLoadingChangeRef.current = onLoadingChange;
+
+  const budgetIdKey = budgetId.toString();
+
+  useEffect(() => {
+    onLoadingChangeRef.current(budgetIdKey, isLoading);
+  }, [budgetIdKey, isLoading]);
 
   useEffect(() => {
     if (templates.length > 0) {
