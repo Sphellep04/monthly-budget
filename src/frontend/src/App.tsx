@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Toaster } from "@/components/ui/sonner";
+import { DownloadSimpleIcon, XIcon } from "@phosphor-icons/react";
 import {
   Outlet,
   RouterProvider,
@@ -7,6 +8,7 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
+import { useTheme } from "next-themes";
 import { Suspense, lazy, useEffect } from "react";
 import { toast } from "sonner";
 import { ErrorFallback } from "./components/ErrorFallback";
@@ -20,6 +22,7 @@ import {
   useApplyRecurringTemplates,
   useFlushExpenseOutbox,
 } from "./hooks/useBudget";
+import { useInstallPrompt } from "./hooks/useInstallPrompt";
 import { useOnlineStatus } from "./hooks/useOnlineStatus";
 
 const DashboardPage = lazy(() =>
@@ -157,6 +160,59 @@ function OfflineBanner() {
   );
 }
 
+/** Slim banner offering to install the app, backed by the browser's own
+ * install prompt (Chromium only - Safari/iOS has no programmatic prompt, so
+ * this never renders there and users add to home screen manually instead). */
+function InstallBanner() {
+  const { canInstall, promptInstall, dismiss } = useInstallPrompt();
+  if (!canInstall) return null;
+  return (
+    <div className="flex items-center justify-center gap-3 bg-primary/10 border-b border-primary/20 px-4 py-1.5 text-xs font-medium text-primary">
+      <span>Install BudgetWise for quicker access and offline use.</span>
+      <button
+        type="button"
+        onClick={promptInstall}
+        className="inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground px-2.5 py-1 transition-colors-fast hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+      >
+        <DownloadSimpleIcon weight="bold" className="w-3.5 h-3.5" />
+        Install
+      </button>
+      <button
+        type="button"
+        onClick={dismiss}
+        aria-label="Dismiss"
+        className="text-primary/70 hover:text-primary focus-visible:outline-none"
+      >
+        <XIcon className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
+/** Keeps the iOS status-bar style legible against the resolved theme -
+ * translucent (white status-bar text) only reads well over the dark theme's
+ * near-black background; the light theme's warm cream background needs the
+ * opaque "default" bar instead, or the status bar text washes out. Only
+ * mounted once authenticated - LoginPage always forces the light theme on
+ * itself regardless of the user's actual preference, so the pre-auth/initial
+ * meta value (set in index.html) already matches it. Resets on unmount
+ * (e.g. logout) so a stale dark-mode value doesn't leak onto that page. */
+function StatusBarThemeSync() {
+  const { resolvedTheme } = useTheme();
+  useEffect(() => {
+    const meta = document.querySelector(
+      'meta[name="apple-mobile-web-app-status-bar-style"]',
+    );
+    if (!meta) return;
+    meta.setAttribute(
+      "content",
+      resolvedTheme === "dark" ? "black-translucent" : "default",
+    );
+    return () => meta.setAttribute("content", "default");
+  }, [resolvedTheme]);
+  return null;
+}
+
 function AuthGuard() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -177,7 +233,9 @@ function AuthGuard() {
 
   return (
     <>
+      <StatusBarThemeSync />
       <OfflineBanner />
+      <InstallBanner />
       <RecurringTemplateApplier />
       <RecurringIncomeApplier />
       <BillReminderNotifier />
