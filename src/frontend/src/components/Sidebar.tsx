@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
@@ -96,7 +95,7 @@ function NavSection({
   );
 }
 
-function SidebarInner({
+export function SidebarInner({
   onNavClick,
   onSettingsOpen,
   onQuickAddOpen,
@@ -173,46 +172,13 @@ function SidebarInner({
   );
 }
 
+/** Desktop-only sidebar. Mobile navigation lives in MobileTabBar instead. */
 export function Sidebar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   return (
     <>
-      {/* Mobile toggle - 1rem clears typical chrome on its own; env() grows it
-          further on devices that report a real safe-area inset */}
-      <button
-        type="button"
-        className="fixed top-[max(1rem,env(safe-area-inset-top,0px))] left-[max(1rem,env(safe-area-inset-left,0px))] z-50 md:hidden flex items-center justify-center h-9 px-3.5 rounded-xl bg-card border border-border shadow-elevated hover:bg-muted active:scale-95 transition-spring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 text-[0.8125rem] font-medium"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Open sidebar"
-      >
-        Menu
-      </button>
-
-      {/* Mobile drawer */}
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent
-          side="left"
-          className="w-64 p-0 bg-sidebar border-sidebar-border md:hidden"
-        >
-          <SheetTitle className="sr-only">Navigation</SheetTitle>
-          <SidebarInner
-            onNavClick={() => setMobileOpen(false)}
-            onSettingsOpen={() => {
-              setMobileOpen(false);
-              setSettingsOpen(true);
-            }}
-            onQuickAddOpen={() => {
-              setMobileOpen(false);
-              setQuickAddOpen(true);
-            }}
-          />
-        </SheetContent>
-      </Sheet>
-
-      {/* Desktop sidebar */}
       <aside className="hidden md:flex w-[220px] flex-shrink-0 h-screen bg-sidebar border-r border-sidebar-border/70 flex-col sticky top-0">
         <SidebarInner
           onSettingsOpen={() => setSettingsOpen(true)}
