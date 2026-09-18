@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { MonthSelector } from "../components/MonthSelector";
 import { QueryErrorState } from "../components/QueryErrorState";
@@ -19,7 +19,7 @@ import {
   useDeleteBillPayment,
   useListBillPayments,
   useListBudgets,
-  useRecurringTemplates,
+  useRecurringTemplatesForBudgets,
   useUpdateBillPayment,
 } from "../hooks/useBudget";
 import type { BillPayment, BillStatus, RecurringTemplate } from "../types";
@@ -321,27 +321,6 @@ function BillCard({ bill, onMarkPaid, onUnmarkPaid }: BillCardProps) {
   );
 }
 
-// ─── Hooks for all templates (across all budgets) ─────────────────────────────
-
-function useAllRecurringTemplates(year: number, month: number) {
-  const {
-    data: budgets = [],
-    isLoading: budgetsLoading,
-    isError: budgetsError,
-    refetch: refetchBudgets,
-  } = useListBudgets(year, month);
-  // We need to call hooks for each budget - but hooks can't be conditional.
-  // Strategy: fetch budgets first, then fetch all templates in one combined hook.
-  // Since we don't know how many budgets there are, we fetch in sequence via effect.
-  // For simplicity: fetch up to 20 budgets' templates using a stable list.
-  return {
-    budgets,
-    isLoading: budgetsLoading,
-    isError: budgetsError,
-    refetch: refetchBudgets,
-  };
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export function BillsPage() {
@@ -367,58 +346,37 @@ export function BillsPage() {
   }
 
   const {
-    budgets,
+    data: budgets = [],
     isLoading: budgetsLoading,
     isError: budgetsError,
     refetch: refetchBudgets,
-  } = useAllRecurringTemplates(year, month);
+  } = useListBudgets(year, month);
   const {
     data: payments = [],
     isLoading: paymentsLoading,
     isError: paymentsError,
     refetch: refetchPayments,
   } = useListBillPayments(year, month);
+  const {
+    templatesByBudget,
+    isLoading: templatesLoading,
+    isError: templatesError,
+  } = useRecurringTemplatesForBudgets(budgets.map((b) => b.id));
 
-  // We render a sub-component that does the multi-budget template fetch
-  const [allTemplates, setAllTemplates] = useState<
-    {
-      template: RecurringTemplate;
-      budgetName: string;
-      budgetCategory: string;
-    }[]
-  >([]);
-
-  // Tracks which budgets' recurring-template queries are still in flight, so
-  // the page doesn't briefly flash "no bills" before every loader has
-  // reported in. Keyed on a value-stable string (not the `budgets` array
-  // itself, which is a fresh reference every render) to avoid re-seeding on
-  // every render.
-  const budgetIdsKey = budgets
-    .map((b) => b.id.toString())
-    .sort()
-    .join(",");
-  const [loadingBudgetIds, setLoadingBudgetIds] = useState<Set<string>>(
-    new Set(),
-  );
-  useEffect(() => {
-    setLoadingBudgetIds(new Set(budgetIdsKey ? budgetIdsKey.split(",") : []));
-  }, [budgetIdsKey]);
-  const handleBudgetLoadingChange = useCallback(
-    (budgetId: string, loading: boolean) => {
-      setLoadingBudgetIds((prev) => {
-        if (loading === prev.has(budgetId)) return prev;
-        const next = new Set(prev);
-        if (loading) next.add(budgetId);
-        else next.delete(budgetId);
-        return next;
-      });
-    },
-    [],
+  const allTemplates = useMemo(
+    () =>
+      budgets.flatMap((budget) =>
+        (templatesByBudget.get(budget.id.toString()) ?? []).map((template) => ({
+          template,
+          budgetName: budget.name,
+          budgetCategory: budget.category,
+        })),
+      ),
+    [budgets, templatesByBudget],
   );
 
-  const isLoading =
-    budgetsLoading || paymentsLoading || loadingBudgetIds.size > 0;
-  const isError = budgetsError || paymentsError;
+  const isLoading = budgetsLoading || paymentsLoading || templatesLoading;
+  const isError = budgetsError || paymentsError || templatesError;
   const retry = () => {
     refetchBudgets();
     refetchPayments();
@@ -507,27 +465,6 @@ export function BillsPage() {
         </div>
       </div>
 
-      {/* Multi-budget template loader (renders hidden components that populate state) */}
-      {budgets.map((budget) => (
-        <BudgetTemplateLoader
-          key={budget.id.toString()}
-          budgetId={budget.id}
-          budgetName={budget.name}
-          budgetCategory={budget.category}
-          onLoadingChange={handleBudgetLoadingChange}
-          onTemplatesLoaded={(items) => {
-            setAllTemplates((prev) => {
-              const withoutThis = prev.filter(
-                (t) =>
-                  t.budgetName !== budget.name ||
-                  !items.some((i) => i.template.id === t.template.id),
-              );
-              return [...withoutThis, ...items];
-            });
-          }}
-        />
-      ))}
-
       {/* Filter tabs */}
       {!isLoading && budgets.length > 0 && (
         <div className="flex gap-1 p-1 bg-muted/50 rounded-xl border border-border w-fit">
@@ -611,52 +548,6 @@ export function BillsPage() {
       />
     </div>
   );
-}
-
-// ─── Budget Template Loader ───────────────────────────────────────────────────
-
-interface BudgetTemplateLoaderProps {
-  budgetId: bigint;
-  budgetName: string;
-  budgetCategory: string;
-  onTemplatesLoaded: (
-    items: {
-      template: RecurringTemplate;
-      budgetName: string;
-      budgetCategory: string;
-    }[],
-  ) => void;
-  onLoadingChange: (budgetId: string, loading: boolean) => void;
-}
-
-function BudgetTemplateLoader({
-  budgetId,
-  budgetName,
-  budgetCategory,
-  onLoadingChange,
-  onTemplatesLoaded,
-}: BudgetTemplateLoaderProps) {
-  const { data: templates = [], isLoading } = useRecurringTemplates(budgetId);
-  const onTemplatesLoadedRef = useRef(onTemplatesLoaded);
-  onTemplatesLoadedRef.current = onTemplatesLoaded;
-  const onLoadingChangeRef = useRef(onLoadingChange);
-  onLoadingChangeRef.current = onLoadingChange;
-
-  const budgetIdKey = budgetId.toString();
-
-  useEffect(() => {
-    onLoadingChangeRef.current(budgetIdKey, isLoading);
-  }, [budgetIdKey, isLoading]);
-
-  useEffect(() => {
-    if (templates.length > 0) {
-      onTemplatesLoadedRef.current(
-        templates.map((t) => ({ template: t, budgetName, budgetCategory })),
-      );
-    }
-  }, [templates, budgetName, budgetCategory]);
-
-  return null;
 }
 
 // ─── Empty State ──────────────────────────────────────────────────────────────

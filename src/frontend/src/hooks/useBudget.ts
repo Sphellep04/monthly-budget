@@ -1,6 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
+  Backend,
   BulkCreateExpensesInput,
   SplitExpenseInput,
 } from "../backends/Backend";
@@ -424,9 +430,12 @@ export function useDeleteBudget() {
 
 // ─── Recurring Templates ──────────────────────────────────────────────────────
 
-export function useRecurringTemplates(budgetId: bigint) {
-  const { actor, isFetching } = useActorOrMock();
-  return useQuery<RecurringTemplate[]>({
+function recurringTemplatesQueryOptions(
+  budgetId: bigint,
+  actor: Backend | null,
+  isFetching: boolean,
+) {
+  return {
     queryKey: ["recurring-templates", budgetId.toString()],
     queryFn: async () => {
       if (!actor) throw new Error("Actor not ready");
@@ -434,7 +443,38 @@ export function useRecurringTemplates(budgetId: bigint) {
       return result as unknown as RecurringTemplate[];
     },
     enabled: !!actor && !isFetching,
+  };
+}
+
+export function useRecurringTemplates(budgetId: bigint) {
+  const { actor, isFetching } = useActorOrMock();
+  return useQuery<RecurringTemplate[]>(
+    recurringTemplatesQueryOptions(budgetId, actor, isFetching),
+  );
+}
+
+/** Fetches recurring templates for a variable-length list of budgets in one
+ * hook call via useQueries, instead of mounting one query per budget through
+ * hidden child components - every result is available synchronously on the
+ * first render, so there's no separate "still loading" bookkeeping needed. */
+export function useRecurringTemplatesForBudgets(budgetIds: bigint[]) {
+  const { actor, isFetching } = useActorOrMock();
+  const results = useQueries({
+    queries: budgetIds.map((budgetId) =>
+      recurringTemplatesQueryOptions(budgetId, actor, isFetching),
+    ),
   });
+
+  const templatesByBudget = new Map<string, RecurringTemplate[]>();
+  budgetIds.forEach((budgetId, i) => {
+    templatesByBudget.set(budgetId.toString(), results[i].data ?? []);
+  });
+
+  return {
+    templatesByBudget,
+    isLoading: results.some((r) => r.isLoading),
+    isError: results.some((r) => r.isError),
+  };
 }
 
 export function useCreateRecurringTemplate() {
